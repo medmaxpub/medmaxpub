@@ -1,6 +1,6 @@
 import { Download, Eye } from "lucide-react";
 import { useEffect, useState } from "react";
-import api, { withFallback } from "../../api/client";
+import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import PptPreviewModal from "../../components/common/PptPreviewModal";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockPpts } from "../../data/mockData";
@@ -9,13 +9,14 @@ import { normalizePptItem } from "../../utils/pptPreview";
 export default function PptsPage() {
   const [items, setItems] = useState([]);
   const [activePreview, setActivePreview] = useState(null);
+  const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
   useEffect(() => {
-    withFallback(() => api.get("/ppts"), mockPpts).then((data) => {
+    withFallback(() => api.get("/ppts"), useDevelopmentFallback ? mockPpts : []).then((data) => {
       const normalized = data.map(normalizePptItem);
       setItems(normalized);
     });
-  }, []);
+  }, [useDevelopmentFallback]);
 
   useEffect(() => {
     const handleEscape = (event) => {

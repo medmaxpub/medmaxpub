@@ -15,6 +15,10 @@ function isLocalRuntime() {
   return isLocalHostname(window.location.hostname);
 }
 
+export function shouldUseDevelopmentFallback() {
+  return isLocalRuntime();
+}
+
 function normalizeApiBaseUrl(url) {
   const normalizedUrl = url.replace(/\/+$/, "");
   return normalizedUrl.endsWith("/api") ? normalizedUrl : `${normalizedUrl}/api`;

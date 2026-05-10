@@ -1,7 +1,7 @@
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import api, { withFallback } from "../../api/client";
+import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockJournals } from "../../data/mockData";
@@ -11,10 +11,11 @@ export default function JournalsPage() {
   const [journals, setJournals] = useState([]);
   const [query, setQuery] = useState(searchParams.get("search") || "");
   const [filter, setFilter] = useState("All");
+  const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
   useEffect(() => {
-    withFallback(() => api.get("/journals"), mockJournals).then(setJournals);
-  }, []);
+    withFallback(() => api.get("/journals"), useDevelopmentFallback ? mockJournals : []).then(setJournals);
+  }, [useDevelopmentFallback]);
 
   const categories = ["All", ...new Set((journals.length ? journals : mockJournals).map((journal) => journal.category))];
 

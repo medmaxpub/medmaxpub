@@ -1,7 +1,7 @@
 import { Download, ExternalLink, PlayCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import api, { withFallback } from "../../api/client";
+import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import PptPreviewModal from "../../components/common/PptPreviewModal";
 import JournalMenu from "../../components/journal/JournalMenu";
@@ -28,10 +28,14 @@ export default function JournalShell() {
   const [journal, setJournal] = useState(null);
   const [activePreview, setActivePreview] = useState(null);
   const [activeVideoId, setActiveVideoId] = useState(null);
+  const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
   useEffect(() => {
-    withFallback(() => api.get(`/journals/${slug}`), mockJournals.find((item) => item.slug === slug)).then(setJournal);
-  }, [slug]);
+    withFallback(
+      () => api.get(`/journals/${slug}`),
+      useDevelopmentFallback ? mockJournals.find((item) => item.slug === slug) : null
+    ).then(setJournal);
+  }, [slug, useDevelopmentFallback]);
 
   useEffect(() => {
     const handleEscape = (event) => {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import api, { withFallback } from "../../api/client";
+import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import SectionHeader from "../../components/common/SectionHeader";
 import { useAuth } from "../../context/AuthContext";
 import { mockJournals, mockPpts, mockTestimonials, mockVideos } from "../../data/mockData";
@@ -77,11 +77,18 @@ export default function AdminDashboardPage() {
   const [pptStatus, setPptStatus] = useState("");
   const [videoStatus, setVideoStatus] = useState("");
   const isSuperAdmin = user?.role === "super_admin";
+  const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
   useEffect(() => {
-    withFallback(() => api.get("/admin/journals"), mockJournals).then((data) => setJournals(data.map(normalizeAdminItem)));
-    withFallback(() => api.get("/admin/ppts"), mockPpts).then((data) => setPpts(data.map(normalizeAdminItem)));
-    withFallback(() => api.get("/admin/videos"), mockVideos).then((data) => setVideos(data.map(normalizeVideoItem)));
+    withFallback(() => api.get("/admin/journals"), useDevelopmentFallback ? mockJournals : []).then((data) =>
+      setJournals(data.map(normalizeAdminItem))
+    );
+    withFallback(() => api.get("/admin/ppts"), useDevelopmentFallback ? mockPpts : []).then((data) =>
+      setPpts(data.map(normalizeAdminItem))
+    );
+    withFallback(() => api.get("/admin/videos"), useDevelopmentFallback ? mockVideos : []).then((data) =>
+      setVideos(data.map(normalizeVideoItem))
+    );
 
     if (isSuperAdmin) {
       withFallback(() => api.get("/admin/contact"), []).then((data) => setContacts(data.map(normalizeAdminItem)));
@@ -89,7 +96,7 @@ export default function AdminDashboardPage() {
     }
 
     setContacts([]);
-  }, [isSuperAdmin]);
+  }, [isSuperAdmin, useDevelopmentFallback]);
 
   useEffect(() => {
     if (!journals.length) {

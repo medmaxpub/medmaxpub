@@ -88,7 +88,7 @@ export const mockJournals = [
         description: "A presentation resource aligned with speaker sessions, poster highlights, and conference dissemination.",
         uploadedDate: "2026-04-01",
         fileUrl: "https://example.com/presentation-1.pptx",
-        previewUrl: "https://docs.google.com/gview?embedded=1&url=https://example.com/presentation-1.pdf"
+        previewUrl: "https://example.com/presentation-1.pdf"
       }
     ],
     [
@@ -115,7 +115,7 @@ export const mockJournals = [
         description: "A slide deck prepared for medmaxpub conference previews and author education.",
         uploadedDate: "2026-03-22",
         fileUrl: "https://example.com/presentation-2.pptx",
-        previewUrl: "https://docs.google.com/gview?embedded=1&url=https://example.com/presentation-2.pdf"
+        previewUrl: "https://example.com/presentation-2.pdf"
       }
     ],
     [

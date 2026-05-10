@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api, { withFallback } from "../../api/client";
+import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockJournals } from "../../data/mockData";
 
@@ -17,13 +17,14 @@ export default function SubmitManuscriptPage() {
   const [journals, setJournals] = useState([]);
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState("");
+  const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
   useEffect(() => {
-    withFallback(() => api.get("/journals"), mockJournals).then((data) => {
+    withFallback(() => api.get("/journals"), useDevelopmentFallback ? mockJournals : []).then((data) => {
       setJournals(data);
       setForm((current) => ({ ...current, journalId: data[0]?.id || "" }));
     });
-  }, []);
+  }, [useDevelopmentFallback]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
