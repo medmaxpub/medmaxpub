@@ -226,7 +226,7 @@ export default function HomePage() {
                         <Eye size={16} className="mr-2" />
                         View
                       </button>
-                      <a href={ppt.fileUrl} className="button-primary px-4 py-2">
+                      <a href={ppt.downloadUrl} target="_blank" rel="noreferrer" download className="button-primary px-4 py-2">
                         <Download size={16} className="mr-2" />
                         Download
                       </a>

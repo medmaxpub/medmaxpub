@@ -1,18 +1,9 @@
 import Journal from "../models/Journal.js";
 import Ppt from "../models/Ppt.js";
+import { createPptRecord, ensurePptPreviewAsset, serializePpt } from "../services/pptService.js";
 import { buildAccessibleJournalFilter, ensureJournalAccess } from "../utils/accessControl.js";
-import { uploadAsset } from "../utils/assetStorage.js";
 import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { generatePreviewAssetFromStoredFile, generatePreviewAssetFromUpload } from "../utils/pptPreviewService.js";
-
-function resolvePptFileAsset(ppt) {
-  return ppt?.file || ppt?.pptFile || ppt?._doc?.file || ppt?._doc?.pptFile || null;
-}
-
-function resolvePptPreviewAsset(ppt) {
-  return ppt?.previewFile || ppt?.pdfPreviewFile || ppt?._doc?.previewFile || ppt?._doc?.pdfPreviewFile || null;
-}
 
 export const uploadPpt = asyncHandler(async (req, res) => {
   const requestedJournalId = req.params.journalId || req.body.journalId;
@@ -24,43 +15,27 @@ export const uploadPpt = asyncHandler(async (req, res) => {
 
   ensureJournalAccess(req.user, journal._id);
 
-  const sourcePptFile = req.files?.pptFile?.[0];
-  const sourcePreviewFile = req.files?.previewFile?.[0];
-  const pptFile = await uploadAsset(sourcePptFile, "medmaxpub/ppts", "raw", req);
-  const previewFile =
-    (await uploadAsset(sourcePreviewFile, "medmaxpub/ppts", "raw", req)) ||
-    (await generatePreviewAssetFromUpload(sourcePptFile, req));
-
-  const ppt = await Ppt.create({
-    journal: journal._id,
+  const ppt = await createPptRecord({
+    journalId: journal._id,
     title: req.body.title,
     description: req.body.description,
-    file: pptFile,
-    previewFile
+    pptUpload: req.files?.pptFile?.[0],
+    previewUpload: req.files?.previewFile?.[0],
+    req
   });
 
   const populatedPpt = await Ppt.findById(ppt._id).populate("journal", "title slug").lean();
-  res.status(201).json(populatedPpt);
+  res.status(201).json(serializePpt(populatedPpt));
 });
 
 export const getPpts = asyncHandler(async (req, res) => {
   const ppts = await Ppt.find().populate("journal", "title slug").sort({ createdAt: -1 });
 
   for (const ppt of ppts) {
-    const sourceFile = resolvePptFileAsset(ppt);
-    const existingPreview = resolvePptPreviewAsset(ppt);
-
-    if (!existingPreview && sourceFile) {
-      const generatedPreview = await generatePreviewAssetFromStoredFile(sourceFile, req);
-
-      if (generatedPreview) {
-        ppt.previewFile = generatedPreview;
-        await ppt.save();
-      }
-    }
+    await ensurePptPreviewAsset(ppt, req);
   }
 
-  res.json(ppts.map((ppt) => ppt.toObject()));
+  res.json(ppts.map((ppt) => serializePpt(ppt.toObject())));
 });
 
 export const getAdminPpts = asyncHandler(async (req, res) => {
@@ -69,20 +44,10 @@ export const getAdminPpts = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 });
 
   for (const ppt of ppts) {
-    const sourceFile = resolvePptFileAsset(ppt);
-    const existingPreview = resolvePptPreviewAsset(ppt);
-
-    if (!existingPreview && sourceFile) {
-      const generatedPreview = await generatePreviewAssetFromStoredFile(sourceFile, req);
-
-      if (generatedPreview) {
-        ppt.previewFile = generatedPreview;
-        await ppt.save();
-      }
-    }
+    await ensurePptPreviewAsset(ppt, req);
   }
 
-  res.json(ppts.map((ppt) => ppt.toObject()));
+  res.json(ppts.map((ppt) => serializePpt(ppt.toObject())));
 });
 
 export const getPptById = asyncHandler(async (req, res) => {
@@ -92,5 +57,6 @@ export const getPptById = asyncHandler(async (req, res) => {
     throw new AppError("PPT not found", 404);
   }
 
-  res.json(ppt);
+  await ensurePptPreviewAsset(ppt, req);
+  res.json(serializePpt(ppt.toObject()));
 });

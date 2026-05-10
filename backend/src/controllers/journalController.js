@@ -4,6 +4,7 @@ import Journal from "../models/Journal.js";
 import Ppt from "../models/Ppt.js";
 import User from "../models/User.js";
 import Video from "../models/Video.js";
+import { serializePpt } from "../services/pptService.js";
 import { buildAccessibleJournalFilter, ensureJournalAccess, ensureSuperAdmin } from "../utils/accessControl.js";
 import { deleteAsset, uploadAsset } from "../utils/assetStorage.js";
 import { AppError } from "../utils/appError.js";
@@ -37,14 +38,6 @@ function buildAuthResponse(user, journal) {
       title: journal.title
     }
   };
-}
-
-function resolvePptFileAsset(ppt) {
-  return ppt?.file || ppt?.pptFile || null;
-}
-
-function resolvePptPreviewAsset(ppt) {
-  return ppt?.previewFile || ppt?.pdfPreviewFile || null;
 }
 
 async function buildJournalDetails(journal) {
@@ -115,21 +108,7 @@ async function buildJournalDetails(journal) {
     },
     currentIssue,
     archive,
-    ppts: ppts.map((ppt) => {
-      const fileAsset = resolvePptFileAsset(ppt);
-      const previewAsset = resolvePptPreviewAsset(ppt);
-
-      return {
-        id: ppt._id,
-        title: ppt.title,
-        description: ppt.description,
-        uploadedDate: ppt.createdAt || ppt.uploadedDate,
-        fileUrl: fileAsset?.secure_url || null,
-        previewUrl: previewAsset?.secure_url || null,
-        file: fileAsset,
-        previewFile: previewAsset
-      };
-    }),
+    ppts: ppts.map((ppt) => serializePpt(ppt)),
     videos: videos.map((video) => ({
       id: video._id,
       title: video.title,

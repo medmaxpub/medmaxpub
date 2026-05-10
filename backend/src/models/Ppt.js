@@ -25,7 +25,15 @@ const pptSchema = new mongoose.Schema(
     title: { type: String, required: true },
     description: { type: String, required: true },
     file: assetSchema,
-    previewFile: assetSchema
+    previewFile: assetSchema,
+    pptUrl: String,
+    pptPublicId: String,
+    previewPdfUrl: String,
+    previewPublicId: String,
+    // Legacy Spring Boot fields kept for production compatibility with older records.
+    pptFile: assetSchema,
+    pdfPreviewFile: assetSchema,
+    uploadedDate: Date
   },
   { timestamps: true }
 );

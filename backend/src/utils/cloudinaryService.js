@@ -1,6 +1,48 @@
 import cloudinary from "../config/cloudinary.js";
 import { AppError } from "./appError.js";
 
+function sanitizePublicIdSegment(value) {
+  return String(value || "file")
+    .replace(/[^a-zA-Z0-9-_.]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function buildRawUploadPublicId(file) {
+  const originalName = file?.originalname || "file";
+  const lastDotIndex = originalName.lastIndexOf(".");
+  const name = lastDotIndex > -1 ? originalName.slice(0, lastDotIndex) : originalName;
+  const extension = lastDotIndex > -1 ? originalName.slice(lastDotIndex).toLowerCase() : "";
+
+  return `${Date.now()}-${sanitizePublicIdSegment(name) || "file"}${extension}`;
+}
+
+function normalizeDeliveryUrl(url, file, asset) {
+  if (!url) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(url);
+
+    if (parsed.protocol === "http:") {
+      parsed.protocol = "https:";
+    }
+
+    const extension =
+      (file?.originalname?.includes(".") ? file.originalname.slice(file.originalname.lastIndexOf(".")).toLowerCase() : "") ||
+      (asset?.format ? `.${String(asset.format).toLowerCase()}` : "");
+
+    if (extension && !parsed.pathname.toLowerCase().endsWith(extension)) {
+      parsed.pathname = `${parsed.pathname}${extension}`;
+    }
+
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
 export function hasCloudinaryConfig() {
   return Boolean(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET);
 }
@@ -19,7 +61,7 @@ export function formatAsset(asset, file) {
   return {
     storage: "cloudinary",
     public_id: asset.public_id,
-    secure_url: asset.secure_url,
+    secure_url: normalizeDeliveryUrl(asset.secure_url, file, asset),
     resource_type: asset.resource_type,
     format: asset.format,
     file_type: file?.mimetype || null,
@@ -37,11 +79,21 @@ export async function uploadToCloudinary(file, folder, resourceType = "auto") {
   ensureConfigured();
 
   return new Promise((resolve, reject) => {
+    const options = {
+      folder,
+      resource_type: resourceType
+    };
+
+    if (resourceType === "raw") {
+      options.public_id = buildRawUploadPublicId(file);
+      options.use_filename = false;
+      options.unique_filename = false;
+      options.overwrite = false;
+      options.access_mode = "public";
+    }
+
     const stream = cloudinary.uploader.upload_stream(
-      {
-        folder,
-        resource_type: resourceType
-      },
+      options,
       (error, result) => {
         if (error) {
           reject(new AppError(error.message || "Cloudinary upload failed", 500));
