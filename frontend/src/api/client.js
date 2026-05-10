@@ -1,7 +1,15 @@
 import axios from "axios";
 
+function buildApiBaseUrl() {
+  const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+
+  return configuredBaseUrl.endsWith("/api")
+    ? configuredBaseUrl
+    : `${configuredBaseUrl.replace(/\/+$/, "")}/api`;
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api"
+  baseURL: buildApiBaseUrl()
 });
 
 function clearAuthState() {

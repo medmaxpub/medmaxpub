@@ -265,12 +265,26 @@ Backend:
 
 1. Deploy `backend/` to Render, Railway, or VPS
 2. Set all environment variables from `backend/.env.example`
-3. Start command: `npm start`
+3. On Render, set the Root Directory to `backend`
+4. Start command: `npm start`
 
 Database:
 
 1. Create MongoDB Atlas cluster
 2. Replace `MONGODB_URI` with the real Atlas connection string
+3. Do not leave `MONGODB_URI` as `mongodb://localhost:27017/medmaxpub` on Render, because Render does not provide a local MongoDB server
+
+Render backend env values:
+
+- `MONGODB_URI`: your MongoDB Atlas connection string
+- `JWT_SECRET`: a long random secret
+- `FILE_STORAGE`: `cloudinary` for production media, or `local` only for temporary testing
+- `BACKEND_PUBLIC_URL`: your Render backend URL, for example `https://your-backend.onrender.com`
+- `FRONTEND_URL`: your deployed frontend URL
+
+Render note:
+
+- If you keep `FILE_STORAGE=local`, uploaded files are not durable on Render and can disappear after redeploys or restarts. Use Cloudinary in production.
 
 Cloudinary:
 
