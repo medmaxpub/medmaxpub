@@ -10,10 +10,28 @@ import { uploadsRoot } from "./utils/assetStorage.js";
 dotenv.config();
 
 const app = express();
+const defaultOrigins = ["http://localhost:5173", "http://127.0.0.1:5173", "https://medmaxpub.pages.dev"];
+const configuredOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.CLIENT_URL,
+  process.env.CORS_ORIGINS
+]
+  .filter(Boolean)
+  .flatMap((value) => value.split(","))
+  .map((value) => value.trim())
+  .filter(Boolean);
+const allowedOrigins = [...new Set([...defaultOrigins, ...configuredOrigins])];
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true
   })
 );

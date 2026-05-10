@@ -1,11 +1,52 @@
 import axios from "axios";
 
-function buildApiBaseUrl() {
-  const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+const LOCAL_API_BASE_URL = "http://localhost:5000/api";
+const PRODUCTION_API_BASE_URL = "https://medmaxpub.onrender.com/api";
 
-  return configuredBaseUrl.endsWith("/api")
-    ? configuredBaseUrl
-    : `${configuredBaseUrl.replace(/\/+$/, "")}/api`;
+function isLocalHostname(hostname) {
+  return hostname === "localhost" || hostname === "127.0.0.1";
+}
+
+function isLocalRuntime() {
+  if (typeof window === "undefined") {
+    return import.meta.env.DEV;
+  }
+
+  return isLocalHostname(window.location.hostname);
+}
+
+function normalizeApiBaseUrl(url) {
+  const normalizedUrl = url.replace(/\/+$/, "");
+  return normalizedUrl.endsWith("/api") ? normalizedUrl : `${normalizedUrl}/api`;
+}
+
+function isLocalApiUrl(url) {
+  try {
+    return isLocalHostname(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+}
+
+function buildApiBaseUrl() {
+  const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+  const localRuntime = isLocalRuntime();
+
+  if (!configuredBaseUrl) {
+    return localRuntime ? LOCAL_API_BASE_URL : PRODUCTION_API_BASE_URL;
+  }
+
+  const normalizedConfiguredUrl = normalizeApiBaseUrl(configuredBaseUrl);
+
+  if (localRuntime && !isLocalApiUrl(normalizedConfiguredUrl)) {
+    return LOCAL_API_BASE_URL;
+  }
+
+  if (!localRuntime && isLocalApiUrl(normalizedConfiguredUrl)) {
+    return PRODUCTION_API_BASE_URL;
+  }
+
+  return normalizedConfiguredUrl;
 }
 
 const api = axios.create({

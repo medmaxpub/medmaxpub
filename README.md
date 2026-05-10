@@ -227,6 +227,8 @@ JOURNAL_ADMIN_NAME=Journal Admin
 JOURNAL_ADMIN_EMAIL=journaladmin@medmaxpub.com
 JOURNAL_ADMIN_PASSWORD=ChangeMe123!
 FRONTEND_URL=http://localhost:5173
+CLIENT_URL=
+CORS_ORIGINS=http://localhost:5173
 ```
 
 ## Local Development
@@ -238,6 +240,12 @@ cd frontend
 npm install
 npm run dev
 ```
+
+Frontend API behavior:
+
+- In local development, the frontend uses `http://localhost:5000/api`
+- In production, the frontend uses `https://medmaxpub.onrender.com/api`
+- `VITE_API_BASE_URL` is optional and overrides the defaults, but if a production build is accidentally given a localhost URL, the app now falls back to the production API automatically
 
 Backend:
 
@@ -281,6 +289,7 @@ Render backend env values:
 - `FILE_STORAGE`: `cloudinary` for production media, or `local` only for temporary testing
 - `BACKEND_PUBLIC_URL`: your Render backend URL, for example `https://your-backend.onrender.com`
 - `FRONTEND_URL`: your deployed frontend URL
+- `CORS_ORIGINS`: comma-separated frontend origins, for example `https://medmaxpub.pages.dev,http://localhost:5173`
 
 Render note:
 
