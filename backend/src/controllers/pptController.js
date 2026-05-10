@@ -6,6 +6,14 @@ import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { generatePreviewAssetFromStoredFile, generatePreviewAssetFromUpload } from "../utils/pptPreviewService.js";
 
+function resolvePptFileAsset(ppt) {
+  return ppt?.file || ppt?.pptFile || ppt?._doc?.file || ppt?._doc?.pptFile || null;
+}
+
+function resolvePptPreviewAsset(ppt) {
+  return ppt?.previewFile || ppt?.pdfPreviewFile || ppt?._doc?.previewFile || ppt?._doc?.pdfPreviewFile || null;
+}
+
 export const uploadPpt = asyncHandler(async (req, res) => {
   const requestedJournalId = req.params.journalId || req.body.journalId;
   const journal = await Journal.findById(requestedJournalId);
@@ -39,8 +47,11 @@ export const getPpts = asyncHandler(async (req, res) => {
   const ppts = await Ppt.find().populate("journal", "title slug").sort({ createdAt: -1 });
 
   for (const ppt of ppts) {
-    if (!ppt.previewFile && ppt.file) {
-      const generatedPreview = await generatePreviewAssetFromStoredFile(ppt.file, req);
+    const sourceFile = resolvePptFileAsset(ppt);
+    const existingPreview = resolvePptPreviewAsset(ppt);
+
+    if (!existingPreview && sourceFile) {
+      const generatedPreview = await generatePreviewAssetFromStoredFile(sourceFile, req);
 
       if (generatedPreview) {
         ppt.previewFile = generatedPreview;
@@ -58,8 +69,11 @@ export const getAdminPpts = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 });
 
   for (const ppt of ppts) {
-    if (!ppt.previewFile && ppt.file) {
-      const generatedPreview = await generatePreviewAssetFromStoredFile(ppt.file, req);
+    const sourceFile = resolvePptFileAsset(ppt);
+    const existingPreview = resolvePptPreviewAsset(ppt);
+
+    if (!existingPreview && sourceFile) {
+      const generatedPreview = await generatePreviewAssetFromStoredFile(sourceFile, req);
 
       if (generatedPreview) {
         ppt.previewFile = generatedPreview;

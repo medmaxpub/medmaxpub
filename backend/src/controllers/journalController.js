@@ -39,6 +39,14 @@ function buildAuthResponse(user, journal) {
   };
 }
 
+function resolvePptFileAsset(ppt) {
+  return ppt?.file || ppt?.pptFile || null;
+}
+
+function resolvePptPreviewAsset(ppt) {
+  return ppt?.previewFile || ppt?.pdfPreviewFile || null;
+}
+
 async function buildJournalDetails(journal) {
   const issues = await Issue.find({ journal: journal._id }).sort({ year: -1, volume: -1, issue: -1 }).lean();
   const ppts = await Ppt.find({ journal: journal._id }).sort({ createdAt: -1 }).lean();
@@ -107,16 +115,21 @@ async function buildJournalDetails(journal) {
     },
     currentIssue,
     archive,
-    ppts: ppts.map((ppt) => ({
-      id: ppt._id,
-      title: ppt.title,
-      description: ppt.description,
-      uploadedDate: ppt.createdAt,
-      fileUrl: ppt.file?.secure_url || null,
-      previewUrl: ppt.previewFile?.secure_url || null,
-      file: ppt.file || null,
-      previewFile: ppt.previewFile || null
-    })),
+    ppts: ppts.map((ppt) => {
+      const fileAsset = resolvePptFileAsset(ppt);
+      const previewAsset = resolvePptPreviewAsset(ppt);
+
+      return {
+        id: ppt._id,
+        title: ppt.title,
+        description: ppt.description,
+        uploadedDate: ppt.createdAt || ppt.uploadedDate,
+        fileUrl: fileAsset?.secure_url || null,
+        previewUrl: previewAsset?.secure_url || null,
+        file: fileAsset,
+        previewFile: previewAsset
+      };
+    }),
     videos: videos.map((video) => ({
       id: video._id,
       title: video.title,

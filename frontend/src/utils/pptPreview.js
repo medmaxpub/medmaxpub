@@ -11,8 +11,10 @@ export function buildOfficePreviewUrl(url) {
 }
 
 export function buildModalPreviewUrl(item) {
-  if (item.previewFile?.secure_url) {
-    return `${item.previewFile.secure_url}#toolbar=1&navpanes=0&view=FitH`;
+  const previewFileUrl = item.previewFile?.secure_url || item.pdfPreviewFile?.secure_url;
+
+  if (previewFileUrl) {
+    return `${previewFileUrl}#toolbar=1&navpanes=0&view=FitH`;
   }
 
   if (item.previewUrl && !/docs\.google\.com/i.test(item.previewUrl)) {
@@ -24,8 +26,12 @@ export function buildModalPreviewUrl(item) {
 }
 
 export function normalizePptItem(item) {
-  const fileUrl = item.fileUrl || item.file?.secure_url;
-  const previewUrl = item.previewUrl || item.previewFile?.secure_url || buildOfficePreviewUrl(fileUrl);
+  const fileUrl = item.fileUrl || item.file?.secure_url || item.pptFile?.secure_url;
+  const previewUrl =
+    item.previewUrl ||
+    item.previewFile?.secure_url ||
+    item.pdfPreviewFile?.secure_url ||
+    buildOfficePreviewUrl(fileUrl);
 
   return {
     ...item,
