@@ -5,7 +5,7 @@ import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const createArticle = asyncHandler(async (req, res) => {
-  ensureJournalAccess(req.user, req.body.journalId);
+  await ensureJournalAccess(req.user, req.body.journalId);
 
   const pdfFile = await uploadAsset(req.file, "medmaxpub/articles", "raw", req);
   const article = await Article.create({

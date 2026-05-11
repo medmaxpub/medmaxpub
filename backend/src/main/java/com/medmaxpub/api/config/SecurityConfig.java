@@ -52,9 +52,6 @@ public class SecurityConfig {
                                 "/api/testimonials/**",
                                 "/api/manual-scripts/**"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.POST,
-                                "/api/contact"
-                        ).permitAll()
                         .requestMatchers("/api/admin/**").authenticated()
                         .anyRequest().permitAll()
                 )

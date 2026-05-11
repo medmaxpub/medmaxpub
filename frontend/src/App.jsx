@@ -6,7 +6,6 @@ import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import JournalShell from "./pages/journal/JournalShell";
 import AdminLoginPage from "./pages/public/AdminLoginPage";
 import AboutPage from "./pages/public/AboutPage";
-import ContactPage from "./pages/public/ContactPage";
 import HomePage from "./pages/public/HomePage";
 import JournalsPage from "./pages/public/JournalsPage";
 import PptsPage from "./pages/public/PptsPage";
@@ -18,12 +17,11 @@ export default function App() {
       <Route element={<SiteLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/journals" element={<JournalsPage />} />
-        <Route path="/journals/:slug" element={<Navigate to="home" replace />} />
-        <Route path="/journals/:slug/:section" element={<JournalShell />} />
+        <Route path="/journals/:journalUrl" element={<Navigate to="about" replace />} />
+        <Route path="/journals/:journalUrl/:section" element={<JournalShell />} />
         <Route path="/ppts" element={<PptsPage />} />
         <Route path="/videos" element={<VideosPage />} />
         <Route path="/about" element={<AboutPage />} />
-        <Route path="/contact" element={<ContactPage />} />
       </Route>
 
       <Route path="/admin/login" element={<AdminLoginPage />} />

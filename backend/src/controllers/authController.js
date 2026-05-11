@@ -5,15 +5,26 @@ import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { signToken } from "../utils/jwt.js";
 
-function authResponse(user) {
+async function buildOwnedJournalIds(userId) {
+  const ownedJournals = await Journal.find({ owner: userId }).select("_id").lean();
+  return ownedJournals.map((journal) => journal._id.toString());
+}
+
+async function authResponse(user, extra = {}) {
+  const assignedJournalIds = await buildOwnedJournalIds(user._id);
+
   return {
     token: signToken({ id: user._id }),
     user: {
       id: user._id,
-      name: user.name,
-      email: user.email,
+      name: [user.firstName, user.lastName].filter(Boolean).join(" ").trim(),
+      firstName: user.firstName,
+      lastName: user.lastName,
+      userName: user.userName,
+      email: user.email || "",
       role: normalizeRole(user.role),
-      assignedJournalIds: (user.assignedJournals || []).map((journal) => journal.toString())
+      assignedJournalIds,
+      impersonator: extra.impersonator || null
     }
   };
 }
@@ -21,45 +32,74 @@ function authResponse(user) {
 export const signupAdmin = asyncHandler(async (req, res) => {
   ensureSuperAdmin(req.user);
 
-  const { name, email, password, role, journalIds = [] } = req.body;
-  const existingUser = await User.findOne({ email });
+  const { firstName, lastName, userName, email, password } = req.body;
+  const normalizedUserName = String(userName || "").trim().toLowerCase();
+
+  if (!firstName || !lastName || !normalizedUserName || !password) {
+    throw new AppError("First name, last name, user name, and password are required", 400);
+  }
+
+  const existingUser = await User.findOne({
+    $or: [{ userName: normalizedUserName }, ...(email ? [{ email }] : [])]
+  });
 
   if (existingUser) {
-    throw new AppError("Admin already exists with this email", 400);
-  }
-
-  const normalizedRole = role === "journal_admin" ? "journal_admin" : "super_admin";
-  const assignedJournals = normalizedRole === "journal_admin" ? journalIds : [];
-
-  if (normalizedRole === "journal_admin" && !assignedJournals.length) {
-    throw new AppError("Journal admins must be assigned to at least one journal", 400);
-  }
-
-  if (assignedJournals.length) {
-    const journalCount = await Journal.countDocuments({ _id: { $in: assignedJournals } });
-
-    if (journalCount !== assignedJournals.length) {
-      throw new AppError("One or more assigned journals are invalid", 400);
-    }
+    throw new AppError("Admin already exists with this user name or email", 400);
   }
 
   const user = await User.create({
-    name,
+    firstName,
+    lastName,
+    userName: normalizedUserName,
     email,
     password,
-    role: normalizedRole,
-    assignedJournals
+    role: "admin"
   });
-  res.status(201).json(authResponse(user));
+
+  res.status(201).json(await authResponse(user));
 });
 
 export const login = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
+  const identifier = String(req.body.identifier || req.body.userName || req.body.email || "")
+    .trim()
+    .toLowerCase();
+  const { password } = req.body;
 
-  if (!user || !(await user.comparePassword(password))) {
-    throw new AppError("Invalid email or password", 401);
+  if (!identifier || !password) {
+    throw new AppError("User name and password are required", 400);
   }
 
-  res.json(authResponse(user));
+  const user = await User.findOne({
+    $or: [{ userName: identifier }, { email: identifier }]
+  });
+
+  if (!user || !(await user.comparePassword(password))) {
+    throw new AppError("Invalid user name or password", 401);
+  }
+
+  res.json(await authResponse(user));
+});
+
+export const impersonateUser = asyncHandler(async (req, res) => {
+  ensureSuperAdmin(req.user);
+
+  const targetUser = await User.findById(req.params.id);
+
+  if (!targetUser) {
+    throw new AppError("User not found", 404);
+  }
+
+  if (normalizeRole(targetUser.role) !== "user") {
+    throw new AppError("Only user accounts can be impersonated", 400);
+  }
+
+  res.json(
+    await authResponse(targetUser, {
+      impersonator: {
+        id: req.user._id,
+        userName: req.user.userName,
+        name: [req.user.firstName, req.user.lastName].filter(Boolean).join(" ").trim()
+      }
+    })
+  );
 });

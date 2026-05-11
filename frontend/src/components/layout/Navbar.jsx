@@ -7,8 +7,7 @@ const navItems = [
   { label: "Journals", to: "/journals" },
   { label: "PPTs", to: "/ppts" },
   { label: "Videos", to: "/videos" },
-  { label: "About", to: "/about" },
-  { label: "Contact", to: "/contact" }
+  { label: "About", to: "/about" }
 ];
 
 function linkClass({ isActive }) {

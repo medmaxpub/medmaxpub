@@ -15,23 +15,21 @@ export function buildJournalArchiveInfo(journal = {}) {
   const articles = currentIssue?.articles || [];
   const featuredArticle = articles[0] || null;
   const featuredAuthors = [...new Set(articles.flatMap((article) => article.authors || []))].slice(0, 6);
-  const overview = stripHtml(journal.sections?.about || journal.sections?.home || journal.description || "");
+  const overview = stripHtml(journal.aboutJournal || "");
 
   return {
     id: journal.id || journal._id,
-    slug: journal.slug || "",
-    title: journal.title || "Untitled journal",
-    issn: journal.issn || "",
-    category: journal.category || "",
-    description: journal.description || "",
+    journalUrl: journal.journalUrl || "",
+    title: journal.managingJournalName || "Untitled journal",
+    domainName: journal.journalDomainName || "",
+    editorName: [journal.firstName, journal.lastName].filter(Boolean).join(" "),
     overview,
-    coverImageUrl: journal.coverImageUrl || journal.coverImage?.secure_url || "",
     currentIssueLabel: buildCurrentIssueLabel(currentIssue),
     featuredArticleTitle: featuredArticle?.title || "",
     featuredAuthors
   };
 }
 
-export function getAssetJournalSlug(item = {}) {
-  return item.journalSlug || item.journal?.slug || "";
+export function getAssetJournalUrl(item = {}) {
+  return item.journalUrl || item.journal?.journalUrl || "";
 }

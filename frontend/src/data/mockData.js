@@ -60,24 +60,19 @@ export const aboutMedmaxParagraphs = [
   "All listed journals are part of the open access process and are available to read without access fees or subscription charges."
 ];
 
-function buildJournal(id, title, slug, issn, category, coverImageUrl, ppts = [], videos = []) {
+function buildJournal(id, firstName, lastName, managingJournalName, journalDomainName, journalUrl, ppts = [], videos = []) {
   return {
     id,
-    slug,
-    title,
-    issn,
-    category,
-    coverImageUrl,
-    description:
-      "A peer-reviewed publication stream supporting global researchers, conference presenters, clinicians, engineers and interdisciplinary scholars.",
-    sections: {
-      home: `<p>${title} supports the scientific publishing mission of medmaxpub by connecting conference-driven research with structured open access journal workflows.</p><p>This journal homepage mirrors the platform's confidence-forward layout while giving editors and authors a modern submission, issue, and archive experience.</p>`,
-      about: `<p>${title} is an international journal for original research, reviews, case studies, perspectives, and scholarly communications relevant to emerging science and applied innovation.</p>`,
-      "aim-scope": `<ul><li>Global multidisciplinary research exchange</li><li>Conference-aligned scholarly publication</li><li>Clinical, engineering, life science, and applied technology topics</li></ul>`,
-      "editorial-board": `<p>Editorial board members, affiliations, and leadership roles are managed through the admin dashboard and rendered journal-by-journal.</p>`,
-      "author-guidelines": `<ul><li>Provide complete affiliations and corresponding author details</li><li>Ensure references, abstracts, and figures follow journal-specific policy</li><li>Prepare files and metadata in the format requested by the editorial team</li></ul>`,
-      "article-in-press": `<p>Accepted papers awaiting issue allocation appear here so authors and readers can preview upcoming publication activity.</p>`
-    },
+    firstName,
+    lastName,
+    userName: `${journalUrl}-admin`,
+    managingJournalName,
+    journalDomainName,
+    journalUrl,
+    aboutJournal:
+      `${managingJournalName} is a peer-reviewed publication stream supporting global researchers, conference presenters, clinicians, engineers, and interdisciplinary scholars.`,
+    journalInstructions:
+      "Prepare complete author metadata, submit all required files in the requested format, and follow the editor-assigned review workflow for publication processing.",
     currentIssue: {
       volume: 5,
       issue: 2,
@@ -128,16 +123,16 @@ function buildJournal(id, title, slug, issn, category, coverImageUrl, ppts = [],
 export const mockJournals = [
   buildJournal(
     "j1",
+    "Alicia",
+    "Carter",
     "Journal of Global Clinical & Translational Research",
+    "Clinical, Medical, and Translational Research",
     "journal-global-clinical-translational-research",
-    "ISSN 2999-1001",
-    "Clinical Science",
-    "https://placehold.co/600x800/0d1b2a/ffffff?text=Global+Clinical+Research",
     [
       {
         id: "ppt-1",
-        title: "Global Scientific Network Keynote Deck",
-        description: "A presentation resource aligned with speaker sessions, poster highlights, and conference dissemination.",
+        title: "Journal of Global Clinical & Translational Research PPT",
+        description: "A presentation resource aligned with the journal's current publication focus.",
         uploadedDate: "2026-04-01",
         fileUrl: "https://example.com/presentation-1.pptx",
         previewUrl: "https://example.com/presentation-1.pdf"
@@ -146,25 +141,25 @@ export const mockJournals = [
     [
       {
         id: "video-1",
-        title: "Empowering Global Scientific Collaboration",
-        description: "Keynote and research visibility overview for the journal audience.",
-        thumbnailUrl: "https://placehold.co/800x450/081c3a/ffffff?text=Global+Scientific+Collaboration",
-        youtubeUrl: "https://www.youtube.com/embed/ysz5S6PUM-U"
+        title: "Journal of Global Clinical & Translational Research Video",
+        description: "A journal-linked media record for the public library.",
+        thumbnailUrl: "https://placehold.co/800x450/081c3a/ffffff?text=Journal+Video",
+        videoUrl: "https://res.cloudinary.com/demo/video/upload/dog.mp4"
       }
     ]
   ),
   buildJournal(
     "j2",
+    "Monica",
+    "Alvarez",
     "Open Journal of Bioinformatics & Intelligent Systems",
+    "Bioinformatics, Intelligent Systems, and Applied AI",
     "open-journal-bioinformatics-intelligent-systems",
-    "ISSN 2999-1002",
-    "Artificial Intelligence",
-    "https://placehold.co/600x800/144552/ffffff?text=Bioinformatics+AI",
     [
       {
         id: "ppt-2",
-        title: "Emerging Research Trends in AI & Health Care",
-        description: "A slide deck prepared for medmaxpub conference previews and author education.",
+        title: "Open Journal of Bioinformatics & Intelligent Systems PPT",
+        description: "A slide deck prepared for journal-linked education and public viewing.",
         uploadedDate: "2026-03-22",
         fileUrl: "https://example.com/presentation-2.pptx",
         previewUrl: "https://example.com/presentation-2.pdf"
@@ -173,60 +168,60 @@ export const mockJournals = [
     [
       {
         id: "video-2",
-        title: "How medmaxpub Supports Authors, Speakers & Delegates",
+        title: "Open Journal of Bioinformatics & Intelligent Systems Video",
         description: "A journal-linked video resource for authors and contributors.",
-        thumbnailUrl: "https://placehold.co/800x450/15616d/ffffff?text=medmaxpub+Support+Workflow",
+        thumbnailUrl: "https://placehold.co/800x450/15616d/ffffff?text=Journal+Support+Workflow",
         videoUrl: "https://res.cloudinary.com/demo/video/upload/dog.mp4"
       }
     ]
   ),
   buildJournal(
     "j3",
+    "Priya",
+    "Deshmukh",
     "Journal of Sustainable Energy Engineering & Policy",
-    "journal-sustainable-energy-engineering-policy",
-    "ISSN 2999-1003",
-    "Energy",
-    "https://placehold.co/600x800/adc178/172033?text=Sustainable+Energy"
+    "Energy Engineering and Sustainability Policy",
+    "journal-sustainable-energy-engineering-policy"
   ),
   buildJournal(
     "j4",
+    "Samuel",
+    "Reed",
     "International Journal of Public Health Frontiers",
-    "international-journal-public-health-frontiers",
-    "ISSN 2999-1004",
-    "Public Health",
-    "https://placehold.co/600x800/1b4965/ffffff?text=Public+Health"
+    "Public Health and Preventive Research",
+    "international-journal-public-health-frontiers"
   ),
   buildJournal(
     "j5",
+    "Ibrahim",
+    "Khan",
     "Journal of Advanced Pharmaceutical Discovery",
-    "journal-advanced-pharmaceutical-discovery",
-    "ISSN 2999-1005",
-    "Pharmacy",
-    "https://placehold.co/600x800/9c6644/ffffff?text=Pharmaceutical+Discovery"
+    "Pharmaceutical Discovery and Drug Development",
+    "journal-advanced-pharmaceutical-discovery"
   ),
   buildJournal(
     "j6",
+    "Mia",
+    "Brooks",
     "Engineering, Robotics & Intelligent Machine Review",
-    "engineering-robotics-intelligent-machine-review",
-    "ISSN 2999-1006",
-    "Engineering",
-    "https://placehold.co/600x800/5e6472/ffffff?text=Engineering+Robotics"
+    "Engineering, Robotics, and Intelligent Machines",
+    "engineering-robotics-intelligent-machine-review"
   )
 ];
 
 export const mockPpts = mockJournals.flatMap((journal) =>
   (journal.ppts || []).map((ppt) => ({
     ...ppt,
-    journalTitle: journal.title,
-    journalSlug: journal.slug
+    journalTitle: journal.managingJournalName,
+    journalUrl: journal.journalUrl
   }))
 );
 
 export const mockVideos = mockJournals.flatMap((journal) =>
   (journal.videos || []).map((video) => ({
     ...video,
-    journalTitle: journal.title,
-    journalSlug: journal.slug
+    journalTitle: journal.managingJournalName,
+    journalUrl: journal.journalUrl
   }))
 );
 
@@ -234,21 +229,21 @@ export const mockTestimonials = [
   {
     id: "t1",
     name: "Dr. Hannah Morris",
-    role: "Conference Speaker",
+    designation: "Conference Speaker",
     message:
       "The platform captures a polished, research-focused feel while making publishing and speaker workflows much easier to manage."
   },
   {
     id: "t2",
     name: "Prof. Daniel Rivera",
-    role: "Journal Editor",
+    designation: "Journal Editor",
     message:
       "Routing journals, conference assets, testimonials, and article metadata through one dashboard is a major operational improvement."
   },
   {
     id: "t3",
     name: "Mia Brooks",
-    role: "Event Coordinator",
+    designation: "Event Coordinator",
     message:
       "The admin tools are practical and the public UI presents journals, media, and scientific content in a confident and trustworthy way."
   }

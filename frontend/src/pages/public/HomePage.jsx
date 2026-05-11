@@ -1,5 +1,7 @@
 import { ArrowRight } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import SectionHeader from "../../components/common/SectionHeader";
 import {
   aboutMedmaxParagraphs,
@@ -15,6 +17,14 @@ import {
 export default function HomePage() {
   const featuredJournals = mockJournals.slice(0, 4);
   const loopingHeroImages = [...heroShowcaseImages, ...heroShowcaseImages];
+  const [testimonials, setTestimonials] = useState(mockTestimonials);
+  const useDevelopmentFallback = shouldUseDevelopmentFallback();
+
+  useEffect(() => {
+    withFallback(() => api.get("/testimonials"), useDevelopmentFallback ? mockTestimonials : []).then((data) =>
+      setTestimonials(data.length ? data : mockTestimonials)
+    );
+  }, [useDevelopmentFallback]);
 
   return (
     <div>
@@ -123,7 +133,7 @@ export default function HomePage() {
                   {["Clinical", "Medicine", "Life Sciences", "Pharma", "Engineering", "Technology"].map((item) => (
                     <div
                       key={item}
-                      className="rounded-2xl border border-brand-gold/30 text-brand-black/10 px-4 py-3 text-sm font-semibold text-brand-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+                      className="rounded-2xl border border-brand-gold/30 bg-black/5 px-4 py-3 text-sm font-semibold text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
                     >
                       {item}
                     </div>
@@ -152,21 +162,21 @@ export default function HomePage() {
         <div className="container-shell">
           <SectionHeader
             label="Featured Journals"
-            title="Open access journals aligned with conference-driven scientific communities"
-            description="Journals are presented in a polished directory layout with direct access to current issues, archive pages, and submission-ready detail views."
+            title="Open access journal profiles with direct public URLs"
+            description="Each featured journal now highlights only the core Medmax profile fields used in the admin portal."
           />
           <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {featuredJournals.map((journal) => (
-              <Link key={journal.id} to={`/journals/${journal.slug}/home`} className="journal-card-link">
-                <article className="card-panel h-full overflow-hidden">
-                  <img src={journal.coverImageUrl} alt={journal.title} className="h-64 w-full object-cover sm:h-72" />
-                  <div className="p-5 sm:p-6">
-                    <p className="text-xs uppercase tracking-[0.2em] text-brand-teal">{journal.category}</p>
-                    <h3 className="mt-3 font-display text-2xl font-semibold text-brand-navy">{journal.title}</h3>
-                    <p className="mt-2 text-sm text-slate-500">{journal.issn}</p>
-                    <p className="mt-4 text-sm leading-7 text-slate-600">{journal.description}</p>
-                    <span className="button-primary mt-5">View Journal</span>
-                  </div>
+              <Link key={journal.id} to={`/journals/${journal.journalUrl}/about`} className="journal-card-link">
+                <article className="card-panel h-full p-5 sm:p-6">
+                  <p className="text-xs uppercase tracking-[0.2em] text-brand-teal">{journal.journalDomainName}</p>
+                  <h3 className="mt-3 font-display text-2xl font-semibold text-brand-navy">{journal.managingJournalName}</h3>
+                  <p className="mt-2 text-sm text-slate-500">
+                    Managed by {journal.firstName} {journal.lastName}
+                  </p>
+                  <p className="mt-2 text-sm text-slate-500">URL: {journal.journalUrl}</p>
+                  <p className="mt-4 text-sm leading-7 text-slate-600">{journal.aboutJournal}</p>
+                  <span className="button-primary mt-5">View Journal</span>
                 </article>
               </Link>
             ))}
@@ -204,12 +214,12 @@ export default function HomePage() {
             align="center"
           />
           <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {mockTestimonials.map((item) => (
+            {testimonials.map((item) => (
               <article key={item.id} className="card-panel p-6 sm:p-8">
                 <p className="text-lg leading-8 text-slate-700">"{item.message}"</p>
                 <div className="mt-6">
                   <p className="font-semibold text-brand-navy">{item.name}</p>
-                  <p className="text-sm text-slate-500">{item.role}</p>
+                  <p className="text-sm text-slate-500">{item.designation}</p>
                 </div>
               </article>
             ))}

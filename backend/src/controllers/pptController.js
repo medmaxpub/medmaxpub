@@ -13,7 +13,7 @@ export const uploadPpt = asyncHandler(async (req, res) => {
     throw new AppError("Journal not found", 404);
   }
 
-  ensureJournalAccess(req.user, journal._id);
+  await ensureJournalAccess(req.user, journal._id);
 
   const ppt = await createPptRecord({
     journalId: journal._id,
@@ -24,12 +24,12 @@ export const uploadPpt = asyncHandler(async (req, res) => {
     req
   });
 
-  const populatedPpt = await Ppt.findById(ppt._id).populate("journal", "title slug").lean();
+  const populatedPpt = await Ppt.findById(ppt._id).populate("journal", "managingJournalName journalUrl journalDomainName").lean();
   res.status(201).json(serializePpt(populatedPpt));
 });
 
 export const getPpts = asyncHandler(async (req, res) => {
-  const ppts = await Ppt.find().populate("journal", "title slug").sort({ createdAt: -1 });
+  const ppts = await Ppt.find().populate("journal", "managingJournalName journalUrl journalDomainName").sort({ createdAt: -1 });
 
   for (const ppt of ppts) {
     await ensurePptPreviewAsset(ppt, req);
@@ -40,7 +40,7 @@ export const getPpts = asyncHandler(async (req, res) => {
 
 export const getAdminPpts = asyncHandler(async (req, res) => {
   const ppts = await Ppt.find(buildAccessibleJournalFilter(req.user))
-    .populate("journal", "title slug")
+    .populate("journal", "managingJournalName journalUrl journalDomainName")
     .sort({ createdAt: -1 });
 
   for (const ppt of ppts) {
@@ -51,7 +51,7 @@ export const getAdminPpts = asyncHandler(async (req, res) => {
 });
 
 export const getPptById = asyncHandler(async (req, res) => {
-  const ppt = await Ppt.findById(req.params.id).populate("journal", "title slug");
+  const ppt = await Ppt.findById(req.params.id).populate("journal", "managingJournalName journalUrl journalDomainName");
 
   if (!ppt) {
     throw new AppError("PPT not found", 404);

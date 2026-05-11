@@ -1,44 +1,35 @@
-import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Eye, EyeOff, Pencil, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
+import EmptyState from "../../components/common/EmptyState";
 import SectionHeader from "../../components/common/SectionHeader";
 import { useAuth } from "../../context/AuthContext";
-import { mockJournals, mockPpts, mockTestimonials, mockVideos } from "../../data/mockData";
-import { normalizeVideoItem } from "../../utils/videoPlayer";
+import { mockJournals, mockTestimonials } from "../../data/mockData";
 
-const initialJournal = {
-  title: "",
-  slug: "",
-  issn: "",
-  category: "",
-  description: "",
-  home: "",
-  about: "",
-  aimScope: "",
-  editorialBoard: "",
-  authorGuidelines: "",
-  articleInPress: "",
-  coverImage: null
-};
-
-const initialPptForm = {
-  journalId: "",
-  title: "",
-  description: "",
+const initialJournalForm = {
+  firstName: "",
+  lastName: "",
+  username: "",
+  password: "",
+  managingJournalName: "",
+  journalDomainName: "",
+  journalUrl: "",
+  aboutJournal: "",
+  journalInstructions: "",
   pptFile: null,
-  previewFile: null
-};
-
-const initialVideoForm = {
-  journalId: "",
-  title: "",
-  description: "",
-  youtubeUrl: "",
-  thumbnail: null,
+  pdfFile: null,
   videoFile: null
 };
 
-function normalizeAdminItem(item) {
+const initialTestimonialForm = {
+  name: "",
+  designation: "",
+  message: "",
+  image: null
+};
+
+function normalizeItem(item) {
   return {
     ...item,
     id: item.id || item._id
@@ -47,498 +38,700 @@ function normalizeAdminItem(item) {
 
 function mapJournalToForm(journal) {
   return {
-    title: journal?.title || "",
-    slug: journal?.slug || "",
-    issn: journal?.issn || "",
-    category: journal?.category || "",
-    description: journal?.description || "",
-    home: journal?.sections?.home || "",
-    about: journal?.sections?.about || "",
-    aimScope: journal?.sections?.aimScope || journal?.sections?.["aim-scope"] || "",
-    editorialBoard: journal?.sections?.editorialBoard || journal?.sections?.["editorial-board"] || "",
-    authorGuidelines: journal?.sections?.authorGuidelines || journal?.sections?.["author-guidelines"] || "",
-    articleInPress: journal?.sections?.articleInPress || journal?.sections?.["article-in-press"] || "",
-    coverImage: null
+    firstName: journal?.firstName || "",
+    lastName: journal?.lastName || "",
+    username: journal?.username || journal?.ownerUsername || "",
+    password: "",
+    managingJournalName: journal?.managingJournalName || "",
+    journalDomainName: journal?.journalDomainName || "",
+    journalUrl: journal?.journalUrl || "",
+    aboutJournal: journal?.aboutJournal || "",
+    journalInstructions: journal?.journalInstructions || "",
+    pptFile: null,
+    pdfFile: null,
+    videoFile: null
+  };
+}
+
+function mapTestimonialToForm(item) {
+  return {
+    name: item?.name || "",
+    designation: item?.designation || "",
+    message: item?.message || "",
+    image: null
   };
 }
 
 export default function AdminDashboardPage() {
+  const { beginImpersonation, user } = useAuth();
   const location = useLocation();
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [users, setUsers] = useState([]);
   const [journals, setJournals] = useState([]);
-  const [ppts, setPpts] = useState([]);
-  const [videos, setVideos] = useState([]);
-  const [contacts, setContacts] = useState([]);
-  const [journalForm, setJournalForm] = useState(initialJournal);
-  const [managedJournalId, setManagedJournalId] = useState("");
-  const [pptForm, setPptForm] = useState(initialPptForm);
-  const [videoForm, setVideoForm] = useState(initialVideoForm);
-  const [status, setStatus] = useState("");
-  const [pptStatus, setPptStatus] = useState("");
-  const [videoStatus, setVideoStatus] = useState("");
-  const isSuperAdmin = user?.role === "super_admin";
+  const [testimonials, setTestimonials] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [editingJournalId, setEditingJournalId] = useState("");
+  const [editingTestimonialId, setEditingTestimonialId] = useState("");
+  const [journalForm, setJournalForm] = useState(initialJournalForm);
+  const [testimonialForm, setTestimonialForm] = useState(initialTestimonialForm);
+  const [revealedPasswords, setRevealedPasswords] = useState({});
+  const [passwordPrompt, setPasswordPrompt] = useState({ open: false, userId: "", adminPassword: "", error: "" });
+  const [journalStatus, setJournalStatus] = useState("");
+  const [userStatus, setUserStatus] = useState("");
+  const [testimonialStatus, setTestimonialStatus] = useState("");
+  const isAdmin = user?.role === "admin";
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
-  useEffect(() => {
-    withFallback(() => api.get("/admin/journals"), useDevelopmentFallback ? mockJournals : []).then((data) =>
-      setJournals(data.map(normalizeAdminItem))
-    );
-    withFallback(() => api.get("/admin/ppts"), useDevelopmentFallback ? mockPpts : []).then((data) =>
-      setPpts(data.map(normalizeAdminItem))
-    );
-    withFallback(() => api.get("/admin/videos"), useDevelopmentFallback ? mockVideos : []).then((data) =>
-      setVideos(data.map(normalizeVideoItem))
-    );
+  const loadUsers = async () => {
+    const data = await withFallback(() => api.get("/admin/users"), useDevelopmentFallback ? [] : []);
+    setUsers(data.map(normalizeItem));
+  };
 
-    if (isSuperAdmin) {
-      withFallback(() => api.get("/admin/contact"), []).then((data) => setContacts(data.map(normalizeAdminItem)));
+  const loadJournals = async () => {
+    const data = await withFallback(() => api.get("/admin/journals"), useDevelopmentFallback ? mockJournals : []);
+    setJournals(data.map(normalizeItem));
+  };
+
+  const loadTestimonials = async () => {
+    const data = await withFallback(() => api.get("/testimonials"), useDevelopmentFallback ? mockTestimonials : []);
+    setTestimonials(data.map(normalizeItem));
+  };
+
+  useEffect(() => {
+    loadUsers();
+    loadJournals();
+    loadTestimonials();
+  }, [useDevelopmentFallback]);
+
+  useEffect(() => {
+    const targetId = (location.hash || "#journals").replace("#", "");
+    const targetSection = document.getElementById(targetId);
+
+    if (!targetSection) {
       return;
     }
 
-    setContacts([]);
-  }, [isSuperAdmin, useDevelopmentFallback]);
+    window.requestAnimationFrame(() => {
+      targetSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [location.hash]);
 
-  useEffect(() => {
-    if (!journals.length) {
-      return;
+  const selectedUser = useMemo(() => users.find((item) => item.id === selectedUserId) || null, [selectedUserId, users]);
+
+  const visibleJournals = useMemo(() => {
+    const base = isAdmin ? journals : journals.filter((journal) => journal.ownerUserId?.toString() === user?.id?.toString());
+
+    if (isAdmin && selectedUserId) {
+      return base.filter((journal) => journal.ownerUserId?.toString() === selectedUserId.toString());
     }
 
-    setPptForm((current) => ({
-      ...current,
-      journalId: current.journalId || journals[0].id
-    }));
-    setVideoForm((current) => ({
-      ...current,
-      journalId: current.journalId || journals[0].id
-    }));
-  }, [journals]);
+    return base;
+  }, [isAdmin, journals, selectedUserId, user?.id]);
 
-  useEffect(() => {
-    if (isSuperAdmin || !journals.length) {
-      return;
+  const attachJournalMedia = async (journalId, form, managingJournalName, aboutJournal) => {
+    const messages = [];
+
+    if (form.pptFile) {
+      const pptData = new FormData();
+      pptData.append("title", `${managingJournalName} PPT`);
+      pptData.append("description", aboutJournal);
+      pptData.append("pptFile", form.pptFile);
+
+      await api.post(`/journals/${journalId}/ppts`, pptData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      messages.push("PPT uploaded.");
     }
 
-    const activeJournal = journals.find((journal) => journal.id === managedJournalId) || journals[0];
-    setManagedJournalId(activeJournal.id);
-    setJournalForm(mapJournalToForm(activeJournal));
-  }, [isSuperAdmin, journals, managedJournalId]);
+    if (form.pdfFile) {
+      const pdfData = new FormData();
+      pdfData.append("pdfFile", form.pdfFile);
+      await api.post(`/journals/${journalId}/pdf`, pdfData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      messages.push("PDF uploaded.");
+    }
 
-  useEffect(() => {
-    const scrollTarget = () => {
-      if (!location.hash) {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        return;
-      }
+    if (form.videoFile) {
+      const videoData = new FormData();
+      videoData.append("title", `${managingJournalName} Video`);
+      videoData.append("description", aboutJournal);
+      videoData.append("videoFile", form.videoFile);
+      await api.post(`/journals/${journalId}/videos`, videoData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      messages.push("Video uploaded.");
+    }
 
-      const elementId = decodeURIComponent(location.hash.slice(1));
-      const element = document.getElementById(elementId);
-
-      if (element) {
-        element.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-      }
-    };
-
-    const frameId = window.requestAnimationFrame(scrollTarget);
-    return () => window.cancelAnimationFrame(frameId);
-  }, [location.hash, location.pathname]);
+    return messages;
+  };
 
   const submitJournal = async (event) => {
     event.preventDefault();
-    const formData = new FormData();
-
-    Object.entries(journalForm).forEach(([key, value]) => {
-      if (value) {
-        formData.append(key, value);
-      }
-    });
+    setJournalStatus("");
 
     try {
-      const response = await api[isSuperAdmin ? "post" : "put"](isSuperAdmin ? "/journals" : `/journals/${managedJournalId}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data"
-        }
-      });
+      const payload = {
+        firstName: journalForm.firstName,
+        lastName: journalForm.lastName,
+        username: journalForm.username,
+        password: journalForm.password,
+        managingJournalName: journalForm.managingJournalName,
+        journalDomainName: journalForm.journalDomainName,
+        journalUrl: journalForm.journalUrl,
+        aboutJournal: journalForm.aboutJournal,
+        journalInstructions: journalForm.journalInstructions
+      };
 
-      if (isSuperAdmin) {
-        setStatus(`Journal "${response.data.title}" saved successfully.`);
-        setJournalForm(initialJournal);
-        setJournals((current) => [normalizeAdminItem(response.data), ...current]);
+      const response = await api[editingJournalId ? "put" : "post"](
+        editingJournalId ? `/journals/${editingJournalId}` : "/journals",
+        payload
+      );
+      const savedJournal = normalizeItem(response.data);
+      const mediaMessages = await attachJournalMedia(
+        savedJournal.id,
+        journalForm,
+        payload.managingJournalName,
+        payload.aboutJournal
+      ).catch((error) => [`Media upload warning: ${error.response?.data?.message || error.message}`]);
+
+      setJournalStatus(
+        `${editingJournalId ? "Journal updated" : "Journal created"} successfully. ${mediaMessages.join(" ")}`.trim()
+      );
+
+      setEditingJournalId("");
+      setJournalForm(initialJournalForm);
+      await Promise.all([loadUsers(), loadJournals()]);
+    } catch (error) {
+      setJournalStatus(error.response?.data?.message || "Journal save failed.");
+    }
+  };
+
+  const deleteJournal = async (journalId) => {
+    setJournalStatus("");
+
+    try {
+      await api.delete(`/journals/${journalId}`);
+      setJournals((current) => current.filter((item) => item.id !== journalId));
+      setEditingJournalId((current) => (current === journalId ? "" : current));
+      setJournalForm((current) => (editingJournalId === journalId ? initialJournalForm : current));
+      await loadUsers();
+      setJournalStatus("Journal deleted successfully.");
+    } catch (error) {
+      setJournalStatus(error.response?.data?.message || "Journal delete failed.");
+    }
+  };
+
+  const submitTestimonial = async (event) => {
+    event.preventDefault();
+    setTestimonialStatus("");
+
+    try {
+      const formData = new FormData();
+      formData.append("name", testimonialForm.name);
+      formData.append("designation", testimonialForm.designation);
+      formData.append("message", testimonialForm.message);
+
+      if (testimonialForm.image) {
+        formData.append("image", testimonialForm.image);
+      }
+
+      const response = await api[editingTestimonialId ? "put" : "post"](
+        editingTestimonialId ? `/testimonials/${editingTestimonialId}` : "/testimonials",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" }
+        }
+      );
+
+      const savedTestimonial = normalizeItem(response.data);
+
+      if (editingTestimonialId) {
+        setTestimonials((current) => current.map((item) => (item.id === editingTestimonialId ? savedTestimonial : item)));
+        setTestimonialStatus("Testimonial updated successfully.");
       } else {
-        setStatus(`Journal "${response.data.title}" updated successfully.`);
-        setJournals((current) =>
-          current.map((journal) => (journal.id === managedJournalId ? normalizeAdminItem({ ...journal, ...response.data }) : journal))
-        );
+        setTestimonials((current) => [savedTestimonial, ...current]);
+        setTestimonialStatus("Testimonial created successfully.");
       }
+
+      setEditingTestimonialId("");
+      setTestimonialForm(initialTestimonialForm);
     } catch (error) {
-      setStatus(error.response?.data?.message || "Journal save failed. Make sure the Express API is running and uploads are enabled.");
+      setTestimonialStatus(error.response?.data?.message || "Testimonial save failed.");
     }
   };
 
-  const submitPpt = async (event) => {
-    event.preventDefault();
-    setPptStatus("");
-
-    const formData = new FormData();
-
-    Object.entries(pptForm).forEach(([key, value]) => {
-      if (value) {
-        formData.append(key, value);
-      }
-    });
+  const deleteTestimonial = async (testimonialId) => {
+    setTestimonialStatus("");
 
     try {
-      const response = await api.post(`/journals/${pptForm.journalId}/ppts`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data"
-        }
-      });
-
-      setPptStatus(`PPT "${response.data.title}" uploaded successfully.`);
-      setPptForm({
-        ...initialPptForm,
-        journalId: journals[0]?.id || ""
-      });
-      setPpts((current) => [normalizeAdminItem(response.data), ...current]);
+      await api.delete(`/testimonials/${testimonialId}`);
+      setTestimonials((current) => current.filter((item) => item.id !== testimonialId));
+      setTestimonialStatus("Testimonial deleted successfully.");
     } catch (error) {
-      setPptStatus(error.response?.data?.message || "PPT upload failed. Make sure the selected journal is accessible.");
+      setTestimonialStatus(error.response?.data?.message || "Testimonial delete failed.");
     }
   };
 
-  const submitVideo = async (event) => {
-    event.preventDefault();
-    setVideoStatus("");
-
-    const formData = new FormData();
-
-    Object.entries(videoForm).forEach(([key, value]) => {
-      if (value) {
-        formData.append(key, value);
-      }
-    });
+  const impersonateUser = async (targetUserId) => {
+    setUserStatus("");
 
     try {
-      const response = await api.post(`/journals/${videoForm.journalId}/videos`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data"
-        }
-      });
-
-      setVideoStatus(`Video "${response.data.title}" uploaded successfully.`);
-      setVideoForm({
-        ...initialVideoForm,
-        journalId: journals[0]?.id || ""
-      });
-      setVideos((current) => [normalizeVideoItem(response.data), ...current]);
+      const response = await api.post(`/auth/impersonate/${targetUserId}`);
+      beginImpersonation(response.data);
     } catch (error) {
-      setVideoStatus(error.response?.data?.message || "Video upload failed. Add a YouTube URL or upload a video file for the selected journal.");
+      setUserStatus(error.response?.data?.message || "Unable to impersonate this user.");
+    }
+  };
+
+  const deleteUser = async (targetUser) => {
+    setUserStatus("");
+
+    const confirmed = window.confirm(
+      `Delete user "${targetUser.username}" and all linked journals, issues, articles, PPTs, and videos?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await api.delete(`/admin/users/${targetUser.id}`);
+      setUsers((current) => current.filter((item) => item.id !== targetUser.id));
+      setJournals((current) => current.filter((item) => item.ownerUserId?.toString() !== targetUser.id.toString()));
+      setSelectedUserId((current) => (current === targetUser.id ? "" : current));
+      setRevealedPasswords((current) => {
+        const next = { ...current };
+        delete next[targetUser.id];
+        return next;
+      });
+      setUserStatus(`User "${targetUser.username}" deleted successfully.`);
+    } catch (error) {
+      setUserStatus(error.response?.data?.message || "User delete failed.");
+    }
+  };
+
+  const confirmRevealPassword = async (event) => {
+    event.preventDefault();
+
+    try {
+      const response = await api.post(`/admin/users/${passwordPrompt.userId}/reveal-password`, {
+        adminPassword: passwordPrompt.adminPassword
+      });
+      setRevealedPasswords((current) => ({
+        ...current,
+        [passwordPrompt.userId]: response.data.password
+      }));
+      setPasswordPrompt({ open: false, userId: "", adminPassword: "", error: "" });
+    } catch (error) {
+      setPasswordPrompt((current) => ({
+        ...current,
+        error: error.response?.data?.message || "Password verification failed."
+      }));
     }
   };
 
   return (
     <div className="space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-      <section id="dashboard" className="card-panel p-8">
+      <section id="journals" className="card-panel p-6 sm:p-8">
         <SectionHeader
-          label="Dashboard"
-          title="Admin publishing workspace"
-          description="Use these modules to manage journals, issues, articles, educational assets, and platform content."
-        />
-        <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-600">
-          {isSuperAdmin
-            ? "You are signed in as a super admin and can manage all journals, platform-wide content, and both admin scopes."
-            : `You are signed in as a journal admin. Your portal is scoped to ${journals.length || 0} assigned journal${journals.length === 1 ? "" : "s"}.`}
-        </div>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[
-            { label: "Journals", value: journals.length },
-            { label: "PPT's", value: ppts.length },
-            { label: "Videos", value: videos.length },
-            { label: "Messages", value: contacts.length }
-          ].map((item) => (
-            <div key={item.label} className="rounded-3xl bg-slate-50 p-5">
-              <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">{item.label}</p>
-              <p className="mt-2 text-4xl font-semibold text-brand-navy">{item.value}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section id="journals" className="card-panel p-8">
-        <SectionHeader
-          label="Journal Management"
-          title={isSuperAdmin ? "Add journal records" : "Manage your assigned journal"}
+          label="Journals"
+          title={isAdmin ? "Journal management" : "Your journals"}
           description={
-            isSuperAdmin
-              ? "Journal covers upload as media assets while section content is saved as structured text fields for the journal detail tabs."
-              : "Journal admins can update the content, branding, and sections of their own journal."
+            isAdmin
+              ? "Create a journal and its linked user in one form. Updating a journal also updates the linked user credentials."
+              : "Manage only the journals linked to your user account, including optional PPT, PDF, and video uploads."
           }
         />
-        <form onSubmit={submitJournal} className="mt-8 grid gap-4 sm:grid-cols-2">
-          {!isSuperAdmin && journals.length > 1 ? (
-            <div className="sm:col-span-2">
-              <label className="mb-2 block text-sm font-medium text-slate-600">Assigned Journal</label>
-              <select
-                value={managedJournalId}
-                onChange={(event) => {
-                  const nextJournal = journals.find((journal) => journal.id === event.target.value);
-                  setManagedJournalId(event.target.value);
-                  setJournalForm(mapJournalToForm(nextJournal));
-                }}
-              >
-                {journals.map((journal) => (
-                  <option key={journal.id} value={journal.id}>
-                    {journal.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ) : null}
-          <input value={journalForm.title} onChange={(event) => setJournalForm({ ...journalForm, title: event.target.value })} placeholder="Journal Title" required />
-          <input value={journalForm.slug} onChange={(event) => setJournalForm({ ...journalForm, slug: event.target.value })} placeholder="Slug" required />
-          <input value={journalForm.issn} onChange={(event) => setJournalForm({ ...journalForm, issn: event.target.value })} placeholder="ISSN" required />
-          <input value={journalForm.category} onChange={(event) => setJournalForm({ ...journalForm, category: event.target.value })} placeholder="Category" required />
-          <textarea
-            value={journalForm.description}
-            onChange={(event) => setJournalForm({ ...journalForm, description: event.target.value })}
-            placeholder="Description"
-            rows="4"
-            className="sm:col-span-2"
-            required
-          />
-          <textarea
-            value={journalForm.home}
-            onChange={(event) => setJournalForm({ ...journalForm, home: event.target.value })}
-            placeholder="Journal Home"
-            rows="4"
-          />
-          <textarea
-            value={journalForm.about}
-            onChange={(event) => setJournalForm({ ...journalForm, about: event.target.value })}
-            placeholder="About"
-            rows="4"
-          />
-          <textarea
-            value={journalForm.aimScope}
-            onChange={(event) => setJournalForm({ ...journalForm, aimScope: event.target.value })}
-            placeholder="Aim & Scope"
-            rows="4"
-          />
-          <textarea
-            value={journalForm.editorialBoard}
-            onChange={(event) => setJournalForm({ ...journalForm, editorialBoard: event.target.value })}
-            placeholder="Editorial Board"
-            rows="4"
-          />
-          <textarea
-            value={journalForm.authorGuidelines}
-            onChange={(event) => setJournalForm({ ...journalForm, authorGuidelines: event.target.value })}
-            placeholder="Author Guidelines"
-            rows="4"
-          />
-          <textarea
-            value={journalForm.articleInPress}
-            onChange={(event) => setJournalForm({ ...journalForm, articleInPress: event.target.value })}
-            placeholder="Article In Press"
-            rows="4"
-          />
-          <div className="sm:col-span-2">
-            <label className="mb-2 block text-sm font-medium text-slate-600">Journal Cover Image</label>
-            <input type="file" accept="image/*" onChange={(event) => setJournalForm({ ...journalForm, coverImage: event.target.files?.[0] || null })} />
-          </div>
-          <div className="sm:col-span-2 flex items-center justify-between gap-4">
-            <button type="submit" className="button-primary" disabled={!isSuperAdmin && !managedJournalId}>
-              {isSuperAdmin ? "Save Journal" : "Update Journal"}
+
+        {isAdmin && selectedUser ? (
+          <div className="mt-6 flex flex-wrap items-center gap-3 rounded-3xl border border-brand-sky bg-brand-mist px-5 py-4">
+            <p className="text-sm text-brand-ink">
+              Filtering journals for <span className="font-semibold">{selectedUser.username}</span>
+            </p>
+            <button type="button" className="button-secondary px-4 py-2" onClick={() => setSelectedUserId("")}>
+              Clear Filter
             </button>
-            {status ? <p className="text-sm text-slate-500">{status}</p> : null}
           </div>
-        </form>
-      </section>
+        ) : null}
 
-      <section id="issues" className="card-panel p-8">
-        <SectionHeader
-          label="Issue & Article Management"
-          title="Current issue and archive publishing"
-          description="This section reflects the journals available inside the current admin portal."
-        />
-        <div className="mt-8 grid gap-4 md:grid-cols-2">
-          {journals.length ? (
-            journals.map((journal) => (
-              <div key={journal.id} className="rounded-2xl border border-slate-200 p-5">
-                <h3 className="font-semibold text-brand-navy">{journal.title}</h3>
-                <p className="mt-2 text-sm text-slate-500">Slug: {journal.slug}</p>
-                <p className="mt-2 text-sm text-slate-500">Category: {journal.category}</p>
-              </div>
-            ))
-          ) : (
-            <p className="text-sm text-slate-500">No journals are available in this portal yet.</p>
-          )}
-        </div>
-      </section>
-
-      <section id="assets" className="grid gap-8 xl:grid-cols-2">
-        <div className="card-panel p-8">
-          <SectionHeader
-            label="PPT Upload Management"
-            title="PPT assets"
-            description="Upload PPTs directly into a journal. They appear inside that journal rather than as a standalone public resource."
-          />
-          <form onSubmit={submitPpt} className="mt-8 grid gap-4">
-            <select value={pptForm.journalId} onChange={(event) => setPptForm({ ...pptForm, journalId: event.target.value })} required>
-              <option value="" disabled>
-                Select Journal
-              </option>
-              {journals.map((journal) => (
-                <option key={journal.id} value={journal.id}>
-                  {journal.title}
-                </option>
-              ))}
-            </select>
-            <input value={pptForm.title} onChange={(event) => setPptForm({ ...pptForm, title: event.target.value })} placeholder="PPT Title" required />
-            <textarea
-              value={pptForm.description}
-              onChange={(event) => setPptForm({ ...pptForm, description: event.target.value })}
-              placeholder="Description"
-              rows="4"
-              required
+        <div className="mt-8 grid gap-8 xl:grid-cols-[0.92fr_1.08fr]">
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
+            <SectionHeader
+              label="Journal Form"
+              title={editingJournalId ? "Update journal" : "Add journal"}
+              description="Only the required journal and linked-user fields are kept here. Re-enter the password whenever you update a journal."
             />
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-600">PPT or PPTX File</label>
+            <form onSubmit={submitJournal} className="mt-6 grid gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <input
+                  value={journalForm.firstName}
+                  onChange={(event) => setJournalForm({ ...journalForm, firstName: event.target.value })}
+                  placeholder="First Name"
+                  required
+                />
+                <input
+                  value={journalForm.lastName}
+                  onChange={(event) => setJournalForm({ ...journalForm, lastName: event.target.value })}
+                  placeholder="Last Name"
+                  required
+                />
+              </div>
               <input
-                type="file"
-                accept=".ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"
-                onChange={(event) => setPptForm({ ...pptForm, pptFile: event.target.files?.[0] || null })}
+                value={journalForm.managingJournalName}
+                onChange={(event) => setJournalForm({ ...journalForm, managingJournalName: event.target.value })}
+                placeholder="Managing Journal Name"
                 required
               />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-600">Preview PDF override (optional)</label>
               <input
-                type="file"
-                accept=".pdf,application/pdf"
-                onChange={(event) => setPptForm({ ...pptForm, previewFile: event.target.files?.[0] || null })}
+                value={journalForm.journalDomainName}
+                onChange={(event) => setJournalForm({ ...journalForm, journalDomainName: event.target.value })}
+                placeholder="Journal Domain Name"
+                required
               />
-            </div>
-            <div className="flex items-center justify-between gap-4">
-              <button type="submit" className="button-primary" disabled={!journals.length}>
-                Upload PPT
-              </button>
-              {pptStatus ? <p className="text-sm text-slate-500">{pptStatus}</p> : null}
-            </div>
-          </form>
-          <div className="mt-8 space-y-4">
-            {ppts.map((item) => (
-              <div key={item.id} className="rounded-2xl border border-slate-200 p-4">
-                <h3 className="font-semibold text-brand-navy">{item.title}</h3>
-                <p className="mt-2 text-sm text-slate-500">{item.journal?.title || item.journalTitle || "Unassigned journal"}</p>
-                <p className="mt-2 text-sm text-slate-500">{item.description}</p>
+              <input
+                value={journalForm.journalUrl}
+                onChange={(event) => setJournalForm({ ...journalForm, journalUrl: event.target.value })}
+                placeholder="Enter Journal URL"
+                required
+              />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <input
+                  value={journalForm.username}
+                  onChange={(event) => setJournalForm({ ...journalForm, username: event.target.value })}
+                  placeholder="User Name"
+                  required
+                />
+                <input
+                  value={journalForm.password}
+                  onChange={(event) => setJournalForm({ ...journalForm, password: event.target.value })}
+                  placeholder="Password"
+                  type="password"
+                  required
+                />
               </div>
-            ))}
+              <textarea
+                value={journalForm.aboutJournal}
+                onChange={(event) => setJournalForm({ ...journalForm, aboutJournal: event.target.value })}
+                placeholder="About Journal"
+                rows="5"
+                required
+              />
+              <textarea
+                value={journalForm.journalInstructions}
+                onChange={(event) => setJournalForm({ ...journalForm, journalInstructions: event.target.value })}
+                placeholder="Journal Instructions"
+                rows="5"
+                required
+              />
+              <div className="rounded-3xl border border-brand-sky bg-white p-5">
+                <p className="text-sm font-semibold text-brand-navy">Optional Uploads</p>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-600">PPT</label>
+                    <input
+                      type="file"
+                      accept=".ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                      onChange={(event) => setJournalForm({ ...journalForm, pptFile: event.target.files?.[0] || null })}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-600">PDF</label>
+                    <input
+                      type="file"
+                      accept=".pdf,application/pdf"
+                      onChange={(event) => setJournalForm({ ...journalForm, pdfFile: event.target.files?.[0] || null })}
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="mb-2 block text-sm font-medium text-slate-600">Video</label>
+                    <input type="file" accept="video/*" onChange={(event) => setJournalForm({ ...journalForm, videoFile: event.target.files?.[0] || null })} />
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <button type="submit" className="button-primary">
+                  {editingJournalId ? "Update Journal" : "Add Journal"}
+                </button>
+                {editingJournalId ? (
+                  <button
+                    type="button"
+                    className="button-secondary"
+                    onClick={() => {
+                      setEditingJournalId("");
+                      setJournalForm(initialJournalForm);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                ) : null}
+              </div>
+              {journalStatus ? <p className="text-sm text-slate-500">{journalStatus}</p> : null}
+            </form>
           </div>
-        </div>
 
-        <div className="card-panel p-8">
-          <SectionHeader
-            label="Video Upload Management"
-            title="Journal video assets"
-            description="Attach YouTube embeds or uploaded video files directly to a journal so readers watch them inside the journal experience."
-          />
-          <form onSubmit={submitVideo} className="mt-8 grid gap-4">
-            <select value={videoForm.journalId} onChange={(event) => setVideoForm({ ...videoForm, journalId: event.target.value })} required>
-              <option value="" disabled>
-                Select Journal
-              </option>
-              {journals.map((journal) => (
-                <option key={journal.id} value={journal.id}>
-                  {journal.title}
-                </option>
-              ))}
-            </select>
-            <input value={videoForm.title} onChange={(event) => setVideoForm({ ...videoForm, title: event.target.value })} placeholder="Video Title" required />
-            <textarea
-              value={videoForm.description}
-              onChange={(event) => setVideoForm({ ...videoForm, description: event.target.value })}
-              placeholder="Description"
-              rows="4"
-              required
-            />
-            <input
-              value={videoForm.youtubeUrl}
-              onChange={(event) => setVideoForm({ ...videoForm, youtubeUrl: event.target.value })}
-              placeholder="YouTube embed URL (optional if uploading a video file)"
-            />
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-600">Thumbnail Image (optional)</label>
-              <input type="file" accept="image/*" onChange={(event) => setVideoForm({ ...videoForm, thumbnail: event.target.files?.[0] || null })} />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-600">Video File (optional if using YouTube)</label>
-              <input type="file" accept="video/*" onChange={(event) => setVideoForm({ ...videoForm, videoFile: event.target.files?.[0] || null })} />
-            </div>
-            <div className="flex items-center justify-between gap-4">
-              <button type="submit" className="button-primary" disabled={!journals.length}>
-                Upload Video
-              </button>
-              {videoStatus ? <p className="text-sm text-slate-500">{videoStatus}</p> : null}
-            </div>
-          </form>
-          <div className="mt-8 space-y-4">
-            {videos.map((video) => (
-              <div key={video.id} className="rounded-2xl border border-slate-200 p-4">
-                <h3 className="font-semibold text-brand-navy">{video.title}</h3>
-                <p className="mt-2 text-sm text-slate-500">{video.journalTitle || "Unassigned journal"}</p>
-                <p className="mt-2 text-sm text-slate-500">{video.description || "Embedded journal video resource."}</p>
-              </div>
-            ))}
+          <div className="space-y-4">
+            {visibleJournals.length ? (
+              visibleJournals.map((journal) => (
+                <div key={journal.id} className="rounded-3xl border border-slate-200 bg-white p-5">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <h3 className="text-xl font-semibold text-brand-navy">{journal.managingJournalName}</h3>
+                      <p className="mt-1 text-sm text-slate-500">{journal.journalDomainName}</p>
+                      <p className="mt-1 text-sm text-slate-500">URL: {journal.journalUrl}</p>
+                      <p className="mt-3 text-sm text-slate-500">
+                        Owner: {journal.firstName} {journal.lastName}
+                        {journal.username || journal.ownerUsername ? ` (@${journal.username || journal.ownerUsername})` : ""}
+                      </p>
+                      <p className="mt-3 text-sm leading-7 text-slate-600">{journal.aboutJournal}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        className="button-soft px-4 py-2"
+                        onClick={() => {
+                          setEditingJournalId(journal.id);
+                          setJournalForm(mapJournalToForm(journal));
+                        }}
+                      >
+                        <Pencil size={16} className="mr-2" />
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="button-secondary px-4 py-2 text-rose-600"
+                        onClick={() => deleteJournal(journal.id)}
+                      >
+                        <Trash2 size={16} className="mr-2" />
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <EmptyState
+                title={isAdmin ? "No journals available" : "No journals in your account"}
+                description={
+                  isAdmin
+                    ? "Add a journal here and the linked user account will be created automatically."
+                    : "Create your first journal or ask an admin to assign one to your account."
+                }
+              />
+            )}
           </div>
         </div>
       </section>
 
-      {isSuperAdmin ? (
-        <section id="videos" className="grid gap-8">
-          <div className="card-panel p-8">
-            <SectionHeader
-              label="Testimonials"
-              title="Homepage social proof"
-              description="Testimonials are short content records that can be managed independently of journals."
-            />
-            <div className="mt-8 space-y-4">
-              {mockTestimonials.map((item) => (
-                <div key={item.id} className="rounded-2xl border border-slate-200 p-4">
-                  <h3 className="font-semibold text-brand-navy">{item.name}</h3>
-                  <p className="mt-2 text-sm text-slate-500">{item.role}</p>
+      {isAdmin ? (
+        <section id="users" className="card-panel p-6 sm:p-8">
+          <SectionHeader
+            label="Users"
+            title="Journal-linked users"
+            description="These user accounts are created from journal credentials. Use View Journals to filter the Journals module or Login as User to enter that user's dashboard."
+          />
+
+          <div className="mt-8 space-y-4">
+            {users.length ? (
+              users.map((item) => (
+                <div key={item.id} className="rounded-3xl border border-slate-200 bg-white p-5">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <h3 className="text-xl font-semibold text-brand-navy">
+                        {item.firstName} {item.lastName}
+                      </h3>
+                      <p className="mt-1 text-sm text-slate-500">@{item.username}</p>
+                      <p className="mt-2 text-sm text-slate-500">
+                        {item.managingJournalName || "No linked journal yet."}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        className="button-soft px-4 py-2"
+                        onClick={() => {
+                          setSelectedUserId(item.id);
+                          navigate("/admin/dashboard#journals");
+                        }}
+                      >
+                        View Journals
+                      </button>
+                      <button type="button" className="button-secondary px-4 py-2" onClick={() => impersonateUser(item.id)}>
+                        Login as User
+                      </button>
+                      <button
+                        type="button"
+                        className="button-secondary px-4 py-2 text-rose-600"
+                        onClick={() => deleteUser(item)}
+                      >
+                        <Trash2 size={16} className="mr-2" />
+                        Delete User
+                      </button>
+                      {revealedPasswords[item.id] ? (
+                        <button
+                          type="button"
+                          className="button-soft px-4 py-2"
+                          onClick={() =>
+                            setRevealedPasswords((current) => {
+                              const next = { ...current };
+                              delete next[item.id];
+                              return next;
+                            })
+                          }
+                        >
+                          <EyeOff size={16} className="mr-2" />
+                          Hide Password
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="button-soft px-4 py-2"
+                          onClick={() => setPasswordPrompt({ open: true, userId: item.id, adminPassword: "", error: "" })}
+                        >
+                          <Eye size={16} className="mr-2" />
+                          View Password
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                      Password: {revealedPasswords[item.id] || "******"}
+                    </div>
+                    <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                      Journals: {item.journals?.length || 0}
+                    </div>
+                  </div>
                 </div>
-              ))}
+              ))
+            ) : (
+              <EmptyState title="No users available" description="Users will be created automatically when a journal is added." />
+            )}
+            {userStatus ? <p className="text-sm text-slate-500">{userStatus}</p> : null}
+          </div>
+        </section>
+      ) : null}
+
+      {isAdmin ? (
+        <section id="testimonials" className="card-panel p-6 sm:p-8">
+          <SectionHeader
+            label="Testimonials"
+            title="Testimonials management"
+            description="Create, update, and delete testimonials shown on the public website."
+          />
+          <div className="mt-8 grid gap-8 xl:grid-cols-[0.85fr_1.15fr]">
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
+              <form onSubmit={submitTestimonial} className="grid gap-4">
+                <input
+                  value={testimonialForm.name}
+                  onChange={(event) => setTestimonialForm({ ...testimonialForm, name: event.target.value })}
+                  placeholder="Name"
+                  required
+                />
+                <input
+                  value={testimonialForm.designation}
+                  onChange={(event) => setTestimonialForm({ ...testimonialForm, designation: event.target.value })}
+                  placeholder="Designation (optional)"
+                />
+                <textarea
+                  value={testimonialForm.message}
+                  onChange={(event) => setTestimonialForm({ ...testimonialForm, message: event.target.value })}
+                  placeholder="Message"
+                  rows="5"
+                  required
+                />
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-600">Image (optional)</label>
+                  <input type="file" accept="image/*" onChange={(event) => setTestimonialForm({ ...testimonialForm, image: event.target.files?.[0] || null })} />
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <button type="submit" className="button-primary">
+                    {editingTestimonialId ? "Update Testimonial" : "Add Testimonial"}
+                  </button>
+                  {editingTestimonialId ? (
+                    <button
+                      type="button"
+                      className="button-secondary"
+                      onClick={() => {
+                        setEditingTestimonialId("");
+                        setTestimonialForm(initialTestimonialForm);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  ) : null}
+                </div>
+                {testimonialStatus ? <p className="text-sm text-slate-500">{testimonialStatus}</p> : null}
+              </form>
+            </div>
+
+            <div className="space-y-4">
+              {testimonials.length ? (
+                testimonials.map((item) => (
+                  <div key={item.id} className="rounded-3xl border border-slate-200 bg-white p-5">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div>
+                        <h3 className="text-xl font-semibold text-brand-navy">{item.name}</h3>
+                        {item.designation ? <p className="mt-1 text-sm text-slate-500">{item.designation}</p> : null}
+                        <p className="mt-3 text-sm leading-7 text-slate-600">"{item.message}"</p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          className="button-soft px-4 py-2"
+                          onClick={() => {
+                            setEditingTestimonialId(item.id);
+                            setTestimonialForm(mapTestimonialToForm(item));
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button type="button" className="button-secondary px-4 py-2 text-rose-600" onClick={() => deleteTestimonial(item.id)}>
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <EmptyState title="No testimonials yet" description="Add testimonials here and they will appear on the public website." />
+              )}
             </div>
           </div>
         </section>
       ) : null}
 
-      {isSuperAdmin ? (
-        <section id="contacts" className="card-panel p-8">
-          <SectionHeader
-            label="Contact Messages"
-            title="Inbox viewer"
-            description="Messages submitted from the public contact page are stored in MongoDB and displayed here."
-          />
-          <div className="mt-8">
-            {contacts.length ? (
-              <div className="space-y-4">
-                {contacts.map((item) => (
-                  <div key={item.id} className="rounded-2xl border border-slate-200 p-4">
-                    <h3 className="font-semibold text-brand-navy">{item.subject}</h3>
-                    <p className="mt-2 text-sm text-slate-500">
-                      {item.name} - {item.email}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-slate-500">No contact messages are loaded yet.</p>
-            )}
-          </div>
-        </section>
+      {passwordPrompt.open ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4">
+          <form onSubmit={confirmRevealPassword} className="card-panel w-full max-w-md p-6">
+            <SectionHeader
+              label="Verification"
+              title="Confirm admin password"
+              description="The stored user password is only revealed after successful admin verification."
+            />
+            <input
+              className="mt-6"
+              value={passwordPrompt.adminPassword}
+              onChange={(event) => setPasswordPrompt((current) => ({ ...current, adminPassword: event.target.value, error: "" }))}
+              placeholder="Enter your admin password"
+              type="password"
+              required
+            />
+            {passwordPrompt.error ? <p className="mt-3 text-sm text-rose-500">{passwordPrompt.error}</p> : null}
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button type="submit" className="button-primary">
+                Verify and Reveal
+              </button>
+              <button
+                type="button"
+                className="button-secondary"
+                onClick={() => setPasswordPrompt({ open: false, userId: "", adminPassword: "", error: "" })}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
       ) : null}
     </div>
   );

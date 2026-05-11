@@ -142,6 +142,7 @@ export function normalizePptItem(item = {}) {
     downloadUrl: pptUrl,
     fileUrl: pptUrl,
     previewUrl: previewPdfUrl || googleViewerUrl || officeViewerUrl,
-    journalTitle: item.journalTitle || item.journal?.title || ""
+    journalTitle: item.journalTitle || item.journal?.managingJournalName || "",
+    journalUrl: item.journalUrl || item.journal?.journalUrl || ""
   };
 }

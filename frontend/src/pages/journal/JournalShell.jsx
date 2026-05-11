@@ -1,4 +1,4 @@
-import { Download, ExternalLink, PlayCircle } from "lucide-react";
+import { Download, ExternalLink, FileText, PlayCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
@@ -11,20 +11,24 @@ import { normalizePptItem } from "../../utils/pptPreview";
 import { normalizeVideoItem } from "../../utils/videoPlayer";
 
 const sectionTitles = {
-  home: "Journal Home",
-  about: "About",
-  "aim-scope": "Aim & Scope",
-  "editorial-board": "Editorial Board",
-  "author-guidelines": "Author Guidelines",
-  "article-in-press": "Article In Press",
+  about: "About Journal",
+  instructions: "Journal Instructions",
   ppts: "Journal PPTs",
   videos: "Journal Videos",
   "current-issue": "Current Issue",
   archive: "Archive"
 };
 
+function renderCopyBlock(value) {
+  return (
+    <div className="rounded-3xl bg-slate-50 p-6 text-slate-700">
+      <p className="whitespace-pre-line leading-8">{value}</p>
+    </div>
+  );
+}
+
 export default function JournalShell() {
-  const { slug, section = "home" } = useParams();
+  const { journalUrl, section = "about" } = useParams();
   const [journal, setJournal] = useState(null);
   const [activePreview, setActivePreview] = useState(null);
   const [activeVideoId, setActiveVideoId] = useState(null);
@@ -32,10 +36,10 @@ export default function JournalShell() {
 
   useEffect(() => {
     withFallback(
-      () => api.get(`/journals/${slug}`),
-      useDevelopmentFallback ? mockJournals.find((item) => item.slug === slug) : null
+      () => api.get(`/journals/${journalUrl}`),
+      useDevelopmentFallback ? mockJournals.find((item) => item.journalUrl === journalUrl) : null
     ).then(setJournal);
-  }, [slug, useDevelopmentFallback]);
+  }, [journalUrl, useDevelopmentFallback]);
 
   useEffect(() => {
     const handleEscape = (event) => {
@@ -50,7 +54,7 @@ export default function JournalShell() {
 
   useEffect(() => {
     setActiveVideoId(null);
-  }, [slug, section]);
+  }, [journalUrl, section]);
 
   if (!journal) {
     return (
@@ -69,28 +73,28 @@ export default function JournalShell() {
     <div className="space-y-4">
       {journal.currentIssue ? (
         <>
-      <div className="rounded-3xl bg-slate-50 p-5">
-        <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">Issue Information</p>
-        <h3 className="mt-2 text-2xl font-semibold text-brand-navy">
-          Volume {journal.currentIssue.volume}, Issue {journal.currentIssue.issue} ({journal.currentIssue.year})
-        </h3>
-      </div>
-      {journal.currentIssue.articles.map((article) => (
-        <article key={article.id} className="rounded-3xl border border-slate-200 bg-white p-5">
-          <h4 className="text-xl font-semibold text-brand-navy">{article.title}</h4>
-          <p className="mt-2 text-sm text-slate-500">{article.authors.join(", ")}</p>
-          <div className="mt-4 flex gap-3">
-            <a href={article.pdfUrl} className="button-soft px-4 py-2" target="_blank" rel="noreferrer">
-              <ExternalLink size={16} className="mr-2" />
-              View PDF
-            </a>
-            <a href={article.pdfUrl} className="button-primary px-4 py-2">
-              <Download size={16} className="mr-2" />
-              Download PDF
-            </a>
+          <div className="rounded-3xl bg-slate-50 p-5">
+            <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">Issue Information</p>
+            <h3 className="mt-2 text-2xl font-semibold text-brand-navy">
+              Volume {journal.currentIssue.volume}, Issue {journal.currentIssue.issue} ({journal.currentIssue.year})
+            </h3>
           </div>
-        </article>
-      ))}
+          {journal.currentIssue.articles.map((article) => (
+            <article key={article.id} className="rounded-3xl border border-slate-200 bg-white p-5">
+              <h4 className="text-xl font-semibold text-brand-navy">{article.title}</h4>
+              <p className="mt-2 text-sm text-slate-500">{article.authors.join(", ")}</p>
+              <div className="mt-4 flex gap-3">
+                <a href={article.pdfUrl} className="button-soft px-4 py-2" target="_blank" rel="noreferrer">
+                  <ExternalLink size={16} className="mr-2" />
+                  View PDF
+                </a>
+                <a href={article.pdfUrl} className="button-primary px-4 py-2">
+                  <Download size={16} className="mr-2" />
+                  Download PDF
+                </a>
+              </div>
+            </article>
+          ))}
         </>
       ) : (
         <EmptyState
@@ -102,6 +106,14 @@ export default function JournalShell() {
   );
 
   const renderSection = () => {
+    if (section === "about") {
+      return renderCopyBlock(journal.aboutJournal);
+    }
+
+    if (section === "instructions") {
+      return renderCopyBlock(journal.journalInstructions);
+    }
+
     if (section === "current-issue") {
       return renderCurrentIssue();
     }
@@ -114,12 +126,7 @@ export default function JournalShell() {
       const ppts = (journal.ppts || []).map(normalizePptItem);
 
       if (!ppts.length) {
-        return (
-          <EmptyState
-            title="No journal PPTs available"
-            description="This journal has not published any PPT resources yet."
-          />
-        );
+        return <EmptyState title="No journal PPTs available" description="This journal has not published any PPT resources yet." />;
       }
 
       return (
@@ -149,12 +156,7 @@ export default function JournalShell() {
 
     if (section === "videos") {
       if (!journalVideos.length) {
-        return (
-          <EmptyState
-            title="No journal videos available"
-            description="This journal has not published any video resources yet."
-          />
-        );
+        return <EmptyState title="No journal videos available" description="This journal has not published any video resources yet." />;
       }
 
       return (
@@ -193,11 +195,13 @@ export default function JournalShell() {
                   activeVideo?.id === video.id ? "border-brand-teal/40 ring-2 ring-brand-teal/20" : "border-slate-200"
                 }`}
               >
-                <img
-                  src={video.thumbnailUrl || "https://placehold.co/800x450/0f2743/ffffff?text=Journal+Video"}
-                  alt={video.title}
-                  className="h-20 w-24 rounded-2xl object-cover sm:h-24 sm:w-36"
-                />
+                <div className="flex h-20 w-24 items-center justify-center rounded-2xl bg-brand-mist sm:h-24 sm:w-36">
+                  {video.thumbnailUrl ? (
+                    <img src={video.thumbnailUrl} alt={video.title} className="h-full w-full rounded-2xl object-cover" />
+                  ) : (
+                    <PlayCircle className="text-brand-teal" />
+                  )}
+                </div>
                 <div className="flex-1">
                   <h4 className="font-semibold text-brand-navy">{video.title}</h4>
                   <p className="mt-2 text-sm text-slate-500">{video.description || "Click to play inside the embedded viewer."}</p>
@@ -210,26 +214,40 @@ export default function JournalShell() {
       );
     }
 
-    const html = journal.sections[section] || journal.sections.home;
-
-    return <div className="rich-copy" dangerouslySetInnerHTML={{ __html: html }} />;
+    return renderCopyBlock(journal.aboutJournal);
   };
 
   return (
     <div className="section-shell">
       <div className="container-shell">
         <div className="card-panel overflow-hidden">
-          <div className="grid gap-6 px-5 py-5 sm:px-8 sm:py-8 lg:grid-cols-[280px_1fr] lg:gap-8">
-            <img src={journal.coverImageUrl} alt={journal.title} className="h-64 w-full rounded-3xl object-cover sm:h-80" />
-            <div>
-              <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">{journal.category}</p>
-              <h1 className="mt-3 font-display text-3xl font-semibold text-brand-navy sm:text-4xl">{journal.title}</h1>
-              <p className="mt-2 text-sm text-slate-500">{journal.issn}</p>
-              <p className="mt-4 max-w-3xl leading-8 text-slate-600">{journal.description}</p>
+          <div className="grid gap-6 px-5 py-5 sm:px-8 sm:py-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-8">
+            <div className="rounded-3xl bg-brand-mist p-6">
+              <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">Managing Journal Name</p>
+              <h1 className="mt-3 font-display text-3xl font-semibold text-brand-navy sm:text-4xl">{journal.managingJournalName}</h1>
+              <p className="mt-4 text-sm text-slate-500">Managed by {journal.firstName} {journal.lastName}</p>
+            </div>
+            <div className="rounded-3xl border border-slate-200 p-6">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.18em] text-brand-gold">Journal Domain Name</p>
+                  <p className="mt-2 text-lg font-semibold text-brand-ink">{journal.journalDomainName}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-[0.18em] text-brand-gold">Journal URL</p>
+                  <p className="mt-2 text-lg font-semibold text-brand-ink">{journal.journalUrl}</p>
+                </div>
+              </div>
+              {journal.pdfFileUrl ? (
+                <a href={journal.pdfFileUrl} target="_blank" rel="noreferrer" className="button-secondary mt-5 inline-flex px-4 py-2">
+                  <FileText size={16} className="mr-2" />
+                  Open Journal PDF
+                </a>
+              ) : null}
             </div>
           </div>
           <div className="border-t border-slate-100 px-5 py-5 sm:px-8 sm:py-6">
-            <JournalMenu journalSlug={journal.slug} />
+            <JournalMenu journalUrl={journal.journalUrl} />
           </div>
         </div>
 

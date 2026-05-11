@@ -58,6 +58,8 @@ const api = axios.create({
 });
 
 function clearAuthState() {
+  localStorage.removeItem("medmax-impersonation-original-token");
+  localStorage.removeItem("medmax-impersonation-original-user");
   localStorage.removeItem("medmax-token");
   localStorage.removeItem("medmax-user");
 }

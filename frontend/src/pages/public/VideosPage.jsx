@@ -5,7 +5,7 @@ import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/clien
 import EmptyState from "../../components/common/EmptyState";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockJournals, mockVideos } from "../../data/mockData";
-import { buildJournalArchiveInfo, getAssetJournalSlug } from "../../utils/journalArchive";
+import { buildJournalArchiveInfo, getAssetJournalUrl } from "../../utils/journalArchive";
 import { hasEmbeddedVideo, normalizeVideoItem } from "../../utils/videoPlayer";
 
 export default function VideosPage() {
@@ -25,19 +25,19 @@ export default function VideosPage() {
 
       if (useDevelopmentFallback) {
         mockJournals.forEach((journal) => {
-          journalLookup[journal.slug] = buildJournalArchiveInfo(journal);
+          journalLookup[journal.journalUrl] = buildJournalArchiveInfo(journal);
         });
       } else {
-        const journalSlugs = [...new Set(normalized.map(getAssetJournalSlug).filter(Boolean))];
+        const journalUrls = [...new Set(normalized.map(getAssetJournalUrl).filter(Boolean))];
         const journalResults = await Promise.all(
-          journalSlugs.map(async (slug) => {
-            const journal = await withFallback(() => api.get(`/journals/${slug}`), null);
-            return journal ? [slug, buildJournalArchiveInfo(journal)] : null;
+          journalUrls.map(async (url) => {
+            const journal = await withFallback(() => api.get(`/journals/${url}`), null);
+            return journal ? [url, buildJournalArchiveInfo(journal)] : null;
           })
         );
 
-        journalResults.filter(Boolean).forEach(([slug, journal]) => {
-          journalLookup[slug] = journal;
+        journalResults.filter(Boolean).forEach(([url, journal]) => {
+          journalLookup[url] = journal;
         });
       }
 
@@ -45,7 +45,7 @@ export default function VideosPage() {
         setItems(
           normalized.map((item) => ({
             ...item,
-            journalInfo: journalLookup[getAssetJournalSlug(item)] || null
+            journalInfo: journalLookup[getAssetJournalUrl(item)] || null
           }))
         );
         setIsLoading(false);
@@ -78,7 +78,7 @@ export default function VideosPage() {
       .some((value) => value.toLowerCase().includes(normalizedQuery));
   });
 
-  const journalCount = new Set(items.map((video) => video.journalInfo?.slug || video.journalSlug).filter(Boolean)).size;
+  const journalCount = new Set(items.map((video) => video.journalInfo?.journalUrl || video.journalUrl).filter(Boolean)).size;
   const playableCount = items.filter(hasEmbeddedVideo).length;
 
   return (
@@ -165,8 +165,8 @@ export default function VideosPage() {
                             Open Video
                           </a>
                         ) : null}
-                        {video.journalInfo?.slug ? (
-                          <Link to={`/journals/${video.journalInfo.slug}/home`} className="button-secondary px-4 py-2">
+                        {video.journalInfo?.journalUrl ? (
+                          <Link to={`/journals/${video.journalInfo.journalUrl}/about`} className="button-secondary px-4 py-2">
                             Open Journal
                           </Link>
                         ) : null}
@@ -178,8 +178,8 @@ export default function VideosPage() {
                       <h3 className="mt-3 font-display text-2xl font-semibold text-brand-navy">
                         {video.journalInfo?.title || video.journalTitle || "Journal details unavailable"}
                       </h3>
-                      {video.journalInfo?.issn ? <p className="mt-2 text-sm text-slate-500">{video.journalInfo.issn}</p> : null}
-                      {video.journalInfo?.category ? <p className="mt-1 text-sm text-slate-500">{video.journalInfo.category}</p> : null}
+                      {video.journalInfo?.domainName ? <p className="mt-2 text-sm text-slate-500">{video.journalInfo.domainName}</p> : null}
+                      {video.journalInfo?.editorName ? <p className="mt-1 text-sm text-slate-500">Managed by {video.journalInfo.editorName}</p> : null}
                       {video.journalInfo?.overview ? (
                         <>
                           <p className="mt-4 text-xs uppercase tracking-[0.18em] text-brand-teal">Abstract / Overview</p>

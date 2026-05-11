@@ -6,7 +6,7 @@ import EmptyState from "../../components/common/EmptyState";
 import PptPreviewModal from "../../components/common/PptPreviewModal";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockJournals, mockPpts } from "../../data/mockData";
-import { buildJournalArchiveInfo, getAssetJournalSlug } from "../../utils/journalArchive";
+import { buildJournalArchiveInfo, getAssetJournalUrl } from "../../utils/journalArchive";
 import { normalizePptItem } from "../../utils/pptPreview";
 
 export default function PptsPage() {
@@ -27,19 +27,19 @@ export default function PptsPage() {
 
       if (useDevelopmentFallback) {
         mockJournals.forEach((journal) => {
-          journalLookup[journal.slug] = buildJournalArchiveInfo(journal);
+          journalLookup[journal.journalUrl] = buildJournalArchiveInfo(journal);
         });
       } else {
-        const journalSlugs = [...new Set(normalized.map(getAssetJournalSlug).filter(Boolean))];
+        const journalUrls = [...new Set(normalized.map(getAssetJournalUrl).filter(Boolean))];
         const journalResults = await Promise.all(
-          journalSlugs.map(async (slug) => {
-            const journal = await withFallback(() => api.get(`/journals/${slug}`), null);
-            return journal ? [slug, buildJournalArchiveInfo(journal)] : null;
+          journalUrls.map(async (url) => {
+            const journal = await withFallback(() => api.get(`/journals/${url}`), null);
+            return journal ? [url, buildJournalArchiveInfo(journal)] : null;
           })
         );
 
-        journalResults.filter(Boolean).forEach(([slug, journal]) => {
-          journalLookup[slug] = journal;
+        journalResults.filter(Boolean).forEach(([url, journal]) => {
+          journalLookup[url] = journal;
         });
       }
 
@@ -47,7 +47,7 @@ export default function PptsPage() {
         setItems(
           normalized.map((item) => ({
             ...item,
-            journalInfo: journalLookup[getAssetJournalSlug(item)] || null
+            journalInfo: journalLookup[getAssetJournalUrl(item)] || null
           }))
         );
         setIsLoading(false);
@@ -91,7 +91,7 @@ export default function PptsPage() {
       .some((value) => value.toLowerCase().includes(normalizedQuery));
   });
 
-  const journalCount = new Set(items.map((ppt) => ppt.journalInfo?.slug || ppt.journalSlug).filter(Boolean)).size;
+  const journalCount = new Set(items.map((ppt) => ppt.journalInfo?.journalUrl || ppt.journalUrl).filter(Boolean)).size;
 
   return (
     <div className="section-shell">
@@ -138,14 +138,14 @@ export default function PptsPage() {
             {filteredItems.map((ppt) => (
               <article key={ppt.id} className="card-panel overflow-hidden">
                 <div className="grid lg:grid-cols-[280px_1fr]">
-                  <div className="bg-slate-100">
-                    {ppt.journalInfo?.coverImageUrl ? (
-                      <img src={ppt.journalInfo.coverImageUrl} alt={ppt.journalInfo.title} className="h-full min-h-64 w-full object-cover" />
-                    ) : (
-                      <div className="flex min-h-64 items-center justify-center px-8 text-center text-sm text-slate-500">
-                        Journal cover artwork will appear here when available.
-                      </div>
-                    )}
+                  <div className="flex min-h-64 items-center justify-center bg-brand-mist px-8 text-center">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Related Journal</p>
+                      <h3 className="mt-3 font-display text-2xl font-semibold text-brand-navy">
+                        {ppt.journalInfo?.title || ppt.journalTitle || "Journal details unavailable"}
+                      </h3>
+                      {ppt.journalInfo?.domainName ? <p className="mt-2 text-sm text-slate-500">{ppt.journalInfo.domainName}</p> : null}
+                    </div>
                   </div>
                   <div className="p-5 sm:p-7">
                     <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -167,8 +167,8 @@ export default function PptsPage() {
                             <Download size={16} className="mr-2" />
                             Download PPT
                           </a>
-                          {ppt.journalInfo?.slug ? (
-                            <Link to={`/journals/${ppt.journalInfo.slug}/home`} className="button-secondary px-4 py-2">
+                          {ppt.journalInfo?.journalUrl ? (
+                            <Link to={`/journals/${ppt.journalInfo.journalUrl}/about`} className="button-secondary px-4 py-2">
                               Open Journal
                             </Link>
                           ) : null}
@@ -180,8 +180,8 @@ export default function PptsPage() {
                         <h3 className="mt-3 font-display text-2xl font-semibold text-brand-navy">
                           {ppt.journalInfo?.title || ppt.journalTitle || "Journal details unavailable"}
                         </h3>
-                        {ppt.journalInfo?.issn ? <p className="mt-2 text-sm text-slate-500">{ppt.journalInfo.issn}</p> : null}
-                        {ppt.journalInfo?.category ? <p className="mt-1 text-sm text-slate-500">{ppt.journalInfo.category}</p> : null}
+                        {ppt.journalInfo?.domainName ? <p className="mt-2 text-sm text-slate-500">{ppt.journalInfo.domainName}</p> : null}
+                        {ppt.journalInfo?.editorName ? <p className="mt-1 text-sm text-slate-500">Managed by {ppt.journalInfo.editorName}</p> : null}
                         {ppt.journalInfo?.overview ? (
                           <>
                             <p className="mt-4 text-xs uppercase tracking-[0.18em] text-brand-teal">Abstract / Overview</p>

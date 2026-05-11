@@ -17,20 +17,19 @@ const assetSchema = new mongoose.Schema(
 
 const journalSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true },
-    slug: { type: String, required: true, unique: true },
-    issn: { type: String, required: true },
-    category: { type: String, required: true },
-    description: { type: String, required: true },
-    coverImage: assetSchema,
-    sections: {
-      home: { type: String, default: "" },
-      about: { type: String, default: "" },
-      aimScope: { type: String, default: "" },
-      editorialBoard: { type: String, default: "" },
-      authorGuidelines: { type: String, default: "" },
-      articleInPress: { type: String, default: "" }
-    }
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
+    firstName: { type: String, required: true, trim: true },
+    lastName: { type: String, required: true, trim: true },
+    managingJournalName: { type: String, required: true, trim: true },
+    journalDomainName: { type: String, required: true, trim: true },
+    journalUrl: { type: String, required: true, unique: true, trim: true, lowercase: true },
+    aboutJournal: { type: String, required: true, trim: true },
+    journalInstructions: { type: String, required: true, trim: true },
+    pdfFile: assetSchema
   },
   { timestamps: true }
 );

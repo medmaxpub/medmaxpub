@@ -52,7 +52,6 @@ medmaxpub/
   - Journal Details
   - Videos
   - About
-  - Contact
 - Journal internal navigation:
   - Home
   - About
@@ -70,14 +69,9 @@ medmaxpub/
 The React admin area includes:
 
 - Admin login
-- Dashboard summary
-- Journal creation form
-- Journal-owner edit portal for assigned journals
-- Issue and article overview
-- Journal-linked PPT upload area
-- Journal video playback area
+- Journals module with linked-user journal creation/editing
+- Users module with journal-owner listing and admin impersonation
 - Testimonials module area
-- Contact inbox viewer
 
 ## Backend Features
 
@@ -97,7 +91,6 @@ The React admin area includes:
 - `ppts`
 - `videos`
 - `testimonials`
-- `contacts`
 
 ## File Storage
 
@@ -112,11 +105,8 @@ Cloudinary can be enabled by setting `FILE_STORAGE=cloudinary` and adding creden
 
 Uploads are used for:
 
-- Journal cover images
 - Article PDFs
 - PPT/PPTX files
-- Optional PPT preview PDFs
-- Video thumbnails
 - Video files
 
 Stored metadata includes:
@@ -136,11 +126,12 @@ Authentication:
 
 - `POST /api/auth/login`
 - `POST /api/auth/signup-admin`
+- `POST /api/auth/impersonate/:id`
 
 Journals:
 
 - `GET /api/journals`
-- `GET /api/journals/:slug`
+- `GET /api/journals/:journalUrl`
 - `GET /api/admin/journals`
 - `POST /api/journals`
 - `PUT /api/journals/:id`
@@ -174,12 +165,9 @@ Journal Videos:
 Testimonials:
 
 - `POST /api/testimonials`
+- `PUT /api/testimonials/:id`
+- `DELETE /api/testimonials/:id`
 - `GET /api/testimonials`
-
-Contact:
-
-- `POST /api/contact`
-- `GET /api/admin/contact`
 
 ## Environment Variables
 

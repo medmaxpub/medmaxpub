@@ -1,11 +1,26 @@
 import mongoose from "mongoose";
 
+const assetSchema = new mongoose.Schema(
+  {
+    storage: String,
+    public_id: String,
+    secure_url: String,
+    resource_type: String,
+    format: String,
+    file_type: String,
+    original_filename: String,
+    size: Number,
+    uploaded_at: String
+  },
+  { _id: false }
+);
+
 const testimonialSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    role: { type: String, required: true },
+    designation: { type: String, default: "" },
     message: { type: String, required: true },
-    active: { type: Boolean, default: true }
+    image: assetSchema
   },
   { timestamps: true }
 );
@@ -13,4 +28,3 @@ const testimonialSchema = new mongoose.Schema(
 const Testimonial = mongoose.model("Testimonial", testimonialSchema);
 
 export default Testimonial;
-

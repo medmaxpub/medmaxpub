@@ -5,7 +5,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const createIssue = asyncHandler(async (req, res) => {
   const { journalId, volume, issue, year, isCurrent } = req.body;
-  ensureJournalAccess(req.user, journalId);
+  await ensureJournalAccess(req.user, journalId);
 
   if (isCurrent) {
     await Issue.updateMany({ journal: journalId }, { isCurrent: false });

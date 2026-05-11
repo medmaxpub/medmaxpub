@@ -18,7 +18,7 @@ export const createVideo = asyncHandler(async (req, res) => {
     throw new AppError("Journal not found", 404);
   }
 
-  ensureJournalAccess(req.user, journal._id);
+  await ensureJournalAccess(req.user, journal._id);
 
   const thumbnail = await uploadAsset(req.files?.thumbnail?.[0], "medmaxpub/videos", "image", req);
   const videoFile = await uploadAsset(req.files?.videoFile?.[0], "medmaxpub/videos", "video", req);
@@ -36,18 +36,18 @@ export const createVideo = asyncHandler(async (req, res) => {
     videoFile
   });
 
-  const populatedVideo = await Video.findById(video._id).populate("journal", "title slug").lean();
+  const populatedVideo = await Video.findById(video._id).populate("journal", "managingJournalName journalUrl journalDomainName").lean();
   res.status(201).json(populatedVideo);
 });
 
 export const getVideos = asyncHandler(async (req, res) => {
-  const videos = await Video.find().populate("journal", "title slug").sort({ createdAt: -1 }).lean();
+  const videos = await Video.find().populate("journal", "managingJournalName journalUrl journalDomainName").sort({ createdAt: -1 }).lean();
   res.json(videos);
 });
 
 export const getAdminVideos = asyncHandler(async (req, res) => {
   const videos = await Video.find(buildAccessibleJournalFilter(req.user))
-    .populate("journal", "title slug")
+    .populate("journal", "managingJournalName journalUrl journalDomainName")
     .sort({ createdAt: -1 })
     .lean();
 

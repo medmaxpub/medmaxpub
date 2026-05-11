@@ -7,66 +7,159 @@ import User from "../models/User.js";
 import Video from "../models/Video.js";
 import { normalizeRole } from "../utils/accessControl.js";
 
-async function bootstrapJournalAdmin(journal) {
-  if (!journal) {
-    return;
+function fallbackName(value, backup) {
+  const normalized = String(value || "").trim();
+  return normalized || backup;
+}
+
+async function ensureUserAssignments(user) {
+  const journals = await Journal.find({ owner: user._id }).select("_id").lean();
+  await User.updateOne(
+    { _id: user._id },
+    {
+      $set: {
+        assignedJournals: journals.map((journal) => journal._id)
+      }
+    }
+  );
+}
+
+async function repairLegacyUsers() {
+  const users = await User.find({
+    $or: [
+      { firstName: null },
+      { firstName: "" },
+      { firstName: { $exists: false } },
+      { lastName: null },
+      { lastName: "" },
+      { lastName: { $exists: false } }
+    ]
+  })
+    .select("_id firstName lastName userName email role")
+    .lean();
+
+  for (const user of users) {
+    const userName = String(user.userName || "")
+      .trim()
+      .toLowerCase();
+    const derivedBase =
+      userName ||
+      String(user.email || "")
+        .trim()
+        .toLowerCase()
+        .split("@")[0] ||
+      `legacy-user-${String(user._id).slice(-6).toLowerCase()}`;
+
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          firstName: fallbackName(user.firstName, normalizeRole(user.role) === "admin" ? "Admin" : "Journal"),
+          lastName: fallbackName(user.lastName, derivedBase || "User")
+        }
+      }
+    );
+  }
+}
+
+async function migrateExistingJournalOwners() {
+  await repairLegacyUsers();
+  const journals = await Journal.find().lean();
+
+  for (const journal of journals) {
+    if (journal.owner) {
+      continue;
+    }
+
+    const derivedUserName = (journal.journalUrl || journal.managingJournalName || `journal-${journal._id}`)
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9-_]+/g, "-");
+
+    let owner = await User.findOne({ userName: derivedUserName });
+
+    if (!owner) {
+      owner = await User.create({
+        firstName: journal.firstName || "Journal",
+        lastName: journal.lastName || "Owner",
+        userName: derivedUserName,
+        password: process.env.MIGRATED_USER_DEFAULT_PASSWORD || "ChangeMe123!",
+        role: "user"
+      });
+    }
+
+    await Journal.updateOne(
+      { _id: journal._id },
+      {
+        $set: {
+          owner: owner._id,
+          firstName: owner.firstName,
+          lastName: owner.lastName
+        }
+      }
+    );
   }
 
-  const journalAdminEmail = process.env.JOURNAL_ADMIN_EMAIL || "journaladmin@medmaxpub.com";
-  const existingJournalAdmin = await User.findOne({ email: journalAdminEmail });
-
-  if (!existingJournalAdmin) {
-    await User.create({
-      name: process.env.JOURNAL_ADMIN_NAME || `${journal.title} Admin`,
-      email: journalAdminEmail,
-      password: process.env.JOURNAL_ADMIN_PASSWORD || "ChangeMe123!",
-      role: "journal_admin",
-      assignedJournals: [journal._id]
-    });
-    return;
-  }
-
-  existingJournalAdmin.role = "journal_admin";
-  existingJournalAdmin.assignedJournals = [journal._id];
-  await existingJournalAdmin.save();
+  const users = await User.find({ role: { $in: ["user", "journal_admin"] } });
+  await Promise.all(users.map((user) => ensureUserAssignments(user)));
 }
 
 export async function bootstrapAdmin() {
-  const superAdmins = [
+  await repairLegacyUsers();
+  const admins = [
     {
-      name: process.env.ADMIN_NAME || "medmaxpub Super Admin 1",
+      firstName: process.env.ADMIN_FIRST_NAME || "medmaxpub",
+      lastName: process.env.ADMIN_LAST_NAME || "Admin",
+      userName: (process.env.ADMIN_USERNAME || "admin").toLowerCase(),
       email: process.env.ADMIN_EMAIL || "admin@medmaxpub.com",
       password: process.env.ADMIN_PASSWORD || "ChangeMe123!"
     },
     {
-      name: process.env.SECOND_SUPER_ADMIN_NAME || "medmaxpub Super Admin 2",
+      firstName: process.env.SECOND_SUPER_ADMIN_FIRST_NAME || "medmaxpub",
+      lastName: process.env.SECOND_SUPER_ADMIN_LAST_NAME || "Admin 2",
+      userName: (process.env.SECOND_SUPER_ADMIN_USERNAME || "superadmin2").toLowerCase(),
       email: process.env.SECOND_SUPER_ADMIN_EMAIL || "superadmin2@medmaxpub.com",
       password: process.env.SECOND_SUPER_ADMIN_PASSWORD || "ChangeMe123!"
     }
   ];
 
-  for (const admin of superAdmins) {
-    const existingAdmin = await User.findOne({ email: admin.email });
+  for (const admin of admins) {
+    const existingAdmin = await User.findOne({
+      $or: [{ userName: admin.userName }, { email: admin.email }]
+    });
 
     if (!existingAdmin) {
       await User.create({
-        name: admin.name,
+        firstName: admin.firstName,
+        lastName: admin.lastName,
+        userName: admin.userName,
         email: admin.email,
         password: admin.password,
-        role: "super_admin"
+        role: "admin"
       });
       continue;
     }
 
     let shouldSave = false;
 
-    if (normalizeRole(existingAdmin.role) !== "super_admin") {
-      existingAdmin.role = "super_admin";
+    if (normalizeRole(existingAdmin.role) !== "admin") {
+      existingAdmin.role = "admin";
       shouldSave = true;
     }
 
-    if (existingAdmin.name !== admin.name) {
-      existingAdmin.name = admin.name;
+    if (existingAdmin.firstName !== admin.firstName) {
+      existingAdmin.firstName = admin.firstName;
+      shouldSave = true;
+    }
+
+    if (existingAdmin.lastName !== admin.lastName) {
+      existingAdmin.lastName = admin.lastName;
+      shouldSave = true;
+    }
+
+    if (existingAdmin.userName !== admin.userName) {
+      existingAdmin.userName = admin.userName;
       shouldSave = true;
     }
 
@@ -80,31 +173,34 @@ export async function seedSampleContent() {
   const count = await Journal.countDocuments();
 
   if (count > 0) {
-    const existingJournal = await Journal.findOne().sort({ createdAt: 1 });
-    await bootstrapJournalAdmin(existingJournal);
+    await migrateExistingJournalOwners();
     return;
   }
 
-  const journal = await Journal.create({
-    title: "Journal of Global Clinical & Translational Research",
-    slug: "journal-global-clinical-translational-research",
-    issn: "ISSN 2999-1001",
-    category: "Clinical Science",
-    description:
-      "A peer-reviewed publication stream supporting global researchers, conference presenters, clinicians, engineers and interdisciplinary scholars.",
-    coverImage: {
-      secure_url: "https://placehold.co/600x800/0d1b2a/ffffff?text=Global+Clinical+Research",
-      resource_type: "image"
-    },
-    sections: {
-      home: "<p>This journal supports medmaxpub research exchange with structured issue publishing and archive management.</p>",
-      about: "<p>An international open access journal for translational, clinical, and interdisciplinary research.</p>",
-      aimScope: "<ul><li>Conference-linked research dissemination</li><li>Clinical and translational science</li><li>Collaborative scholarly communication</li></ul>",
-      editorialBoard: "<p>Editorial board members are managed from the admin dashboard.</p>",
-      authorGuidelines: "<p>Prepare article files in the requested format and include complete publication metadata.</p>",
-      articleInPress: "<p>Accepted papers waiting for issue assignment are displayed here.</p>"
-    }
+  const journalUser = await User.create({
+    firstName: process.env.JOURNAL_ADMIN_FIRST_NAME || "Alicia",
+    lastName: process.env.JOURNAL_ADMIN_LAST_NAME || "Carter",
+    userName: (process.env.JOURNAL_ADMIN_USERNAME || "journaladmin").toLowerCase(),
+    email: process.env.JOURNAL_ADMIN_EMAIL || "journaladmin@medmaxpub.com",
+    password: process.env.JOURNAL_ADMIN_PASSWORD || "ChangeMe123!",
+    role: "user"
   });
+
+  const journal = await Journal.create({
+    owner: journalUser._id,
+    firstName: journalUser.firstName,
+    lastName: journalUser.lastName,
+    managingJournalName: "Journal of Global Clinical & Translational Research",
+    journalDomainName: "Clinical, Medical, and Translational Research",
+    journalUrl: "journal-global-clinical-translational-research",
+    aboutJournal:
+      "A peer-reviewed, open access journal supporting global researchers, conference presenters, clinicians, and interdisciplinary scholars.",
+    journalInstructions:
+      "Submit complete publication metadata, attach article files in the required format, and follow the editorial workflow defined by the assigned journal team."
+  });
+
+  journalUser.assignedJournals = [journal._id];
+  await journalUser.save();
 
   const issue = await Issue.create({
     journal: journal._id,
@@ -127,8 +223,8 @@ export async function seedSampleContent() {
 
   await Ppt.create({
     journal: journal._id,
-    title: "Global Scientific Network Keynote Deck",
-    description: "Sample PPT record for local development.",
+    title: `${journal.managingJournalName} PPT`,
+    description: journal.aboutJournal,
     file: {
       secure_url: "https://example.com/presentation-1.pptx",
       resource_type: "raw"
@@ -141,8 +237,8 @@ export async function seedSampleContent() {
 
   await Video.create({
     journal: journal._id,
-    title: "Empowering Global Scientific Collaboration",
-    description: "Sample video record for local development.",
+    title: `${journal.managingJournalName} Video`,
+    description: journal.aboutJournal,
     youtubeUrl: "https://www.youtube.com/embed/ysz5S6PUM-U",
     thumbnail: {
       secure_url: "https://placehold.co/800x450/081c3a/ffffff?text=Global+Scientific+Collaboration",
@@ -152,9 +248,8 @@ export async function seedSampleContent() {
 
   await Testimonial.create({
     name: "Dr. Hannah Morris",
-    role: "Conference Speaker",
+    designation: "Conference Speaker",
     message:
       "The platform captures a polished, research-focused feel while making publishing and speaker workflows much easier to manage."
   });
-  await bootstrapJournalAdmin(journal);
 }

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 export default function AdminLoginPage() {
-  const [email, setEmail] = useState("admin@medmaxpub.com");
+  const [identifier, setIdentifier] = useState("admin");
   const [password, setPassword] = useState("ChangeMe123!");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -16,7 +16,7 @@ export default function AdminLoginPage() {
     setIsSubmitting(true);
 
     try {
-      await login(email, password);
+      await login(identifier, password);
       navigate("/admin/dashboard");
     } catch (requestError) {
       setError("Login failed. Make sure the backend is running and the bootstrap admin exists.");
@@ -34,7 +34,7 @@ export default function AdminLoginPage() {
         <p className="mt-4 text-slate-600">JWT authentication protects super-admin and journal-admin publishing workflows.</p>
 
         <div className="mt-8 space-y-4">
-          <input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email" type="email" required />
+          <input value={identifier} onChange={(event) => setIdentifier(event.target.value)} placeholder="User Name or Email" required />
           <input
             value={password}
             onChange={(event) => setPassword(event.target.value)}
