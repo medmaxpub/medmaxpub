@@ -1,24 +1,26 @@
-import { ArrowRight } from "lucide-react";
+import { BookOpen, CalendarDays, Database, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
+import dnaImage from "../../assets/DNA.png";
+import AboutMedmaxSection from "../../components/common/AboutMedmaxSection";
+import JournalCard from "../../components/common/JournalCard";
 import SectionHeader from "../../components/common/SectionHeader";
 import {
-  aboutMedmaxParagraphs,
   heroShowcaseImages,
   indexingPartners,
-  mediaCollections,
   mockJournals,
   mockTestimonials,
-  regionBadges,
-  scientificReach
+  websiteStatHighlights,
+  websiteStats
 } from "../../data/mockData";
 
 export default function HomePage() {
   const featuredJournals = mockJournals.slice(0, 4);
-  const loopingHeroImages = [...heroShowcaseImages, ...heroShowcaseImages];
   const [testimonials, setTestimonials] = useState(mockTestimonials);
+  const [activeHeroIndex, setActiveHeroIndex] = useState(0);
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
+  const statIcons = [BookOpen, FileText, CalendarDays, Database];
 
   useEffect(() => {
     withFallback(() => api.get("/testimonials"), useDevelopmentFallback ? mockTestimonials : []).then((data) =>
@@ -26,55 +28,86 @@ export default function HomePage() {
     );
   }, [useDevelopmentFallback]);
 
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setActiveHeroIndex((current) => (current + 1) % heroShowcaseImages.length);
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
   return (
     <div>
-      <section>
-        <div className="container-shell py-10 lg:py-14">
-          <div className="overflow-hidden rounded-[2rem] border border-brand-border bg-brand-surface shadow-panel">
-            <div className="hero-marquee">
-              <div className="hero-marquee-track">
-                {loopingHeroImages.map((item, index) => (
-                  <div
-                    key={`${item.id}-${index}`}
-                    className="hero-marquee-slide h-[220px] overflow-hidden bg-brand-elevated border-r border-brand-border/60 last:border-r-0 sm:h-[280px] lg:h-[350px]"
-                    aria-hidden={index >= heroShowcaseImages.length}
-                  >
-                    <img
-                      src={item.image}
-                      alt={index < heroShowcaseImages.length ? item.title : ""}
-                      className="block h-full max-h-[220px] w-full max-w-full object-cover object-center sm:max-h-[280px] lg:max-h-[350px]"
-                    />
-                  </div>
-                ))}
-              </div>
+      <section className="relative isolate overflow-hidden bg-brand-mist">
+        <div className="absolute inset-0">
+          {heroShowcaseImages.map((item, index) => (
+            <div
+              key={item.id}
+              className={`absolute inset-0 transition-all duration-1000 ${
+                activeHeroIndex === index ? "scale-100 opacity-100" : "scale-105 opacity-0"
+              }`}
+              aria-hidden={activeHeroIndex !== index}
+            >
+              <img src={item.image} alt={item.title} className="h-full w-full object-cover object-center" />
             </div>
+          ))}
+          <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(10,18,34,0.84)_0%,rgba(10,18,34,0.68)_40%,rgba(10,18,34,0.5)_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,0.28),transparent_22%),radial-gradient(circle_at_left_center,rgba(198,40,40,0.24),transparent_28%)]" />
+        </div>
 
-            <div className="border-t border-brand-border bg-brand-surface px-4 py-8 sm:px-6 sm:py-10 lg:px-10">
-              <div className="mx-auto max-w-4xl text-center">
-                <span className="eyebrow mb-4">Medmax Publishers</span>
-                <h1 className="font-display text-3xl font-semibold leading-tight text-brand-ink sm:text-4xl lg:text-6xl">
-                  Open Access Journals for Clinical, Medical, Life Science, Pharma, and Technology Research
-                </h1>
-                <p className="mx-auto mt-4 max-w-3xl text-sm leading-7 text-brand-slate sm:mt-5 sm:text-lg sm:leading-8">
-                  Discover peer-reviewed journals, public PPT archives, and video resources presented through a clean,
-                  publication-first experience.
-                </p>
-                <div className="mt-6 flex flex-wrap justify-center gap-3 sm:mt-8 sm:gap-4">
-                  <Link to="/journals" className="button-primary">
-                    View Journals
-                  </Link>
-                  <Link to="/ppts" className="button-secondary">
-                    Browse PPTs
-                  </Link>
-                  <Link to="/videos" className="button-secondary">
-                    Browse Videos
-                  </Link>
-                </div>
+        <div className="relative">
+          <div className="container-shell flex min-h-[80vh] items-center py-14 sm:min-h-[84vh] lg:min-h-[90vh] lg:py-20">
+            <div className="max-w-3xl text-white">
+              <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-brand-gold">
+                Medmax Publishers
+              </span>
+              <h1 className="mt-6 font-display text-4xl font-semibold leading-tight sm:text-5xl lg:text-7xl">
+                Open Access Journals for Clinical, Medical, Life Science, Pharma, and Technology Research
+              </h1>
+              <p className="mt-5 max-w-2xl text-base leading-7 text-slate-200 sm:text-lg sm:leading-8">
+                Discover peer-reviewed journals, public PPT archives, and video resources through a cleaner,
+                publication-first experience designed for authors, readers, and institutions.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3 sm:gap-4">
+                <Link to="/journals" className="button-primary bg-brand-crimson hover:bg-brand-gold">
+                  View Journals
+                </Link>
+                <Link
+                  to="/ppts"
+                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold text-white shadow-lg backdrop-blur-sm transition duration-300 hover:border-brand-gold hover:bg-brand-gold hover:text-brand-mist"
+                >
+                  Browse PPTs
+                </Link>
+                <Link
+                  to="/videos"
+                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold text-white shadow-lg backdrop-blur-sm transition duration-300 hover:border-brand-gold hover:bg-brand-gold hover:text-brand-mist"
+                >
+                  Browse Videos
+                </Link>
+              </div>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                {heroShowcaseImages.map((item, index) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                      activeHeroIndex === index
+                        ? "bg-white text-brand-crimson shadow-lg"
+                        : "border border-white/25 bg-white/10 text-white hover:border-brand-gold hover:bg-white/15"
+                    }`}
+                    onClick={() => setActiveHeroIndex(index)}
+                  >
+                    {item.title}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      <AboutMedmaxSection />
 
       <section className="section-shell">
         <div className="container-shell">
@@ -85,18 +118,7 @@ export default function HomePage() {
           />
           <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {featuredJournals.map((journal) => (
-              <Link key={journal.id} to={`/journals/${journal.journalUrl}/about`} className="journal-card-link">
-                <article className="card-panel h-full p-5 sm:p-6">
-                  <p className="text-xs uppercase tracking-[0.2em] text-brand-teal">{journal.journalDomainName}</p>
-                  <h3 className="mt-3 font-display text-2xl font-semibold text-brand-ink">{journal.managingJournalName}</h3>
-                  <p className="mt-2 text-sm text-brand-slate">
-                    Managed by {journal.firstName} {journal.lastName}
-                  </p>
-                  <p className="mt-2 text-sm text-brand-slate">URL: {journal.journalUrl}</p>
-                  <p className="mt-4 text-sm leading-7 text-brand-slate">{journal.aboutJournal}</p>
-                  <span className="button-primary mt-5">View Journal</span>
-                </article>
-              </Link>
+              <JournalCard key={journal.id} journal={journal} />
             ))}
           </div>
         </div>
@@ -119,6 +141,90 @@ export default function HomePage() {
                 {partner}
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden pb-12 pt-4 sm:pb-14 lg:pb-20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_left_center,rgba(37,99,235,0.1),transparent_28%),radial-gradient(circle_at_right_top,rgba(198,40,40,0.08),transparent_26%)]" />
+        <div className="container-shell relative">
+          <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(14,18,33,0.96),rgba(21,27,46,0.94))] shadow-[0_30px_70px_rgba(0,0,0,0.28)]">
+            <div className="grid gap-10 px-6 py-8 sm:px-8 sm:py-10 lg:grid-cols-[minmax(260px,0.82fr)_minmax(0,1.18fr)] lg:items-center lg:gap-14 lg:px-10 lg:py-12">
+              <div className="flex justify-center lg:justify-start">
+                <div className="relative w-full max-w-[26rem] lg:max-w-[29rem]">
+                  <div className="absolute inset-[12%] rounded-full bg-brand-crimson/10 blur-3xl" />
+                  <div className="absolute inset-[18%] rounded-full bg-brand-teal/10 blur-3xl" />
+                  <img
+                    src={dnaImage}
+                    alt="DNA visualization"
+                    className="relative mx-auto w-full object-contain drop-shadow-[0_30px_55px_rgba(0,0,0,0.5)] lg:mx-0"
+                  />
+                </div>
+              </div>
+
+              <div className="text-white">
+                <h2 className="font-display text-4xl font-semibold uppercase leading-[0.95] tracking-[0.04em] text-white sm:text-5xl lg:text-6xl xl:text-[5.2rem]">
+                  <span className="block">The Science</span>
+                  <span className="mt-1 block text-brand-crimson">Mandate</span>
+                </h2>
+
+                <div className="mt-6 h-[2px] w-14 bg-brand-crimson" />
+
+                <p className="mt-6 max-w-3xl text-base leading-8 text-slate-300 sm:text-lg">
+                  Medmax Publishers was built on a simple conviction: scientific knowledge should remain visible,
+                  discoverable, and accessible to the global research community.
+                </p>
+                <p className="mt-5 max-w-3xl text-base leading-8 text-slate-300 sm:text-lg">
+                  Our journals span clinical medicine, life sciences, pharma, public health, and engineering,
+                  supported by rigorous peer review and open-access publishing workflows.
+                </p>
+
+                <div className="mt-7 flex flex-wrap gap-3">
+                  {websiteStatHighlights.map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-sm border border-white/10 bg-white/[0.03] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-200"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="mt-9 overflow-hidden rounded-[1.6rem] border border-white/10 bg-[linear-gradient(135deg,rgba(45,33,81,0.55),rgba(16,20,36,0.88))] shadow-[0_30px_60px_rgba(0,0,0,0.28)]">
+                  <div className="grid sm:grid-cols-2">
+                    {websiteStats.map((item, index) => {
+                      const Icon = statIcons[index] || Database;
+                      const borderClass =
+                        index === 0
+                          ? "border-b border-white/10 sm:border-b sm:border-r"
+                          : index === 1
+                            ? "border-b border-white/10"
+                            : index === 2
+                              ? "sm:border-r sm:border-white/10"
+                              : "";
+
+                      return (
+                        <div key={item.label} className={`flex items-center gap-4 px-5 py-6 sm:px-6 sm:py-7 ${borderClass}`}>
+                          <div
+                            className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${
+                              index % 2 === 0 ? "bg-brand-crimson/70" : "bg-brand-navy/70"
+                            }`}
+                          >
+                            <Icon size={24} />
+                          </div>
+                          <div>
+                            <p className="text-4xl font-semibold leading-none text-white sm:text-5xl">{item.value}</p>
+                            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.26em] text-slate-300">
+                              {item.label}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

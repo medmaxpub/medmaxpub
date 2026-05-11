@@ -1,0 +1,168 @@
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - link "Medmax Publishers" [ref=e7] [cursor=pointer]:
+      - /url: /
+      - img "Medmax Publishers" [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - img [ref=e11]
+        - textbox "Search journals, PPT archives, videos, and topics" [ref=e14]
+        - button "Search" [ref=e15] [cursor=pointer]
+      - generic [ref=e16]:
+        - link "contact@medmaxpub.com" [ref=e17] [cursor=pointer]:
+          - /url: mailto:contact@medmaxpub.com
+          - img [ref=e18]
+          - text: contact@medmaxpub.com
+        - link "+1 (970) 642-3881" [ref=e21] [cursor=pointer]:
+          - /url: tel:+19706423881
+          - img [ref=e22]
+          - text: +1 (970) 642-3881
+  - button "Open website menu" [ref=e26] [cursor=pointer]:
+    - img [ref=e27]
+  - main [ref=e28]:
+    - generic [ref=e29]:
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - img "Life Sciences" [ref=e213]
+          - img [ref=e214]
+          - img [ref=e37]
+        - generic [ref=e42]:
+          - generic [ref=e43]: Medmax Publishers
+          - heading "Open Access Journals for Clinical, Medical, Life Science, Pharma, and Technology Research" [level=1] [ref=e44]
+          - paragraph [ref=e45]: Discover peer-reviewed journals, public PPT archives, and video resources through a cleaner, publication-first experience designed for authors, readers, and institutions.
+          - generic [ref=e46]:
+            - link "View Journals" [ref=e47] [cursor=pointer]:
+              - /url: /journals
+            - link "Browse PPTs" [ref=e48] [cursor=pointer]:
+              - /url: /ppts
+            - link "Browse Videos" [ref=e49] [cursor=pointer]:
+              - /url: /videos
+          - generic [ref=e50]:
+            - button "Life Sciences" [ref=e51] [cursor=pointer]
+            - button "Clinical Research" [ref=e52] [cursor=pointer]
+            - button "Engineering & Technology" [ref=e53] [cursor=pointer]
+      - generic [ref=e55]:
+        - generic [ref=e56]:
+          - generic [ref=e57]: Featured Journals
+          - heading "Open access journal profiles with direct public URLs" [level=2] [ref=e58]
+          - paragraph [ref=e59]: Each featured journal now highlights only the core Medmax profile fields used in the admin portal.
+        - generic [ref=e60]:
+          - link [ref=e61] [cursor=pointer]:
+            - /url: /journals/journal-global-clinical-translational-research/about
+            - article [ref=e62]:
+              - paragraph [ref=e63]: Clinical, Medical, and Translational Research
+              - heading "Journal of Global Clinical & Translational Research" [level=3] [ref=e64]
+              - paragraph [ref=e65]: Managed by Alicia Carter
+              - paragraph [ref=e66]: "URL: journal-global-clinical-translational-research"
+              - paragraph [ref=e67]: Journal of Global Clinical & Translational Research is a peer-reviewed publication stream supporting global researchers, conference presenters, clinicians, engineers, and interdisciplinary scholars.
+              - generic [ref=e68]: View Journal
+          - link [ref=e69] [cursor=pointer]:
+            - /url: /journals/open-journal-bioinformatics-intelligent-systems/about
+            - article [ref=e70]:
+              - paragraph [ref=e71]: Bioinformatics, Intelligent Systems, and Applied AI
+              - heading "Open Journal of Bioinformatics & Intelligent Systems" [level=3] [ref=e72]
+              - paragraph [ref=e73]: Managed by Monica Alvarez
+              - paragraph [ref=e74]: "URL: open-journal-bioinformatics-intelligent-systems"
+              - paragraph [ref=e75]: Open Journal of Bioinformatics & Intelligent Systems is a peer-reviewed publication stream supporting global researchers, conference presenters, clinicians, engineers, and interdisciplinary scholars.
+              - generic [ref=e76]: View Journal
+          - link [ref=e77] [cursor=pointer]:
+            - /url: /journals/journal-sustainable-energy-engineering-policy/about
+            - article [ref=e78]:
+              - paragraph [ref=e79]: Energy Engineering and Sustainability Policy
+              - heading "Journal of Sustainable Energy Engineering & Policy" [level=3] [ref=e80]
+              - paragraph [ref=e81]: Managed by Priya Deshmukh
+              - paragraph [ref=e82]: "URL: journal-sustainable-energy-engineering-policy"
+              - paragraph [ref=e83]: Journal of Sustainable Energy Engineering & Policy is a peer-reviewed publication stream supporting global researchers, conference presenters, clinicians, engineers, and interdisciplinary scholars.
+              - generic [ref=e84]: View Journal
+          - link [ref=e85] [cursor=pointer]:
+            - /url: /journals/international-journal-public-health-frontiers/about
+            - article [ref=e86]:
+              - paragraph [ref=e87]: Public Health and Preventive Research
+              - heading "International Journal of Public Health Frontiers" [level=3] [ref=e88]
+              - paragraph [ref=e89]: Managed by Samuel Reed
+              - paragraph [ref=e90]: "URL: international-journal-public-health-frontiers"
+              - paragraph [ref=e91]: International Journal of Public Health Frontiers is a peer-reviewed publication stream supporting global researchers, conference presenters, clinicians, engineers, and interdisciplinary scholars.
+              - generic [ref=e92]: View Journal
+      - generic [ref=e94]:
+        - generic [ref=e95]:
+          - generic [ref=e96]: Indexing & Reach
+          - heading "Discoverability signals for scientific credibility" [level=2] [ref=e97]
+          - paragraph [ref=e98]: Indexing logos are displayed in a clean strip similar to publisher and conference trust sections.
+        - generic [ref=e99]:
+          - generic [ref=e100]: Google Scholar
+          - generic [ref=e101]: Crossref
+          - generic [ref=e102]: DOAJ
+          - generic [ref=e103]: PubMed
+          - generic [ref=e104]: Scilit
+          - generic [ref=e105]: OpenAlex
+      - generic [ref=e107]:
+        - generic [ref=e108]:
+          - generic [ref=e109]: Testimonials
+          - heading "What speakers, editors, and delegates say" [level=2] [ref=e110]
+          - paragraph [ref=e111]: A testimonial carousel can be powered from admin-managed entries, with text or video-based social proof.
+        - generic [ref=e112]:
+          - article [ref=e113]:
+            - paragraph [ref=e114]: "\"The platform captures a polished, research-focused feel while making publishing and speaker workflows much easier to manage.\""
+            - generic [ref=e115]:
+              - paragraph [ref=e116]: Dr. Hannah Morris
+              - paragraph [ref=e117]: Conference Speaker
+          - article [ref=e118]:
+            - paragraph [ref=e119]: "\"Routing journals, conference assets, testimonials, and article metadata through one dashboard is a major operational improvement.\""
+            - generic [ref=e120]:
+              - paragraph [ref=e121]: Prof. Daniel Rivera
+              - paragraph [ref=e122]: Journal Editor
+          - article [ref=e123]:
+            - paragraph [ref=e124]: "\"The admin tools are practical and the public UI presents journals, media, and scientific content in a confident and trustworthy way.\""
+            - generic [ref=e125]:
+              - paragraph [ref=e126]: Mia Brooks
+              - paragraph [ref=e127]: Event Coordinator
+  - generic:
+    - generic:
+      - link "Chat on WhatsApp" [ref=e130] [cursor=pointer]:
+        - /url: https://wa.me/917569062951
+        - img [ref=e131]
+      - button "Open live chat support popup" [ref=e135] [cursor=pointer]:
+        - img [ref=e136]
+  - contentinfo [ref=e138]:
+    - generic [ref=e139]:
+      - img "Medmax Publishers" [ref=e142]
+      - generic [ref=e143]:
+        - heading "Quick Links" [level=3] [ref=e144]
+        - generic [ref=e145]:
+          - link "Home" [ref=e146] [cursor=pointer]:
+            - /url: /
+          - link "About" [ref=e147] [cursor=pointer]:
+            - /url: /about
+          - link "Journals" [ref=e148] [cursor=pointer]:
+            - /url: /journals
+          - link "PPTs" [ref=e149] [cursor=pointer]:
+            - /url: /ppts
+          - link "Videos" [ref=e150] [cursor=pointer]:
+            - /url: /videos
+          - link "Submit Manuscript" [ref=e151] [cursor=pointer]:
+            - /url: /submit-manuscript
+          - link "Membership" [ref=e152] [cursor=pointer]:
+            - /url: /membership
+          - link "Contact" [ref=e153] [cursor=pointer]:
+            - /url: /contact
+      - generic [ref=e154]:
+        - heading "Contact Info" [level=3] [ref=e155]
+        - generic [ref=e156]:
+          - generic [ref=e157]:
+            - img [ref=e158]
+            - generic [ref=e161]:
+              - generic [ref=e162]: Medmax Publishers LLC
+              - generic [ref=e163]: 2705 Greystone Drive
+              - generic [ref=e164]: Apt A
+              - generic [ref=e165]: Columbus, Ohio - 43220
+              - generic [ref=e166]: USA
+          - link "contact@medmaxpub.com" [ref=e167] [cursor=pointer]:
+            - /url: mailto:contact@medmaxpub.com
+          - link "+1 (970) 642-3881" [ref=e168] [cursor=pointer]:
+            - /url: tel:+19706423881
+            - img [ref=e169]
+            - text: +1 (970) 642-3881
+          - generic [ref=e171]:
+            - img [ref=e173]
+            - img [ref=e176]
+            - img [ref=e179]

@@ -1,6 +1,8 @@
 export const companyInfo = {
   name: "medmaxpub",
   email: import.meta.env.VITE_DEFAULT_CONTACT_EMAIL || "contact@medmaxpub.com",
+  phone: "+91 7569-062951",
+  phoneHref: ("+91 7569-062951").replace(/[^\d+]/g, ""),
   addressLines: [
     "Medmax Publishers LLC",
     "2705 Greystone Drive",
@@ -71,7 +73,34 @@ export const aboutMedmaxHighlights = [
 
 export const aboutMedmaxCoverage = ["Clinical", "Medicine", "Life Sciences", "Pharma", "Engineering", "Technology"];
 
-function buildJournal(id, firstName, lastName, managingJournalName, journalDomainName, journalUrl, ppts = [], videos = []) {
+export const websiteStats = [
+  { value: "18+", label: "Active Journals" },
+  { value: "260+", label: "Publications" },
+  { value: "10+", label: "Years Publishing" },
+  { value: "7+", label: "Index Databases" }
+];
+
+export const websiteStatHighlights = [
+  "Crossref DOI",
+  "Google Scholar",
+  "DOAJ Indexed",
+  "Creative Commons",
+  "Double Blind Review",
+  "Research Archive"
+];
+
+function buildJournal(
+  id,
+  firstName,
+  lastName,
+  managingJournalName,
+  journalDomainName,
+  journalUrl,
+  issn,
+  coverImage,
+  ppts = [],
+  videos = []
+) {
   return {
     id,
     firstName,
@@ -80,6 +109,8 @@ function buildJournal(id, firstName, lastName, managingJournalName, journalDomai
     managingJournalName,
     journalDomainName,
     journalUrl,
+    issn,
+    coverImage,
     aboutJournal:
       `${managingJournalName} is a peer-reviewed publication stream supporting global researchers, conference presenters, clinicians, engineers, and interdisciplinary scholars.`,
     journalInstructions:
@@ -139,6 +170,8 @@ export const mockJournals = [
     "Journal of Global Clinical & Translational Research",
     "Clinical, Medical, and Translational Research",
     "journal-global-clinical-translational-research",
+    "ISSN 2584-1101",
+    "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=900&q=80",
     [
       {
         id: "ppt-1",
@@ -166,6 +199,8 @@ export const mockJournals = [
     "Open Journal of Bioinformatics & Intelligent Systems",
     "Bioinformatics, Intelligent Systems, and Applied AI",
     "open-journal-bioinformatics-intelligent-systems",
+    "ISSN 2584-1102",
+    "https://images.unsplash.com/photo-1518152006812-edab29b069ac?auto=format&fit=crop&w=900&q=80",
     [
       {
         id: "ppt-2",
@@ -192,7 +227,9 @@ export const mockJournals = [
     "Deshmukh",
     "Journal of Sustainable Energy Engineering & Policy",
     "Energy Engineering and Sustainability Policy",
-    "journal-sustainable-energy-engineering-policy"
+    "journal-sustainable-energy-engineering-policy",
+    "ISSN 2584-1103",
+    "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=900&q=80"
   ),
   buildJournal(
     "j4",
@@ -200,7 +237,9 @@ export const mockJournals = [
     "Reed",
     "International Journal of Public Health Frontiers",
     "Public Health and Preventive Research",
-    "international-journal-public-health-frontiers"
+    "international-journal-public-health-frontiers",
+    "ISSN 2584-1104",
+    "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=900&q=80"
   ),
   buildJournal(
     "j5",
@@ -208,7 +247,9 @@ export const mockJournals = [
     "Khan",
     "Journal of Advanced Pharmaceutical Discovery",
     "Pharmaceutical Discovery and Drug Development",
-    "journal-advanced-pharmaceutical-discovery"
+    "journal-advanced-pharmaceutical-discovery",
+    "ISSN 2584-1105",
+    "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&q=80"
   ),
   buildJournal(
     "j6",
@@ -216,7 +257,9 @@ export const mockJournals = [
     "Brooks",
     "Engineering, Robotics & Intelligent Machine Review",
     "Engineering, Robotics, and Intelligent Machines",
-    "engineering-robotics-intelligent-machine-review"
+    "engineering-robotics-intelligent-machine-review",
+    "ISSN 2584-1106",
+    "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=900&q=80"
   )
 ];
 

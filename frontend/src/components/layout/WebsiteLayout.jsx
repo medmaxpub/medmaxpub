@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import Footer from "./Footer";
+import FloatingContactActions from "./FloatingContactActions";
 import TopHeader from "./TopHeader";
 import WebsiteNavbar from "./WebsiteNavbar";
 
@@ -20,6 +21,7 @@ export default function WebsiteLayout() {
       <main>
         <Outlet />
       </main>
+      <FloatingContactActions />
       <Footer />
     </div>
   );

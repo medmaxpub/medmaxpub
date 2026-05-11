@@ -36,7 +36,7 @@ export default function Footer() {
             <a href={`mailto:${companyInfo.email}`} className="block break-all transition hover:text-brand-gold sm:break-normal">
               {companyInfo.email}
             </a>
-            <a href={`tel:${companyInfo.phone}`} className="flex items-center gap-2 transition hover:text-brand-gold">
+            <a href={`tel:${companyInfo.phoneHref}`} className="flex items-center gap-2 transition hover:text-brand-gold">
               <Phone size={16} className="text-brand-gold" />
               {companyInfo.phone}
             </a>

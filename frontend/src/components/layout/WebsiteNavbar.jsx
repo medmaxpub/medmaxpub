@@ -1,5 +1,5 @@
 import { Menu, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 
 const websiteNavItems = [
@@ -29,9 +29,13 @@ export default function WebsiteNavbar() {
     [location.pathname]
   );
 
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
+
   return (
-    <div className="sticky top-0 z-30 border-b border-brand-border bg-brand-mist/95 backdrop-blur">
-      <div className="container-shell flex items-center justify-between py-3">
+    <div className="sticky top-0 z-30 border-b border-brand-crimson bg-brand-crimson shadow-[0_14px_30px_rgba(198,40,40,0.22)]">
+      <div className="container-shell flex items-center justify-between py-2">
         <nav className="hidden flex-wrap items-center gap-2 lg:flex">
           {activeItems.map((item) => (
             <NavLink key={item.to} to={item.to} className={`website-nav-link ${item.active ? "website-nav-link-active" : ""}`}>
@@ -42,7 +46,7 @@ export default function WebsiteNavbar() {
 
         <button
           type="button"
-          className="inline-flex rounded-2xl border border-brand-border bg-brand-surface p-3 text-brand-ink lg:hidden"
+          className="inline-flex rounded-full border border-white/20 bg-white/10 p-3 text-white shadow-lg lg:hidden"
           onClick={() => setOpen((current) => !current)}
           aria-label={open ? "Close website menu" : "Open website menu"}
         >
@@ -52,13 +56,12 @@ export default function WebsiteNavbar() {
 
       {open ? (
         <div className="container-shell pb-4 lg:hidden">
-          <div className="card-panel flex flex-col gap-2 p-3 sm:p-4">
+          <div className="flex flex-col gap-2 rounded-[1.75rem] border border-white/15 bg-brand-crimson p-3 shadow-[0_20px_40px_rgba(120,18,18,0.28)] sm:p-4">
             {activeItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={`website-nav-link justify-center ${item.active ? "website-nav-link-active" : ""}`}
-                onClick={() => setOpen(false)}
               >
                 {item.label}
               </NavLink>

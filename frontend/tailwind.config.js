@@ -5,6 +5,7 @@ export default {
     extend: {
       colors: {
         brand: {
+          crimson: "#c62828",
           navy: "#2563eb",
           teal: "#60a5fa",
           gold: "#d4af37",

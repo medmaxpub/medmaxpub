@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Footer from "./Footer";
+import FloatingContactActions from "./FloatingContactActions";
 import JournalNavbar from "./JournalNavbar";
 
 export default function JournalLayout() {
@@ -9,6 +10,7 @@ export default function JournalLayout() {
       <main>
         <Outlet />
       </main>
+      <FloatingContactActions />
       <Footer />
     </div>
   );
