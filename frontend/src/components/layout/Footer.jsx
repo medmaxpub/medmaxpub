@@ -20,11 +20,13 @@ export default function Footer() {
           <h3 className="text-lg font-semibold">Quick Links</h3>
           <div className="mt-4 flex flex-col gap-3 text-sm text-slate-300">
             <Link to="/">Home</Link>
+            <Link to="/about">About</Link>
             <Link to="/journals">Journals</Link>
             <Link to="/ppts">PPTs</Link>
             <Link to="/videos">Videos</Link>
-            <Link to="/about">About</Link>
-            <Link to="/journals">Author Guidelines</Link>
+            <Link to="/submit-manuscript">Submit Manuscript</Link>
+            <Link to="/membership">Membership</Link>
+            <Link to="/contact">Contact</Link>
           </div>
         </div>
 

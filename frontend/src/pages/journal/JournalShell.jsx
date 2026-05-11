@@ -221,6 +221,9 @@ export default function JournalShell() {
     <div className="section-shell">
       <div className="container-shell">
         <div className="card-panel overflow-hidden">
+          <div className="border-b border-slate-100 px-5 py-5 sm:px-8 sm:py-6">
+            <JournalMenu journalUrl={journal.journalUrl} />
+          </div>
           <div className="grid gap-6 px-5 py-5 sm:px-8 sm:py-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-8">
             <div className="rounded-3xl bg-brand-mist p-6">
               <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">Managing Journal Name</p>
@@ -245,9 +248,6 @@ export default function JournalShell() {
                 </a>
               ) : null}
             </div>
-          </div>
-          <div className="border-t border-slate-100 px-5 py-5 sm:px-8 sm:py-6">
-            <JournalMenu journalUrl={journal.journalUrl} />
           </div>
         </div>
 

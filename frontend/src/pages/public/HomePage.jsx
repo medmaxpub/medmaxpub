@@ -31,19 +31,18 @@ export default function HomePage() {
       <section className="bg-white">
         <div className="container-shell py-10 lg:py-14">
           <div className="overflow-hidden rounded-[2rem] border border-brand-sky bg-white shadow-panel">
-            <div className="h-3 bg-brand-gold" />
             <div className="hero-marquee">
               <div className="hero-marquee-track">
                 {loopingHeroImages.map((item, index) => (
                   <div
                     key={`${item.id}-${index}`}
-                    className="hero-marquee-slide h-[220px] overflow-hidden border-r border-white/20 last:border-r-0 sm:h-[280px] lg:h-[350px]"
+                    className="hero-marquee-slide h-[220px] overflow-hidden bg-slate-100 border-r border-white/20 last:border-r-0 sm:h-[280px] lg:h-[350px]"
                     aria-hidden={index >= heroShowcaseImages.length}
                   >
                     <img
                       src={item.image}
                       alt={index < heroShowcaseImages.length ? item.title : ""}
-                      className="h-full max-h-[220px] w-full max-w-full object-cover sm:max-h-[280px] lg:max-h-[350px]"
+                      className="block h-full max-h-[220px] w-full max-w-full object-cover object-center sm:max-h-[280px] lg:max-h-[350px]"
                     />
                   </div>
                 ))}
@@ -71,28 +70,7 @@ export default function HomePage() {
                     Browse Videos
                   </Link>
                 </div>
-                <div className="mt-6 flex flex-wrap justify-center gap-3 sm:mt-8">
-                  {regionBadges.map((region) => (
-                    <span key={region} className="rounded-full border border-brand-sky bg-brand-mist px-4 py-2 text-sm text-brand-ink">
-                      {region}
-                    </span>
-                  ))}
-                </div>
               </div>
-            </div>
-
-            <div className="grid gap-4 border-t border-brand-sky bg-brand-mist px-4 py-4 sm:px-6 sm:py-6 md:grid-cols-3">
-              {mediaCollections.map((collection) => (
-                <div key={collection.id} className="rounded-3xl bg-white px-5 py-5">
-                  <p className="text-xs uppercase tracking-[0.22em] text-brand-gold">Public Access</p>
-                  <h2 className="mt-3 font-display text-2xl font-semibold text-brand-navy">{collection.title}</h2>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">{collection.description}</p>
-                  <Link to={collection.link} className="mt-4 inline-flex items-center gap-2 font-semibold text-brand-navy">
-                    {collection.linkLabel}
-                    <ArrowRight size={16} />
-                  </Link>
-                </div>
-              ))}
             </div>
           </div>
         </div>

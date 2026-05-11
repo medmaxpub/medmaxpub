@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import Footer from "./Footer";
-import Navbar from "./Navbar";
 import TopHeader from "./TopHeader";
+import WebsiteNavbar from "./WebsiteNavbar";
 
-export default function SiteLayout() {
+export default function WebsiteLayout() {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
@@ -16,7 +16,7 @@ export default function SiteLayout() {
   return (
     <div className="min-h-screen bg-brand-mist">
       <TopHeader searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={handleSearch} />
-      <Navbar />
+      <WebsiteNavbar />
       <main>
         <Outlet />
       </main>
@@ -24,4 +24,3 @@ export default function SiteLayout() {
     </div>
   );
 }
-

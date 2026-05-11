@@ -49,6 +49,22 @@ button {
   @apply inline-flex min-h-11 items-center justify-center rounded-full bg-brand-sky px-5 py-3 text-center text-sm font-semibold text-brand-ink hover:bg-brand-sky/80;
 }
 
+.website-nav-link {
+  @apply inline-flex min-h-11 items-center justify-center rounded-none border border-brand-ink bg-white px-3 py-2 text-center text-sm font-medium text-brand-ink hover:bg-brand-sky/40 sm:px-4;
+}
+
+.website-nav-link-active {
+  @apply border-brand-navy bg-brand-navy text-white;
+}
+
+.journal-nav-link {
+  @apply inline-flex min-h-11 items-center justify-center rounded-xl border border-brand-sky bg-white px-4 py-2 text-center text-sm font-medium text-brand-ink hover:border-brand-teal hover:bg-brand-sky/40;
+}
+
+.journal-nav-link-active {
+  @apply border-brand-navy bg-brand-navy text-white;
+}
+
 .eyebrow {
   @apply mb-3 inline-flex rounded-full bg-brand-gold/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-brand-gold;
 }
