@@ -19,7 +19,9 @@ export default function AdminLayout() {
       <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
         <aside className="bg-brand-navy px-6 py-8 text-white">
           <div>
-            <p className="font-display text-3xl font-semibold">medmaxpub</p>
+            <div className="inline-flex rounded-3xl bg-white px-4 py-3 shadow-panel">
+              <img src="/medmax-logo.png" alt="Medmax Publishers" className="h-12 w-auto" />
+            </div>
             <p className="mt-2 text-sm text-slate-300">{isSuperAdmin ? "Super Admin Portal" : "Journal Admin Portal"}</p>
           </div>
 

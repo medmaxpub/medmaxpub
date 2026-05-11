@@ -101,7 +101,7 @@ export async function seedSampleContent() {
       about: "<p>An international open access journal for translational, clinical, and interdisciplinary research.</p>",
       aimScope: "<ul><li>Conference-linked research dissemination</li><li>Clinical and translational science</li><li>Collaborative scholarly communication</li></ul>",
       editorialBoard: "<p>Editorial board members are managed from the admin dashboard.</p>",
-      authorGuidelines: "<p>Submit manuscripts in PDF, DOC, or DOCX format with full metadata.</p>",
+      authorGuidelines: "<p>Prepare article files in the requested format and include complete publication metadata.</p>",
       articleInPress: "<p>Accepted papers waiting for issue assignment are displayed here.</p>"
     }
   });

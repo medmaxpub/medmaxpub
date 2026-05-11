@@ -29,7 +29,7 @@ export default function ContactPage() {
   return (
     <div className="section-shell">
       <div className="container-shell grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-        <div className="card-panel p-8">
+        <div className="card-panel p-6 sm:p-8">
           <SectionHeader
             label="Contact"
             title="Publisher contact details"
@@ -44,7 +44,7 @@ export default function ContactPage() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="card-panel p-8">
+        <form onSubmit={handleSubmit} className="card-panel p-6 sm:p-8">
           <SectionHeader
             label="Send Message"
             title="Contact form"
@@ -80,7 +80,7 @@ export default function ContactPage() {
               required
             />
           </div>
-          <div className="mt-6 flex items-center justify-between gap-4">
+          <div className="mt-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
             <button type="submit" className="button-primary">
               Send Message
             </button>
@@ -91,4 +91,3 @@ export default function ContactPage() {
     </div>
   );
 }
-

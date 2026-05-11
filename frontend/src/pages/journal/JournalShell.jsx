@@ -131,7 +131,7 @@ export default function JournalShell() {
               </p>
               <h4 className="mt-3 text-xl font-semibold text-brand-navy">{ppt.title}</h4>
               <p className="mt-3 leading-7 text-slate-600">{ppt.description}</p>
-              <div className="mt-4 flex gap-3">
+              <div className="mt-4 flex flex-wrap gap-3">
                 <button type="button" className="button-soft px-4 py-2" onClick={() => setActivePreview(ppt)}>
                   <ExternalLink size={16} className="mr-2" />
                   View
@@ -196,7 +196,7 @@ export default function JournalShell() {
                 <img
                   src={video.thumbnailUrl || "https://placehold.co/800x450/0f2743/ffffff?text=Journal+Video"}
                   alt={video.title}
-                  className="h-24 w-36 rounded-2xl object-cover"
+                  className="h-20 w-24 rounded-2xl object-cover sm:h-24 sm:w-36"
                 />
                 <div className="flex-1">
                   <h4 className="font-semibold text-brand-navy">{video.title}</h4>
@@ -219,23 +219,23 @@ export default function JournalShell() {
     <div className="section-shell">
       <div className="container-shell">
         <div className="card-panel overflow-hidden">
-          <div className="grid gap-8 px-8 py-8 lg:grid-cols-[280px_1fr]">
-            <img src={journal.coverImageUrl} alt={journal.title} className="h-80 w-full rounded-3xl object-cover" />
+          <div className="grid gap-6 px-5 py-5 sm:px-8 sm:py-8 lg:grid-cols-[280px_1fr] lg:gap-8">
+            <img src={journal.coverImageUrl} alt={journal.title} className="h-64 w-full rounded-3xl object-cover sm:h-80" />
             <div>
               <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">{journal.category}</p>
-              <h1 className="mt-3 font-display text-4xl font-semibold text-brand-navy">{journal.title}</h1>
+              <h1 className="mt-3 font-display text-3xl font-semibold text-brand-navy sm:text-4xl">{journal.title}</h1>
               <p className="mt-2 text-sm text-slate-500">{journal.issn}</p>
               <p className="mt-4 max-w-3xl leading-8 text-slate-600">{journal.description}</p>
             </div>
           </div>
-          <div className="border-t border-slate-100 px-8 py-6">
+          <div className="border-t border-slate-100 px-5 py-5 sm:px-8 sm:py-6">
             <JournalMenu journalSlug={journal.slug} />
           </div>
         </div>
 
-        <div className="mt-8 card-panel p-8">
+        <div className="mt-8 card-panel p-5 sm:p-8">
           <span className="eyebrow">{sectionTitles[section] || "Journal"}</span>
-          <h2 className="font-display text-3xl font-semibold text-brand-navy">{sectionTitles[section] || "Journal Section"}</h2>
+          <h2 className="font-display text-2xl font-semibold text-brand-navy sm:text-3xl">{sectionTitles[section] || "Journal Section"}</h2>
           <div className="mt-6">{renderSection()}</div>
         </div>
       </div>

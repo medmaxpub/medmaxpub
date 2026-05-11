@@ -40,15 +40,15 @@ export default function JournalsPage() {
         <SectionHeader
           label="Journals"
           title="Journal listing with search and category filtering"
-          description="This directory follows the structured, professional conference-and-publication feel of the medmaxpub platform."
+          description="Browse the journal directory with the clean listing patterns used across publisher-style archive pages."
         />
 
-        <div className="mt-8 card-panel p-6">
+        <div className="mt-8 card-panel p-4 sm:p-6">
           <div className="grid gap-4 lg:grid-cols-[1.6fr_0.6fr]">
-            <form onSubmit={handleSearch} className="flex items-center gap-3">
-              <Search size={18} className="text-slate-400" />
+            <form onSubmit={handleSearch} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Search size={18} className="hidden text-slate-400 sm:block" />
               <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search journals" />
-              <button type="submit" className="button-primary px-4 py-3">
+              <button type="submit" className="button-primary shrink-0 px-4 py-3">
                 Search
               </button>
             </form>
@@ -64,18 +64,18 @@ export default function JournalsPage() {
         {filtered.length ? (
           <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {filtered.map((journal) => (
-              <article key={journal.id} className="card-panel overflow-hidden">
-                <img src={journal.coverImageUrl} alt={journal.title} className="h-72 w-full object-cover" />
-                <div className="p-6">
-                  <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">{journal.category}</p>
-                  <h3 className="mt-3 font-display text-2xl font-semibold text-brand-navy">{journal.title}</h3>
-                  <p className="mt-2 text-sm text-slate-500">{journal.issn}</p>
-                  <p className="mt-4 text-sm leading-7 text-slate-600">{journal.description}</p>
-                  <Link to={`/journals/${journal.slug}/home`} className="button-primary mt-5">
-                    View Journal
-                  </Link>
-                </div>
-              </article>
+              <Link key={journal.id} to={`/journals/${journal.slug}/home`} className="journal-card-link">
+                <article className="card-panel h-full overflow-hidden">
+                  <img src={journal.coverImageUrl} alt={journal.title} className="h-64 w-full object-cover sm:h-72" />
+                  <div className="p-5 sm:p-6">
+                    <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">{journal.category}</p>
+                    <h3 className="mt-3 font-display text-2xl font-semibold text-brand-navy">{journal.title}</h3>
+                    <p className="mt-2 text-sm text-slate-500">{journal.issn}</p>
+                    <p className="mt-4 text-sm leading-7 text-slate-600">{journal.description}</p>
+                    <span className="button-primary mt-5">View Journal</span>
+                  </div>
+                </article>
+              </Link>
             ))}
           </div>
         ) : (

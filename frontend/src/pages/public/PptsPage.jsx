@@ -1,21 +1,63 @@
-import { Download, Eye } from "lucide-react";
+import { Download, Eye, Search } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
+import EmptyState from "../../components/common/EmptyState";
 import PptPreviewModal from "../../components/common/PptPreviewModal";
 import SectionHeader from "../../components/common/SectionHeader";
-import { mockPpts } from "../../data/mockData";
+import { mockJournals, mockPpts } from "../../data/mockData";
+import { buildJournalArchiveInfo, getAssetJournalSlug } from "../../utils/journalArchive";
 import { normalizePptItem } from "../../utils/pptPreview";
 
 export default function PptsPage() {
   const [items, setItems] = useState([]);
   const [activePreview, setActivePreview] = useState(null);
+  const [query, setQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
   useEffect(() => {
-    withFallback(() => api.get("/ppts"), useDevelopmentFallback ? mockPpts : []).then((data) => {
+    let ignore = false;
+
+    const loadItems = async () => {
+      setIsLoading(true);
+      const data = await withFallback(() => api.get("/ppts"), useDevelopmentFallback ? mockPpts : []);
       const normalized = data.map(normalizePptItem);
-      setItems(normalized);
-    });
+      const journalLookup = {};
+
+      if (useDevelopmentFallback) {
+        mockJournals.forEach((journal) => {
+          journalLookup[journal.slug] = buildJournalArchiveInfo(journal);
+        });
+      } else {
+        const journalSlugs = [...new Set(normalized.map(getAssetJournalSlug).filter(Boolean))];
+        const journalResults = await Promise.all(
+          journalSlugs.map(async (slug) => {
+            const journal = await withFallback(() => api.get(`/journals/${slug}`), null);
+            return journal ? [slug, buildJournalArchiveInfo(journal)] : null;
+          })
+        );
+
+        journalResults.filter(Boolean).forEach(([slug, journal]) => {
+          journalLookup[slug] = journal;
+        });
+      }
+
+      if (!ignore) {
+        setItems(
+          normalized.map((item) => ({
+            ...item,
+            journalInfo: journalLookup[getAssetJournalSlug(item)] || null
+          }))
+        );
+        setIsLoading(false);
+      }
+    };
+
+    loadItems();
+    return () => {
+      ignore = true;
+    };
   }, [useDevelopmentFallback]);
 
   useEffect(() => {
@@ -29,37 +71,153 @@ export default function PptsPage() {
     return () => window.removeEventListener("keydown", handleEscape);
   }, []);
 
+  const filteredItems = items.filter((ppt) => {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    if (!normalizedQuery) {
+      return true;
+    }
+
+    return [
+      ppt.title,
+      ppt.description,
+      ppt.journalTitle,
+      ppt.journalInfo?.title,
+      ppt.journalInfo?.overview,
+      ppt.journalInfo?.featuredArticleTitle,
+      (ppt.journalInfo?.featuredAuthors || []).join(" ")
+    ]
+      .filter(Boolean)
+      .some((value) => value.toLowerCase().includes(normalizedQuery));
+  });
+
+  const journalCount = new Set(items.map((ppt) => ppt.journalInfo?.slug || ppt.journalSlug).filter(Boolean)).size;
+
   return (
     <div className="section-shell">
       <div className="container-shell">
         <SectionHeader
-          label="PPTs"
-          title="Presentation resources with preview and download actions"
-          description="View opens an in-page popup. For the slide-style viewer, upload a preview PDF from the admin portal."
+          label="PPT Archive"
+          title="Presentation resources linked to journal records"
+          description="Browse all public PPT entries in an archive-style listing with journal details, issue context, preview access, and downloads."
         />
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-2">
-          {items.map((ppt) => (
-            <article key={ppt.id} className="card-panel p-8">
-              <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">
-                Uploaded {new Date(ppt.uploadedDate).toLocaleDateString()}
-              </p>
-              {ppt.journalTitle ? <p className="mt-2 text-sm font-medium text-slate-500">{ppt.journalTitle}</p> : null}
-              <h3 className="mt-3 font-display text-2xl font-semibold text-brand-navy">{ppt.title}</h3>
-              <p className="mt-4 leading-7 text-slate-600">{ppt.description}</p>
-              <div className="mt-6 flex gap-3">
-                <button type="button" className="button-soft px-4 py-2" onClick={() => setActivePreview(ppt)}>
-                  <Eye size={16} className="mr-2" />
-                  View
-                </button>
-                <a href={ppt.downloadUrl} target="_blank" rel="noreferrer" download className="button-primary px-4 py-2">
-                  <Download size={16} className="mr-2" />
-                  Download
-                </a>
-              </div>
-            </article>
-          ))}
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="card-panel p-5">
+            <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">Total PPTs</p>
+            <p className="mt-2 font-display text-4xl font-semibold text-brand-navy">{items.length}</p>
+          </div>
+          <div className="card-panel p-5">
+            <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">Linked Journals</p>
+            <p className="mt-2 font-display text-4xl font-semibold text-brand-navy">{journalCount}</p>
+          </div>
+          <div className="card-panel p-5">
+            <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">Downloads</p>
+            <p className="mt-2 text-sm leading-7 text-slate-600">Each record keeps preview and download actions grouped with the source journal.</p>
+          </div>
         </div>
+
+        <div className="mt-8 card-panel p-4 sm:p-6">
+          <div className="flex items-center gap-3">
+            <Search size={18} className="text-slate-400" />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search PPT titles, journal names, authors, or archive details"
+              className="border-none bg-transparent p-0 shadow-none focus:ring-0"
+            />
+          </div>
+        </div>
+
+        {isLoading ? (
+          <div className="mt-10">
+            <EmptyState title="Loading PPT archive" description="Public presentation records are being prepared." />
+          </div>
+        ) : filteredItems.length ? (
+          <div className="mt-10 space-y-6">
+            {filteredItems.map((ppt) => (
+              <article key={ppt.id} className="card-panel overflow-hidden">
+                <div className="grid lg:grid-cols-[280px_1fr]">
+                  <div className="bg-slate-100">
+                    {ppt.journalInfo?.coverImageUrl ? (
+                      <img src={ppt.journalInfo.coverImageUrl} alt={ppt.journalInfo.title} className="h-full min-h-64 w-full object-cover" />
+                    ) : (
+                      <div className="flex min-h-64 items-center justify-center px-8 text-center text-sm text-slate-500">
+                        Journal cover artwork will appear here when available.
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-5 sm:p-7">
+                    <div className="flex flex-wrap items-center gap-3 text-sm">
+                      <span className="eyebrow mb-0">PPT Record</span>
+                      <p className="text-slate-500">Uploaded {new Date(ppt.uploadedDate).toLocaleDateString()}</p>
+                    </div>
+                    <h2 className="mt-4 font-display text-3xl font-semibold text-brand-navy">{ppt.title}</h2>
+                    <p className="mt-4 leading-7 text-slate-600">{ppt.description}</p>
+
+                    <div className="mt-6 grid gap-5 xl:grid-cols-[1fr_0.95fr]">
+                      <div className="rounded-3xl bg-slate-50 p-5">
+                        <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Actions</p>
+                        <div className="mt-4 flex flex-wrap gap-3">
+                          <button type="button" className="button-soft px-4 py-2" onClick={() => setActivePreview(ppt)}>
+                            <Eye size={16} className="mr-2" />
+                            Preview
+                          </button>
+                          <a href={ppt.downloadUrl} target="_blank" rel="noreferrer" download className="button-primary px-4 py-2">
+                            <Download size={16} className="mr-2" />
+                            Download PPT
+                          </a>
+                          {ppt.journalInfo?.slug ? (
+                            <Link to={`/journals/${ppt.journalInfo.slug}/home`} className="button-secondary px-4 py-2">
+                              Open Journal
+                            </Link>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      <div className="rounded-3xl border border-slate-200 p-5">
+                        <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Related Journal</p>
+                        <h3 className="mt-3 font-display text-2xl font-semibold text-brand-navy">
+                          {ppt.journalInfo?.title || ppt.journalTitle || "Journal details unavailable"}
+                        </h3>
+                        {ppt.journalInfo?.issn ? <p className="mt-2 text-sm text-slate-500">{ppt.journalInfo.issn}</p> : null}
+                        {ppt.journalInfo?.category ? <p className="mt-1 text-sm text-slate-500">{ppt.journalInfo.category}</p> : null}
+                        {ppt.journalInfo?.overview ? (
+                          <>
+                            <p className="mt-4 text-xs uppercase tracking-[0.18em] text-brand-teal">Abstract / Overview</p>
+                            <p className="mt-2 text-sm leading-7 text-slate-600">{ppt.journalInfo.overview}</p>
+                          </>
+                        ) : null}
+                        {ppt.journalInfo?.featuredAuthors?.length ? (
+                          <p className="mt-4 text-sm text-slate-600">
+                            <span className="font-semibold text-brand-navy">Authors:</span> {ppt.journalInfo.featuredAuthors.join(", ")}
+                          </p>
+                        ) : null}
+                        {ppt.journalInfo?.featuredArticleTitle ? (
+                          <p className="mt-2 text-sm text-slate-600">
+                            <span className="font-semibold text-brand-navy">Current article:</span> {ppt.journalInfo.featuredArticleTitle}
+                          </p>
+                        ) : null}
+                        {ppt.journalInfo?.currentIssueLabel ? (
+                          <p className="mt-2 text-sm text-slate-600">
+                            <span className="font-semibold text-brand-navy">Current issue:</span> {ppt.journalInfo.currentIssueLabel}
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-10">
+            <EmptyState
+              title="No PPT records matched this search"
+              description="Try a broader journal title, author name, or presentation keyword."
+            />
+          </div>
+        )}
       </div>
 
       <PptPreviewModal ppt={activePreview} onClose={() => setActivePreview(null)} />

@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 body {
   @apply bg-brand-mist font-sans text-brand-ink;
 }
@@ -25,27 +30,27 @@ button {
 }
 
 .section-shell {
-  @apply py-14 sm:py-16;
+  @apply py-10 sm:py-12 lg:py-16;
 }
 
 .card-panel {
-  @apply rounded-3xl border border-slate-200 bg-white shadow-panel;
+  @apply rounded-3xl border border-brand-sky/80 bg-white shadow-panel;
 }
 
 .button-primary {
-  @apply inline-flex items-center justify-center rounded-full bg-brand-gold px-5 py-3 text-sm font-semibold text-brand-navy hover:bg-brand-navy hover:text-white;
+  @apply inline-flex min-h-11 items-center justify-center rounded-full bg-brand-navy px-5 py-3 text-center text-sm font-semibold text-white hover:bg-brand-gold;
 }
 
 .button-secondary {
-  @apply inline-flex items-center justify-center rounded-full border border-brand-navy px-5 py-3 text-sm font-semibold text-brand-navy hover:bg-brand-navy hover:text-white;
+  @apply inline-flex min-h-11 items-center justify-center rounded-full border border-brand-teal bg-white px-5 py-3 text-center text-sm font-semibold text-brand-navy hover:border-brand-navy hover:bg-brand-sky;
 }
 
 .button-soft {
-  @apply inline-flex items-center justify-center rounded-full bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-200;
+  @apply inline-flex min-h-11 items-center justify-center rounded-full bg-brand-sky px-5 py-3 text-center text-sm font-semibold text-brand-ink hover:bg-brand-sky/80;
 }
 
 .eyebrow {
-  @apply mb-3 inline-flex rounded-full bg-brand-teal/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-brand-teal;
+  @apply mb-3 inline-flex rounded-full bg-brand-gold/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-brand-gold;
 }
 
 .rich-copy p {
@@ -54,4 +59,51 @@ button {
 
 .rich-copy ul {
   @apply mb-4 list-disc space-y-2 pl-5 text-slate-700;
+}
+
+.hero-marquee {
+  overflow: hidden;
+}
+
+.hero-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: hero-marquee-scroll 24s linear infinite;
+  will-change: transform;
+}
+
+.hero-marquee-slide {
+  flex: 0 0 100%;
+}
+
+.journal-card-link {
+  @apply block h-full rounded-3xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_54px_rgba(15,63,150,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal focus-visible:ring-offset-4;
+}
+
+@keyframes hero-marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (min-width: 640px) {
+  .hero-marquee-slide {
+    flex-basis: 50%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-marquee-slide {
+    flex-basis: 33.3333%;
+  }
+}
+
+@media (hover: hover) {
+  .hero-marquee:hover .hero-marquee-track {
+    animation-play-state: paused;
+  }
 }

@@ -152,7 +152,7 @@ public class SampleContentSeeder implements CommandLineRunner {
                         .createdAt(Instant.now())
                         .build(),
                 VideoResource.builder()
-                        .title("How Authors Submit Manuscripts")
+                        .title("Editorial Media Workflow Overview")
                         .description("Sample uploaded video record.")
                         .videoFile(FileAsset.builder().secureUrl("https://res.cloudinary.com/demo/video/upload/dog.mp4").resourceType("video").build())
                         .thumbnailFile(FileAsset.builder().secureUrl("https://placehold.co/800x450/0e7490/ffffff?text=Author+Workflow").resourceType("image").build())

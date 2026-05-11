@@ -5,7 +5,7 @@ export default function AboutPage() {
   return (
     <div className="section-shell">
       <div className="container-shell space-y-8">
-        <section className="card-panel p-8 lg:p-10">
+        <section className="card-panel p-6 sm:p-8 lg:p-10">
           <SectionHeader
             label="About medmaxpub"
             title="Welcome to medmaxpub"
@@ -24,7 +24,7 @@ export default function AboutPage() {
                 participation.
               </p>
             </div>
-            <div className="rounded-3xl bg-brand-navy p-6 text-white">
+            <div className="rounded-3xl bg-brand-navy p-5 text-white sm:p-6">
               <p className="text-sm uppercase tracking-[0.24em] text-brand-gold">Regions</p>
               <div className="mt-5 flex flex-wrap gap-3">
                 {regionBadges.map((region) => (
@@ -37,16 +37,16 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-3">
+        <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {scientificReach.map((item) => (
-            <article key={item.title} className="card-panel p-8">
-              <h2 className="font-display text-3xl font-semibold text-brand-navy">{item.title}</h2>
+            <article key={item.title} className="card-panel p-6 sm:p-8">
+              <h2 className="font-display text-2xl font-semibold text-brand-navy sm:text-3xl">{item.title}</h2>
               <p className="mt-4 text-sm leading-7 text-slate-600">{item.description}</p>
             </article>
           ))}
         </section>
 
-        <section className="card-panel p-8 lg:p-10">
+        <section className="card-panel p-6 sm:p-8 lg:p-10">
           <SectionHeader
             label="Services"
             title="Comprehensive support for exceptional scientific and professional events"

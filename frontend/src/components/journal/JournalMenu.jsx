@@ -21,7 +21,7 @@ export default function JournalMenu({ journalSlug }) {
           key={item.slug}
           to={`/journals/${journalSlug}/${item.slug}`}
           className={({ isActive }) =>
-            `rounded-full px-4 py-2 text-sm font-medium ${
+            `rounded-full px-3 py-2 text-sm font-medium sm:px-4 ${
               isActive ? "bg-brand-navy text-white" : "bg-white text-slate-700 hover:bg-slate-100"
             }`
           }

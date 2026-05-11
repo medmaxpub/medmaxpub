@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 export default function AdminLoginPage() {
@@ -26,8 +26,9 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-brand-navy px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-brand-mist px-4 py-12">
       <form onSubmit={handleSubmit} className="card-panel w-full max-w-md p-8">
+        <img src="/medmax-logo.png" alt="Medmax Publishers" className="h-16 w-auto" />
         <span className="eyebrow">Admin Portal</span>
         <h1 className="font-display text-4xl font-semibold text-brand-navy">Secure Login</h1>
         <p className="mt-4 text-slate-600">JWT authentication protects super-admin and journal-admin publishing workflows.</p>
@@ -48,13 +49,6 @@ export default function AdminLoginPage() {
         <button type="submit" className="button-primary mt-6 w-full" disabled={isSubmitting}>
           {isSubmitting ? "Signing in..." : "Login"}
         </button>
-
-        <p className="mt-5 text-center text-sm text-slate-500">
-          Need your own journal portal?{" "}
-          <Link to="/start-journal" className="font-semibold text-brand-teal hover:text-brand-navy">
-            Start a journal
-          </Link>
-        </p>
       </form>
     </div>
   );

@@ -53,8 +53,7 @@ public class SecurityConfig {
                                 "/api/manual-scripts/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST,
-                                "/api/contact",
-                                "/api/manuscript/submit"
+                                "/api/contact"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").authenticated()
                         .anyRequest().permitAll()
@@ -96,4 +95,3 @@ public class SecurityConfig {
         return source;
     }
 }
-

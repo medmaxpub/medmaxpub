@@ -48,12 +48,11 @@ medmaxpub/
 - Public pages:
   - Home
   - Journals
+  - PPTs
   - Journal Details
   - Videos
   - About
   - Contact
-  - Submit Manuscript
-  - Start Journal
 - Journal internal navigation:
   - Home
   - About
@@ -65,7 +64,6 @@ medmaxpub/
   - Archive
 - Protected admin route at `/admin`
 - Axios client with JWT token handling and auto logout on `401`
-- Public journal onboarding flow that creates a journal admin account and assigned journal in one step
 
 ## Admin Dashboard
 
@@ -79,7 +77,6 @@ The React admin area includes:
 - Journal-linked PPT upload area
 - Journal video playback area
 - Testimonials module area
-- Manuscript inbox viewer
 - Contact inbox viewer
 
 ## Backend Features
@@ -101,7 +98,6 @@ The React admin area includes:
 - `videos`
 - `testimonials`
 - `contacts`
-- `manuscripts`
 
 ## File Storage
 
@@ -120,7 +116,6 @@ Uploads are used for:
 - Article PDFs
 - PPT/PPTX files
 - Optional PPT preview PDFs
-- Manuscript uploads
 - Video thumbnails
 - Video files
 
@@ -162,10 +157,6 @@ Articles:
 - `GET /api/issues/:id/articles`
 - `GET /api/articles/:id`
 
-Journal Onboarding:
-
-- `POST /api/journals/onboard`
-
 Journal PPTs:
 
 - `POST /api/journals/:journalId/ppts`
@@ -189,11 +180,6 @@ Contact:
 
 - `POST /api/contact`
 - `GET /api/admin/contact`
-
-Manuscripts:
-
-- `POST /api/manuscripts/submit`
-- `GET /api/admin/manuscripts`
 
 ## Environment Variables
 

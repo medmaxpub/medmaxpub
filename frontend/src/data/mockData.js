@@ -8,6 +8,58 @@ export const companyInfo = {
   ]
 };
 
+export const mediaCollections = [
+  {
+    id: "collection-journals",
+    title: "Journal Directory",
+    description: "Browse journal homes, current issues, and archive-ready publication pages.",
+    link: "/journals",
+    linkLabel: "View Journals"
+  },
+  {
+    id: "collection-ppts",
+    title: "PPT Archive",
+    description: "Open public slide decks with journal-linked context, preview access, and downloads.",
+    link: "/ppts",
+    linkLabel: "Browse PPTs"
+  },
+  {
+    id: "collection-videos",
+    title: "Video Library",
+    description: "Watch journal-owned videos and embedded media with related publication details.",
+    link: "/videos",
+    linkLabel: "Browse Videos"
+  }
+];
+
+export const heroShowcaseImages = [
+  {
+    id: "hero-life-science",
+    title: "Life Sciences",
+    image:
+      "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    id: "hero-clinical",
+    title: "Clinical Research",
+    image:
+      "https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    id: "hero-engineering",
+    title: "Engineering & Technology",
+    image:
+      "https://images.unsplash.com/photo-1532187643603-ba119ca4109e?auto=format&fit=crop&w=1200&q=80"
+  }
+];
+
+export const aboutMedmaxParagraphs = [
+  "Medmax Publishers is a peer-reviewed, open access publisher covering a comprehensive range of topics in Clinical, Medicine, Life Sciences, Pharma, and Engineering & Technology. We help scientific researchers, institutions, academic professionals, and young professionals advance healthcare, open science, and performance for the benefit of humanity.",
+  "Medmax Publishers is moving ahead with a vision to develop an optimized knowledge-sharing platform and an enlightening interactive network for scholars and scientific researchers all over the world through its scientific publications. Medmax Publishers works with well-qualified community and advisory board members who support new research and development for the organization. Medmax Journals follow a single-blind peer-review process, where each manuscript submitted by an author is assigned to a particular editor.",
+  "Medmax Publishers publishes many kinds of manuscripts, including Original Research, Review Articles, Case Reports, Rapid Communications, Short Communications, Mini Reviews, Editorials, Letters to the Editor, Commentary, Perspectives, Case in Images, Clinical Images, and Research Highlights across medical, clinical, and engineering fields.",
+  "All listed journals are part of the open access process and are available to read without access fees or subscription charges."
+];
+
 function buildJournal(id, title, slug, issn, category, coverImageUrl, ppts = [], videos = []) {
   return {
     id,
@@ -23,7 +75,7 @@ function buildJournal(id, title, slug, issn, category, coverImageUrl, ppts = [],
       about: `<p>${title} is an international journal for original research, reviews, case studies, perspectives, and scholarly communications relevant to emerging science and applied innovation.</p>`,
       "aim-scope": `<ul><li>Global multidisciplinary research exchange</li><li>Conference-aligned scholarly publication</li><li>Clinical, engineering, life science, and applied technology topics</li></ul>`,
       "editorial-board": `<p>Editorial board members, affiliations, and leadership roles are managed through the admin dashboard and rendered journal-by-journal.</p>`,
-      "author-guidelines": `<ul><li>Submit manuscripts in PDF, DOC, or DOCX format</li><li>Include complete affiliations and corresponding author details</li><li>Ensure references, abstracts, and figures follow journal-specific policy</li></ul>`,
+      "author-guidelines": `<ul><li>Provide complete affiliations and corresponding author details</li><li>Ensure references, abstracts, and figures follow journal-specific policy</li><li>Prepare files and metadata in the format requested by the editorial team</li></ul>`,
       "article-in-press": `<p>Accepted papers awaiting issue allocation appear here so authors and readers can preview upcoming publication activity.</p>`
     },
     currentIssue: {
@@ -209,42 +261,6 @@ export const indexingPartners = [
   "PubMed",
   "Scilit",
   "OpenAlex"
-];
-
-export const homeSlides = [
-  {
-    id: "slide-1",
-    eyebrow: "Global Scientific Network",
-    title: "Empowering global scientific collaboration",
-    description: "Connect with researchers, innovators, clinicians, and industry leaders worldwide through conferences, journals, and publication support.",
-    primaryLabel: "Explore Journals",
-    primaryLink: "/journals",
-    secondaryLabel: "Submit Manuscript",
-    secondaryLink: "/submit-manuscript",
-    image: "https://placehold.co/900x700/081c3a/ffffff?text=Global+Scientific+Collaboration"
-  },
-  {
-    id: "slide-2",
-    eyebrow: "50+ International Speakers",
-    title: "Learn from world-class experts",
-    description: "Surface keynote sessions, speaker insight, conference assets, and journal publication opportunities from one modern platform.",
-    primaryLabel: "Browse Journals",
-    primaryLink: "/journals",
-    secondaryLabel: "Start Journal",
-    secondaryLink: "/start-journal",
-    image: "https://placehold.co/900x700/144552/ffffff?text=World+Class+Speakers"
-  },
-  {
-    id: "slide-3",
-    eyebrow: "Future-Focused Research",
-    title: "Shaping the future of science and innovation",
-    description: "Bring together emerging topics, interdisciplinary journals, manuscript workflows, and downloadable knowledge resources.",
-    primaryLabel: "About medmaxpub",
-    primaryLink: "/about",
-    secondaryLabel: "Contact Us",
-    secondaryLink: "/contact",
-    image: "https://placehold.co/900x700/15616d/ffffff?text=Future+Focused+Research"
-  }
 ];
 
 export const scientificReach = [

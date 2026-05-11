@@ -2,14 +2,12 @@ import Article from "../models/Article.js";
 import Issue from "../models/Issue.js";
 import Journal from "../models/Journal.js";
 import Ppt from "../models/Ppt.js";
-import User from "../models/User.js";
 import Video from "../models/Video.js";
 import { serializePpt } from "../services/pptService.js";
 import { buildAccessibleJournalFilter, ensureJournalAccess, ensureSuperAdmin } from "../utils/accessControl.js";
 import { deleteAsset, uploadAsset } from "../utils/assetStorage.js";
 import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { signToken } from "../utils/jwt.js";
 
 function buildSections(body) {
   return {
@@ -19,24 +17,6 @@ function buildSections(body) {
     editorialBoard: body.editorialBoard || "",
     authorGuidelines: body.authorGuidelines || "",
     articleInPress: body.articleInPress || ""
-  };
-}
-
-function buildAuthResponse(user, journal) {
-  return {
-    token: signToken({ id: user._id }),
-    user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      assignedJournalIds: (user.assignedJournals || []).map((item) => item.toString())
-    },
-    journal: {
-      id: journal._id,
-      slug: journal.slug,
-      title: journal.title
-    }
   };
 }
 
@@ -191,61 +171,6 @@ export const createJournal = asyncHandler(async (req, res) => {
     description: journal.description,
     coverImageUrl: journal.coverImage?.secure_url || null
   });
-});
-
-export const createJournalWithOwner = asyncHandler(async (req, res) => {
-  const { ownerName, ownerEmail, ownerPassword, title, slug, issn, category, description } = req.body;
-
-  if (!ownerName || !ownerEmail || !ownerPassword) {
-    throw new AppError("Owner name, email, and password are required", 400);
-  }
-
-  const existingUser = await User.findOne({ email: ownerEmail });
-
-  if (existingUser) {
-    throw new AppError("An account already exists with this email", 400);
-  }
-
-  const existingJournal = await Journal.findOne({ slug });
-
-  if (existingJournal) {
-    throw new AppError("A journal already exists with this slug", 400);
-  }
-
-  const coverImage = await uploadAsset(req.file, "medmaxpub/journals", "image", req);
-  let journal = null;
-
-  try {
-    journal = await Journal.create({
-      title,
-      slug,
-      issn,
-      category,
-      description,
-      coverImage,
-      sections: buildSections(req.body)
-    });
-
-    const user = await User.create({
-      name: ownerName,
-      email: ownerEmail,
-      password: ownerPassword,
-      role: "journal_admin",
-      assignedJournals: [journal._id]
-    });
-
-    res.status(201).json(buildAuthResponse(user, journal));
-  } catch (error) {
-    if (journal) {
-      await journal.deleteOne();
-    }
-
-    if (coverImage) {
-      await deleteAsset(coverImage, "image");
-    }
-
-    throw error;
-  }
 });
 
 export const updateJournal = asyncHandler(async (req, res) => {
