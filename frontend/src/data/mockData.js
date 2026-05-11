@@ -62,6 +62,15 @@ export const aboutMedmaxParagraphs = [
   "All listed journals are part of the open access process and are available to read without access fees or subscription charges."
 ];
 
+export const aboutMedmaxHighlights = [
+  { label: "Publishing Model", value: "Peer-reviewed open access journals" },
+  { label: "Review Process", value: "Single-blind peer review with editor assignment" },
+  { label: "Article Types", value: "Original Research, Reviews, Case Reports, Editorials, Commentary, and more" },
+  { label: "Reader Access", value: "No subscription fees or access charges" }
+];
+
+export const aboutMedmaxCoverage = ["Clinical", "Medicine", "Life Sciences", "Pharma", "Engineering", "Technology"];
+
 function buildJournal(id, firstName, lastName, managingJournalName, journalDomainName, journalUrl, ppts = [], videos = []) {
   return {
     id,
@@ -268,6 +277,24 @@ export const conferenceServices = [
   "Attendee Registration",
   "Onsite Coordination",
   "Post-Event Evaluation"
+];
+
+export const scientificReach = [
+  {
+    title: "Peer-Reviewed Publishing",
+    description:
+      "Support clinical, medical, life science, pharma, and engineering researchers through structured open access publication workflows."
+  },
+  {
+    title: "Editorial Coordination",
+    description:
+      "Maintain single-blind peer review, editor assignment, and publication-ready issue management across journal programs."
+  },
+  {
+    title: "Global Knowledge Sharing",
+    description:
+      "Present journals, PPT resources, videos, and archive content in a format built for international scholarly visibility."
+  }
 ];
 
 export const regionBadges = ["USA", "Europe", "Middle East", "Asia"];
