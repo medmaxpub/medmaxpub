@@ -74,26 +74,26 @@ export default function PptPreviewModal({ ppt, onClose }) {
           </div>
         ) : null}
 
-        <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
+        <div className="flex items-start justify-between gap-4 border-b border-brand-border px-6 py-5">
           <div>
             <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">PPT Preview</p>
-            <h2 className="mt-2 font-display text-3xl font-semibold text-brand-navy">{ppt.title}</h2>
-            {ppt.journalTitle ? <p className="mt-2 text-sm text-slate-500">{ppt.journalTitle}</p> : null}
+            <h2 className="mt-2 font-display text-3xl font-semibold text-brand-ink">{ppt.title}</h2>
+            {ppt.journalTitle ? <p className="mt-2 text-sm text-brand-slate">{ppt.journalTitle}</p> : null}
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-slate-200 p-3 text-slate-500 hover:bg-slate-100 hover:text-brand-navy"
+            className="rounded-full border border-brand-border bg-brand-sky p-3 text-brand-slate hover:bg-brand-elevated hover:text-brand-ink"
             aria-label="Close preview"
           >
             <X size={18} />
           </button>
         </div>
 
-        <div className="flex-1 bg-slate-50">
+        <div className="flex-1 bg-brand-elevated">
           {activeViewer?.url ? (
             <div className="flex h-full flex-col">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-6 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-brand-border bg-brand-surface px-6 py-3">
                 <div className="flex flex-wrap gap-2">
                   {viewerCandidates.map((candidate, index) => (
                     <button
@@ -104,7 +104,7 @@ export default function PptPreviewModal({ ppt, onClose }) {
                         setToastMessage("");
                       }}
                       className={`rounded-full px-3 py-2 text-sm ${
-                        activeViewerIndex === index ? "bg-brand-navy text-white" : "bg-slate-100 text-slate-600"
+                        activeViewerIndex === index ? "bg-brand-navy text-white" : "bg-brand-elevated text-brand-slate"
                       }`}
                     >
                       {candidate.label}
@@ -149,8 +149,8 @@ export default function PptPreviewModal({ ppt, onClose }) {
           ) : (
             <div className="flex h-full items-center justify-center p-8">
               <div className="max-w-xl text-center">
-                <h3 className="font-display text-2xl font-semibold text-brand-navy">Preview unavailable</h3>
-                <p className="mt-4 leading-7 text-slate-600">
+                <h3 className="font-display text-2xl font-semibold text-brand-ink">Preview unavailable</h3>
+                <p className="mt-4 leading-7 text-brand-slate">
                   This PPT does not have a valid embeddable preview right now. Upload a preview PDF or verify that the PPT file URL is
                   public and reachable from the browser.
                 </p>

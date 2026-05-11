@@ -18,7 +18,7 @@ a {
 input,
 select,
 textarea {
-  @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm outline-none transition focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20;
+  @apply w-full rounded-xl border border-brand-border bg-brand-sky px-4 py-3 text-sm text-brand-ink shadow-sm outline-none transition placeholder:text-brand-slate focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/30;
 }
 
 button {
@@ -34,35 +34,35 @@ button {
 }
 
 .card-panel {
-  @apply rounded-3xl border border-brand-sky/80 bg-white shadow-panel;
+  @apply rounded-3xl border border-brand-border bg-brand-surface shadow-panel;
 }
 
 .button-primary {
-  @apply inline-flex min-h-11 items-center justify-center rounded-full bg-brand-navy px-5 py-3 text-center text-sm font-semibold text-white hover:bg-brand-gold;
+  @apply inline-flex min-h-11 items-center justify-center rounded-full bg-brand-navy px-5 py-3 text-center text-sm font-semibold text-white hover:bg-brand-gold hover:text-brand-mist;
 }
 
 .button-secondary {
-  @apply inline-flex min-h-11 items-center justify-center rounded-full border border-brand-teal bg-white px-5 py-3 text-center text-sm font-semibold text-brand-navy hover:border-brand-navy hover:bg-brand-sky;
+  @apply inline-flex min-h-11 items-center justify-center rounded-full border border-brand-border bg-brand-sky px-5 py-3 text-center text-sm font-semibold text-brand-ink hover:border-brand-gold hover:bg-brand-elevated hover:text-white;
 }
 
 .button-soft {
-  @apply inline-flex min-h-11 items-center justify-center rounded-full bg-brand-sky px-5 py-3 text-center text-sm font-semibold text-brand-ink hover:bg-brand-sky/80;
+  @apply inline-flex min-h-11 items-center justify-center rounded-full border border-brand-border bg-brand-elevated px-5 py-3 text-center text-sm font-semibold text-brand-ink hover:border-brand-teal hover:bg-brand-sky;
 }
 
 .website-nav-link {
-  @apply inline-flex min-h-11 items-center justify-center rounded-none border border-brand-ink bg-white px-3 py-2 text-center text-sm font-medium text-brand-ink hover:bg-brand-sky/40 sm:px-4;
+  @apply inline-flex min-h-11 items-center justify-center rounded-none border border-brand-border bg-brand-surface px-3 py-2 text-center text-sm font-medium text-brand-ink hover:border-brand-gold hover:bg-brand-elevated sm:px-4;
 }
 
 .website-nav-link-active {
-  @apply border-brand-navy bg-brand-navy text-white;
+  @apply border-brand-gold bg-brand-navy text-white;
 }
 
 .journal-nav-link {
-  @apply inline-flex min-h-11 items-center justify-center rounded-xl border border-brand-sky bg-white px-4 py-2 text-center text-sm font-medium text-brand-ink hover:border-brand-teal hover:bg-brand-sky/40;
+  @apply inline-flex min-h-11 items-center justify-center rounded-xl border border-brand-border bg-brand-surface px-4 py-2 text-center text-sm font-medium text-brand-ink hover:border-brand-teal hover:bg-brand-elevated;
 }
 
 .journal-nav-link-active {
-  @apply border-brand-navy bg-brand-navy text-white;
+  @apply border-brand-gold bg-brand-navy text-white;
 }
 
 .eyebrow {
@@ -70,11 +70,11 @@ button {
 }
 
 .rich-copy p {
-  @apply mb-4 leading-7 text-slate-700;
+  @apply mb-4 leading-7 text-brand-slate;
 }
 
 .rich-copy ul {
-  @apply mb-4 list-disc space-y-2 pl-5 text-slate-700;
+  @apply mb-4 list-disc space-y-2 pl-5 text-brand-slate;
 }
 
 .hero-marquee {
@@ -93,7 +93,7 @@ button {
 }
 
 .journal-card-link {
-  @apply block h-full rounded-3xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_54px_rgba(15,63,150,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal focus-visible:ring-offset-4;
+  @apply block h-full rounded-3xl transition duration-300 hover:-translate-y-1 hover:border-brand-teal hover:shadow-[0_24px_54px_rgba(4,10,24,0.6)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal focus-visible:ring-offset-4 focus-visible:ring-offset-brand-mist;
 }
 
 @keyframes hero-marquee-scroll {

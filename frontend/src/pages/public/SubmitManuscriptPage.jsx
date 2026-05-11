@@ -62,21 +62,11 @@ export default function SubmitManuscriptPage() {
             description="Complete the form below with author, journal, manuscript, and file details."
           />
 
-          <div className="mt-8 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="rounded-3xl bg-brand-navy p-6 text-white sm:p-8">
-              <p className="text-sm uppercase tracking-[0.24em] text-brand-gold">Submission Guidance</p>
-              <div className="mt-5 space-y-3 text-sm leading-7 text-slate-200">
-                <p>Choose the target journal that best matches the manuscript scope.</p>
-                <p>Select the correct article type before uploading files.</p>
-                <p>Include a clear manuscript title and abstract for editorial screening.</p>
-                <p>You can attach multiple supporting files in the upload field below.</p>
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
+          <div className="mt-8">
+            <form onSubmit={handleSubmit} className="rounded-3xl border border-brand-border bg-brand-surface p-6 sm:p-8">
               <div className="grid gap-5">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-600">Name</label>
+                  <label className="mb-2 block text-sm font-medium text-brand-slate">Name</label>
                   <input
                     value={form.name}
                     onChange={(event) => setForm({ ...form, name: event.target.value })}
@@ -86,7 +76,7 @@ export default function SubmitManuscriptPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-600">Email address</label>
+                  <label className="mb-2 block text-sm font-medium text-brand-slate">Email address</label>
                   <input
                     type="email"
                     value={form.email}
@@ -97,7 +87,7 @@ export default function SubmitManuscriptPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-600">Postal Address</label>
+                  <label className="mb-2 block text-sm font-medium text-brand-slate">Postal Address</label>
                   <textarea
                     rows="4"
                     value={form.postalAddress}
@@ -108,7 +98,7 @@ export default function SubmitManuscriptPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-600">Country</label>
+                  <label className="mb-2 block text-sm font-medium text-brand-slate">Country</label>
                   <select value={form.country} onChange={(event) => setForm({ ...form, country: event.target.value })} required>
                     <option value="">Select Your Country</option>
                     {countries.map((country) => (
@@ -120,7 +110,7 @@ export default function SubmitManuscriptPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-600">Journal</label>
+                  <label className="mb-2 block text-sm font-medium text-brand-slate">Journal</label>
                   <select value={form.journal} onChange={(event) => setForm({ ...form, journal: event.target.value })} required>
                     <option value="">Select Journal</option>
                     {journalOptions.map((journal) => (
@@ -132,7 +122,7 @@ export default function SubmitManuscriptPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-600">Article Type</label>
+                  <label className="mb-2 block text-sm font-medium text-brand-slate">Article Type</label>
                   <select
                     value={form.articleType}
                     onChange={(event) => setForm({ ...form, articleType: event.target.value })}
@@ -148,7 +138,7 @@ export default function SubmitManuscriptPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-600">Manuscript Title</label>
+                  <label className="mb-2 block text-sm font-medium text-brand-slate">Manuscript Title</label>
                   <textarea
                     rows="3"
                     value={form.manuscriptTitle}
@@ -159,7 +149,7 @@ export default function SubmitManuscriptPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-600">Abstract</label>
+                  <label className="mb-2 block text-sm font-medium text-brand-slate">Abstract</label>
                   <textarea
                     rows="5"
                     value={form.abstract}
@@ -170,14 +160,14 @@ export default function SubmitManuscriptPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-600">Attach your file</label>
+                  <label className="mb-2 block text-sm font-medium text-brand-slate">Attach your file</label>
                   <input
                     type="file"
                     multiple
                     onChange={(event) => setForm({ ...form, files: Array.from(event.target.files || []) })}
                     required
                   />
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-brand-slate">
                     Note: If you want to select multiple files press Ctrl + File selection.
                   </p>
                 </div>
@@ -188,7 +178,7 @@ export default function SubmitManuscriptPage() {
                   </button>
                 </div>
 
-                {status ? <p className="text-sm text-slate-500">{status}</p> : null}
+                {status ? <p className="text-sm text-brand-slate">{status}</p> : null}
               </div>
             </form>
           </div>

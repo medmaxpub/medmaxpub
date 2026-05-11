@@ -127,6 +127,7 @@ Authentication:
 - `POST /api/auth/login`
 - `POST /api/auth/signup-admin`
 - `POST /api/auth/impersonate/:id`
+- `POST /api/contact`
 
 Journals:
 
@@ -203,6 +204,9 @@ JOURNAL_ADMIN_PASSWORD=ChangeMe123!
 FRONTEND_URL=http://localhost:5173
 CLIENT_URL=
 CORS_ORIGINS=http://localhost:5173
+RESEND_API_KEY=
+CONTACT_FROM_EMAIL=Medmax Contact Form <no-reply@yourdomain.com>
+CONTACT_TO_EMAIL=contact@medmaxpub.com
 ```
 
 ## Local Development

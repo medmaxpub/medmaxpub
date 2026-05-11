@@ -1,5 +1,6 @@
 import express from "express";
 import { impersonateUser, login, signupAdmin } from "../controllers/authController.js";
+import { postContactMessage } from "../controllers/contactController.js";
 import {
   createJournal,
   deleteJournal,
@@ -24,6 +25,7 @@ const router = express.Router();
 router.post("/auth/login", login);
 router.post("/auth/signup-admin", protect, signupAdmin);
 router.post("/auth/impersonate/:id", protect, impersonateUser);
+router.post("/contact", ...postContactMessage);
 
 router.get("/admin/journals", protect, getAdminJournals);
 router.get("/admin/ppts", protect, getAdminPpts);

@@ -30,8 +30,8 @@ export default function AdminLoginPage() {
       <form onSubmit={handleSubmit} className="card-panel w-full max-w-md p-8">
         <img src="/medmax-logo.png" alt="Medmax Publishers" className="h-16 w-auto" />
         <span className="eyebrow">Admin Portal</span>
-        <h1 className="font-display text-4xl font-semibold text-brand-navy">Secure Login</h1>
-        <p className="mt-4 text-slate-600">JWT authentication protects super-admin and journal-admin publishing workflows.</p>
+        <h1 className="font-display text-4xl font-semibold text-brand-ink">Secure Login</h1>
+        <p className="mt-4 text-brand-slate">JWT authentication protects super-admin and journal-admin publishing workflows.</p>
 
         <div className="mt-8 space-y-4">
           <input value={identifier} onChange={(event) => setIdentifier(event.target.value)} placeholder="User Name or Email" required />

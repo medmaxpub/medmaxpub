@@ -27,7 +27,7 @@ export default function JournalNavbar() {
   );
 
   return (
-    <div className="sticky top-0 z-30 border-b border-brand-sky bg-white/95 backdrop-blur">
+    <div className="sticky top-0 z-30 border-b border-brand-border bg-brand-mist/95 backdrop-blur">
       <div className="container-shell flex items-center justify-between py-4">
         <div className="flex items-center">
           <img src="/medmax-logo.png" alt="Medmax Publishers" className="h-20 w-auto sm:h-24 lg:h-24" />
@@ -43,7 +43,7 @@ export default function JournalNavbar() {
 
         <button
           type="button"
-          className="inline-flex rounded-2xl border border-brand-sky p-3 text-brand-navy lg:hidden"
+          className="inline-flex rounded-2xl border border-brand-border bg-brand-surface p-3 text-brand-ink lg:hidden"
           onClick={() => setOpen((current) => !current)}
           aria-label={open ? "Close journal menu" : "Open journal menu"}
         >

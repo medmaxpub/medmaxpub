@@ -20,7 +20,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="sticky top-0 z-30 border-b border-brand-sky bg-white/95 backdrop-blur">
+    <div className="sticky top-0 z-30 border-b border-brand-border bg-brand-mist/95 backdrop-blur">
       <div className="container-shell flex items-center justify-between py-3">
         <nav className="hidden flex-wrap items-center gap-2 lg:flex">
           {navItems.map((item) => (
@@ -32,7 +32,7 @@ export default function Navbar() {
 
         <button
           type="button"
-          className="inline-flex rounded-full border border-brand-sky p-3 text-brand-navy lg:hidden"
+          className="inline-flex rounded-full border border-brand-border bg-brand-surface p-3 text-brand-ink lg:hidden"
           onClick={() => setOpen((current) => !current)}
         >
           {open ? <X size={20} /> : <Menu size={20} />}

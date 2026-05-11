@@ -345,7 +345,7 @@ export default function AdminDashboardPage() {
         />
 
         {isAdmin && selectedUser ? (
-          <div className="mt-6 flex flex-wrap items-center gap-3 rounded-3xl border border-brand-sky bg-brand-mist px-5 py-4">
+          <div className="mt-6 flex flex-wrap items-center gap-3 rounded-3xl border border-brand-border bg-brand-elevated px-5 py-4">
             <p className="text-sm text-brand-ink">
               Filtering journals for <span className="font-semibold">{selectedUser.username}</span>
             </p>
@@ -356,7 +356,7 @@ export default function AdminDashboardPage() {
         ) : null}
 
         <div className="mt-8 grid gap-8 xl:grid-cols-[0.92fr_1.08fr]">
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
+          <div className="rounded-3xl border border-brand-border bg-brand-elevated p-6">
             <SectionHeader
               label="Journal Form"
               title={editingJournalId ? "Update journal" : "Add journal"}
@@ -424,11 +424,11 @@ export default function AdminDashboardPage() {
                 rows="5"
                 required
               />
-              <div className="rounded-3xl border border-brand-sky bg-white p-5">
-                <p className="text-sm font-semibold text-brand-navy">Optional Uploads</p>
+              <div className="rounded-3xl border border-brand-border bg-brand-surface p-5">
+                <p className="text-sm font-semibold text-brand-ink">Optional Uploads</p>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-600">PPT</label>
+                    <label className="mb-2 block text-sm font-medium text-brand-slate">PPT</label>
                     <input
                       type="file"
                       accept=".ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"
@@ -436,7 +436,7 @@ export default function AdminDashboardPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-600">PDF</label>
+                    <label className="mb-2 block text-sm font-medium text-brand-slate">PDF</label>
                     <input
                       type="file"
                       accept=".pdf,application/pdf"
@@ -444,7 +444,7 @@ export default function AdminDashboardPage() {
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="mb-2 block text-sm font-medium text-slate-600">Video</label>
+                    <label className="mb-2 block text-sm font-medium text-brand-slate">Video</label>
                     <input type="file" accept="video/*" onChange={(event) => setJournalForm({ ...journalForm, videoFile: event.target.files?.[0] || null })} />
                   </div>
                 </div>
@@ -466,24 +466,24 @@ export default function AdminDashboardPage() {
                   </button>
                 ) : null}
               </div>
-              {journalStatus ? <p className="text-sm text-slate-500">{journalStatus}</p> : null}
+              {journalStatus ? <p className="text-sm text-brand-slate">{journalStatus}</p> : null}
             </form>
           </div>
 
           <div className="space-y-4">
             {visibleJournals.length ? (
               visibleJournals.map((journal) => (
-                <div key={journal.id} className="rounded-3xl border border-slate-200 bg-white p-5">
+                <div key={journal.id} className="rounded-3xl border border-brand-border bg-brand-surface p-5">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div>
-                      <h3 className="text-xl font-semibold text-brand-navy">{journal.managingJournalName}</h3>
-                      <p className="mt-1 text-sm text-slate-500">{journal.journalDomainName}</p>
-                      <p className="mt-1 text-sm text-slate-500">URL: {journal.journalUrl}</p>
-                      <p className="mt-3 text-sm text-slate-500">
+                      <h3 className="text-xl font-semibold text-brand-ink">{journal.managingJournalName}</h3>
+                      <p className="mt-1 text-sm text-brand-slate">{journal.journalDomainName}</p>
+                      <p className="mt-1 text-sm text-brand-slate">URL: {journal.journalUrl}</p>
+                      <p className="mt-3 text-sm text-brand-slate">
                         Owner: {journal.firstName} {journal.lastName}
                         {journal.username || journal.ownerUsername ? ` (@${journal.username || journal.ownerUsername})` : ""}
                       </p>
-                      <p className="mt-3 text-sm leading-7 text-slate-600">{journal.aboutJournal}</p>
+                      <p className="mt-3 text-sm leading-7 text-brand-slate">{journal.aboutJournal}</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <button
@@ -534,14 +534,14 @@ export default function AdminDashboardPage() {
           <div className="mt-8 space-y-4">
             {users.length ? (
               users.map((item) => (
-                <div key={item.id} className="rounded-3xl border border-slate-200 bg-white p-5">
+                <div key={item.id} className="rounded-3xl border border-brand-border bg-brand-surface p-5">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div>
-                      <h3 className="text-xl font-semibold text-brand-navy">
+                      <h3 className="text-xl font-semibold text-brand-ink">
                         {item.firstName} {item.lastName}
                       </h3>
-                      <p className="mt-1 text-sm text-slate-500">@{item.username}</p>
-                      <p className="mt-2 text-sm text-slate-500">
+                      <p className="mt-1 text-sm text-brand-slate">@{item.username}</p>
+                      <p className="mt-2 text-sm text-brand-slate">
                         {item.managingJournalName || "No linked journal yet."}
                       </p>
                     </div>
@@ -595,10 +595,10 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
                   <div className="mt-4 grid gap-3 md:grid-cols-2">
-                    <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                    <div className="rounded-2xl border border-brand-border bg-brand-elevated px-4 py-3 text-sm text-brand-slate">
                       Password: {revealedPasswords[item.id] || "******"}
                     </div>
-                    <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                    <div className="rounded-2xl border border-brand-border bg-brand-elevated px-4 py-3 text-sm text-brand-slate">
                       Journals: {item.journals?.length || 0}
                     </div>
                   </div>
@@ -607,7 +607,7 @@ export default function AdminDashboardPage() {
             ) : (
               <EmptyState title="No users available" description="Users will be created automatically when a journal is added." />
             )}
-            {userStatus ? <p className="text-sm text-slate-500">{userStatus}</p> : null}
+            {userStatus ? <p className="text-sm text-brand-slate">{userStatus}</p> : null}
           </div>
         </section>
       ) : null}
@@ -620,7 +620,7 @@ export default function AdminDashboardPage() {
             description="Create, update, and delete testimonials shown on the public website."
           />
           <div className="mt-8 grid gap-8 xl:grid-cols-[0.85fr_1.15fr]">
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
+            <div className="rounded-3xl border border-brand-border bg-brand-elevated p-6">
               <form onSubmit={submitTestimonial} className="grid gap-4">
                 <input
                   value={testimonialForm.name}
@@ -641,7 +641,7 @@ export default function AdminDashboardPage() {
                   required
                 />
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-600">Image (optional)</label>
+                  <label className="mb-2 block text-sm font-medium text-brand-slate">Image (optional)</label>
                   <input type="file" accept="image/*" onChange={(event) => setTestimonialForm({ ...testimonialForm, image: event.target.files?.[0] || null })} />
                 </div>
                 <div className="flex flex-wrap gap-3">
@@ -661,19 +661,19 @@ export default function AdminDashboardPage() {
                     </button>
                   ) : null}
                 </div>
-                {testimonialStatus ? <p className="text-sm text-slate-500">{testimonialStatus}</p> : null}
+                {testimonialStatus ? <p className="text-sm text-brand-slate">{testimonialStatus}</p> : null}
               </form>
             </div>
 
             <div className="space-y-4">
               {testimonials.length ? (
                 testimonials.map((item) => (
-                  <div key={item.id} className="rounded-3xl border border-slate-200 bg-white p-5">
+                  <div key={item.id} className="rounded-3xl border border-brand-border bg-brand-surface p-5">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                       <div>
-                        <h3 className="text-xl font-semibold text-brand-navy">{item.name}</h3>
-                        {item.designation ? <p className="mt-1 text-sm text-slate-500">{item.designation}</p> : null}
-                        <p className="mt-3 text-sm leading-7 text-slate-600">"{item.message}"</p>
+                        <h3 className="text-xl font-semibold text-brand-ink">{item.name}</h3>
+                        {item.designation ? <p className="mt-1 text-sm text-brand-slate">{item.designation}</p> : null}
+                        <p className="mt-3 text-sm leading-7 text-brand-slate">"{item.message}"</p>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <button

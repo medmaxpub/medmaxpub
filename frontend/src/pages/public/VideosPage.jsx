@@ -93,21 +93,21 @@ export default function VideosPage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <div className="card-panel p-5">
             <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">Total Videos</p>
-            <p className="mt-2 font-display text-4xl font-semibold text-brand-navy">{items.length}</p>
+            <p className="mt-2 font-display text-4xl font-semibold text-brand-ink">{items.length}</p>
           </div>
           <div className="card-panel p-5">
             <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">Playable Records</p>
-            <p className="mt-2 font-display text-4xl font-semibold text-brand-navy">{playableCount}</p>
+            <p className="mt-2 font-display text-4xl font-semibold text-brand-ink">{playableCount}</p>
           </div>
           <div className="card-panel p-5">
             <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">Linked Journals</p>
-            <p className="mt-2 font-display text-4xl font-semibold text-brand-navy">{journalCount}</p>
+            <p className="mt-2 font-display text-4xl font-semibold text-brand-ink">{journalCount}</p>
           </div>
         </div>
 
         <div className="mt-8 card-panel p-4 sm:p-6">
           <div className="flex items-center gap-3">
-            <Search size={18} className="text-slate-400" />
+            <Search size={18} className="text-brand-slate" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -151,12 +151,12 @@ export default function VideosPage() {
                   <div className="p-5 sm:p-7">
                     <div className="flex flex-wrap items-center gap-3 text-sm">
                       <span className="eyebrow mb-0">Video Record</span>
-                      <p className="text-slate-500">{video.journalInfo?.currentIssueLabel || "Journal media library"}</p>
+                      <p className="text-brand-slate">{video.journalInfo?.currentIssueLabel || "Journal media library"}</p>
                     </div>
-                    <h2 className="mt-4 font-display text-3xl font-semibold text-brand-navy">{video.title}</h2>
-                    <p className="mt-4 leading-7 text-slate-600">{video.description || "Video description unavailable."}</p>
+                    <h2 className="mt-4 font-display text-3xl font-semibold text-brand-ink">{video.title}</h2>
+                    <p className="mt-4 leading-7 text-brand-slate">{video.description || "Video description unavailable."}</p>
 
-                    <div className="mt-6 rounded-3xl bg-slate-50 p-5">
+                    <div className="mt-6 rounded-3xl border border-brand-border bg-brand-elevated p-5">
                       <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Actions</p>
                       <div className="mt-4 flex flex-wrap gap-3">
                         {video.youtubeUrl || video.videoUrl ? (
@@ -173,27 +173,27 @@ export default function VideosPage() {
                       </div>
                     </div>
 
-                    <div className="mt-6 rounded-3xl border border-slate-200 p-5">
+                    <div className="mt-6 rounded-3xl border border-brand-border bg-brand-surface p-5">
                       <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Related Journal</p>
-                      <h3 className="mt-3 font-display text-2xl font-semibold text-brand-navy">
+                      <h3 className="mt-3 font-display text-2xl font-semibold text-brand-ink">
                         {video.journalInfo?.title || video.journalTitle || "Journal details unavailable"}
                       </h3>
-                      {video.journalInfo?.domainName ? <p className="mt-2 text-sm text-slate-500">{video.journalInfo.domainName}</p> : null}
-                      {video.journalInfo?.editorName ? <p className="mt-1 text-sm text-slate-500">Managed by {video.journalInfo.editorName}</p> : null}
+                      {video.journalInfo?.domainName ? <p className="mt-2 text-sm text-brand-slate">{video.journalInfo.domainName}</p> : null}
+                      {video.journalInfo?.editorName ? <p className="mt-1 text-sm text-brand-slate">Managed by {video.journalInfo.editorName}</p> : null}
                       {video.journalInfo?.overview ? (
                         <>
                           <p className="mt-4 text-xs uppercase tracking-[0.18em] text-brand-teal">Abstract / Overview</p>
-                          <p className="mt-2 text-sm leading-7 text-slate-600">{video.journalInfo.overview}</p>
+                          <p className="mt-2 text-sm leading-7 text-brand-slate">{video.journalInfo.overview}</p>
                         </>
                       ) : null}
                       {video.journalInfo?.featuredAuthors?.length ? (
-                        <p className="mt-4 text-sm text-slate-600">
-                          <span className="font-semibold text-brand-navy">Authors:</span> {video.journalInfo.featuredAuthors.join(", ")}
+                        <p className="mt-4 text-sm text-brand-slate">
+                          <span className="font-semibold text-brand-ink">Authors:</span> {video.journalInfo.featuredAuthors.join(", ")}
                         </p>
                       ) : null}
                       {video.journalInfo?.featuredArticleTitle ? (
-                        <p className="mt-2 text-sm text-slate-600">
-                          <span className="font-semibold text-brand-navy">Current article:</span> {video.journalInfo.featuredArticleTitle}
+                        <p className="mt-2 text-sm text-brand-slate">
+                          <span className="font-semibold text-brand-ink">Current article:</span> {video.journalInfo.featuredArticleTitle}
                         </p>
                       ) : null}
                     </div>

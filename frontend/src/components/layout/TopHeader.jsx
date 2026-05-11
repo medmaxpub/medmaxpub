@@ -3,19 +3,22 @@ import { companyInfo } from "../../data/mockData";
 
 export default function TopHeader({ searchTerm, setSearchTerm, onSearch }) {
   return (
-    <div className="border-b border-brand-navy/10 bg-white">
+    <div className="border-b border-brand-border bg-brand-surface">
       <div className="container-shell flex flex-col gap-4 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <a href="/" className="flex items-center">
-            <img src="/medmax-logo.png" alt="Medmax Publishers" className="h-20 w-auto sm:h-24 lg:h-24" />
+          <a
+            href="/"
+            className="inline-flex items-center rounded-3xl border border-brand-border bg-brand-elevated px-4 py-3 shadow-panel"
+          >
+            <img src="/medmax-logo.png" alt="Medmax Publishers" className="h-24 w-auto sm:h-28 lg:h-32" />
           </a>
         </div>
 
         <form
           onSubmit={onSearch}
-          className="flex w-full max-w-xl items-center gap-2 rounded-full border border-brand-sky bg-brand-mist px-3 py-2"
+          className="flex w-full max-w-xl items-center gap-2 rounded-full border border-brand-border bg-brand-elevated px-3 py-2"
         >
-          <Search size={18} className="text-slate-400" />
+          <Search size={18} className="text-brand-slate" />
           <input
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}

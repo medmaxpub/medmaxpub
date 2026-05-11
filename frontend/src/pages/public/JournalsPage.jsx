@@ -43,7 +43,7 @@ export default function JournalsPage() {
         <div className="mt-8 card-panel p-4 sm:p-6">
           <div className="grid gap-4">
             <form onSubmit={handleSearch} className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Search size={18} className="hidden text-slate-400 sm:block" />
+              <Search size={18} className="hidden text-brand-slate sm:block" />
               <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search journals" />
               <button type="submit" className="button-primary shrink-0 px-4 py-3">
                 Search
@@ -58,12 +58,12 @@ export default function JournalsPage() {
               <Link key={journal.id} to={`/journals/${journal.journalUrl}/about`} className="journal-card-link">
                 <article className="card-panel h-full p-5 sm:p-6">
                   <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">{journal.journalDomainName}</p>
-                  <h3 className="mt-3 font-display text-2xl font-semibold text-brand-navy">{journal.managingJournalName}</h3>
-                  <p className="mt-3 text-sm text-slate-500">
+                  <h3 className="mt-3 font-display text-2xl font-semibold text-brand-ink">{journal.managingJournalName}</h3>
+                  <p className="mt-3 text-sm text-brand-slate">
                     Managed by {journal.firstName} {journal.lastName}
                   </p>
-                  <p className="mt-2 text-sm text-slate-500">URL: {journal.journalUrl}</p>
-                  <p className="mt-4 text-sm leading-7 text-slate-600">{journal.aboutJournal}</p>
+                  <p className="mt-2 text-sm text-brand-slate">URL: {journal.journalUrl}</p>
+                  <p className="mt-4 text-sm leading-7 text-brand-slate">{journal.aboutJournal}</p>
                   <span className="button-primary mt-5">View Journal</span>
                 </article>
               </Link>

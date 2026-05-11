@@ -19,9 +19,9 @@ export default function MembershipPage() {
           />
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             {membershipBenefits.map((item) => (
-              <div key={item} className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                <h2 className="font-semibold text-brand-navy">{item}</h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
+              <div key={item} className="rounded-3xl border border-brand-border bg-brand-elevated p-5">
+                <h2 className="font-semibold text-brand-ink">{item}</h2>
+                <p className="mt-3 text-sm leading-7 text-brand-slate">
                   Delivered through a clean platform experience, publication workflows, and media-ready scholarly presentation.
                 </p>
               </div>

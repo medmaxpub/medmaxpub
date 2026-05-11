@@ -1,68 +1,47 @@
 import SectionHeader from "../../components/common/SectionHeader";
-import { conferenceServices, regionBadges, scientificReach } from "../../data/mockData";
+import { aboutMedmaxCoverage, aboutMedmaxHighlights, aboutMedmaxParagraphs } from "../../data/mockData";
 
 export default function AboutPage() {
   return (
     <div className="section-shell">
-      <div className="container-shell space-y-8">
-        <section className="card-panel p-6 sm:p-8 lg:p-10">
-          <SectionHeader
-            label="About medmaxpub"
-            title="Welcome to medmaxpub"
-            description="This platform reflects the medmaxpub publishing ecosystem across journals, media, and admin-driven research workflows."
-          />
-          <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-            <div className="rich-copy">
-              <p>
-                Scientific Research Conferences are vibrant gatherings where experts and enthusiasts come together to
-                share discoveries, build collaborations, and advance knowledge across science, health care,
-                engineering, and technology.
-              </p>
-              <p>
-                The site experience is designed to feel professional, credible, and globally oriented, giving event
-                organizers, journal editors, speakers, and authors one central place to manage visibility and
-                participation.
-              </p>
+      <div className="container-shell">
+        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
+          <div className="card-panel p-6 sm:p-8 lg:p-10">
+            <SectionHeader
+              label="About Medmax Publishers"
+              title="A peer-reviewed open access platform built for global scientific knowledge sharing"
+              description="The following profile appears directly below the homepage hero so visitors immediately understand the Medmax publishing mission."
+            />
+            <div className="rich-copy mt-8 text-base">
+              {aboutMedmaxParagraphs.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
             </div>
-            <div className="rounded-3xl bg-brand-navy p-5 text-white sm:p-6">
-              <p className="text-sm uppercase tracking-[0.24em] text-brand-gold">Regions</p>
-              <div className="mt-5 flex flex-wrap gap-3">
-                {regionBadges.map((region) => (
-                  <span key={region} className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm">
-                    {region}
-                  </span>
+          </div>
+
+          <div className="space-y-4">
+            {aboutMedmaxHighlights.map((item) => (
+              <div key={item.label} className="card-panel p-5 sm:p-6">
+                <p className="text-xs uppercase tracking-[0.2em] text-brand-gold">{item.label}</p>
+                <p className="mt-3 text-lg font-semibold leading-8 text-brand-ink">{item.value}</p>
+              </div>
+            ))}
+
+            <div className="card-panel bg-brand-navy p-6 text-white">
+              <p className="text-xs uppercase tracking-[0.22em] text-brand-gold">Coverage</p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {aboutMedmaxCoverage.map((item) => (
+                  <div
+                    key={item}
+                    className="rounded-2xl border border-brand-gold/30 bg-white/5 px-4 py-3 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+                  >
+                    {item}
+                  </div>
                 ))}
               </div>
             </div>
           </div>
-        </section>
-
-        <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {scientificReach.map((item) => (
-            <article key={item.title} className="card-panel p-6 sm:p-8">
-              <h2 className="font-display text-2xl font-semibold text-brand-navy sm:text-3xl">{item.title}</h2>
-              <p className="mt-4 text-sm leading-7 text-slate-600">{item.description}</p>
-            </article>
-          ))}
-        </section>
-
-        <section className="card-panel p-6 sm:p-8 lg:p-10">
-          <SectionHeader
-            label="Services"
-            title="Comprehensive support for exceptional scientific and professional events"
-            description="Conference planning, research visibility, journals, and publication assets are all brought together in one operational system."
-          />
-          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {conferenceServices.map((service) => (
-              <div key={service} className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                <h3 className="font-semibold text-brand-navy">{service}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Delivered with structured workflows, audience awareness, and polished scientific presentation.
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
+        </div>
       </div>
     </div>
   );

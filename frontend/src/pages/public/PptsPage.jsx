@@ -105,21 +105,21 @@ export default function PptsPage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <div className="card-panel p-5">
             <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">Total PPTs</p>
-            <p className="mt-2 font-display text-4xl font-semibold text-brand-navy">{items.length}</p>
+            <p className="mt-2 font-display text-4xl font-semibold text-brand-ink">{items.length}</p>
           </div>
           <div className="card-panel p-5">
             <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">Linked Journals</p>
-            <p className="mt-2 font-display text-4xl font-semibold text-brand-navy">{journalCount}</p>
+            <p className="mt-2 font-display text-4xl font-semibold text-brand-ink">{journalCount}</p>
           </div>
           <div className="card-panel p-5">
             <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">Downloads</p>
-            <p className="mt-2 text-sm leading-7 text-slate-600">Each record keeps preview and download actions grouped with the source journal.</p>
+            <p className="mt-2 text-sm leading-7 text-brand-slate">Each record keeps preview and download actions grouped with the source journal.</p>
           </div>
         </div>
 
         <div className="mt-8 card-panel p-4 sm:p-6">
           <div className="flex items-center gap-3">
-            <Search size={18} className="text-slate-400" />
+            <Search size={18} className="text-brand-slate" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -138,25 +138,25 @@ export default function PptsPage() {
             {filteredItems.map((ppt) => (
               <article key={ppt.id} className="card-panel overflow-hidden">
                 <div className="grid lg:grid-cols-[280px_1fr]">
-                  <div className="flex min-h-64 items-center justify-center bg-brand-mist px-8 text-center">
+                  <div className="flex min-h-64 items-center justify-center bg-brand-elevated px-8 text-center">
                     <div>
                       <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Related Journal</p>
-                      <h3 className="mt-3 font-display text-2xl font-semibold text-brand-navy">
+                      <h3 className="mt-3 font-display text-2xl font-semibold text-brand-ink">
                         {ppt.journalInfo?.title || ppt.journalTitle || "Journal details unavailable"}
                       </h3>
-                      {ppt.journalInfo?.domainName ? <p className="mt-2 text-sm text-slate-500">{ppt.journalInfo.domainName}</p> : null}
+                      {ppt.journalInfo?.domainName ? <p className="mt-2 text-sm text-brand-slate">{ppt.journalInfo.domainName}</p> : null}
                     </div>
                   </div>
                   <div className="p-5 sm:p-7">
                     <div className="flex flex-wrap items-center gap-3 text-sm">
                       <span className="eyebrow mb-0">PPT Record</span>
-                      <p className="text-slate-500">Uploaded {new Date(ppt.uploadedDate).toLocaleDateString()}</p>
+                      <p className="text-brand-slate">Uploaded {new Date(ppt.uploadedDate).toLocaleDateString()}</p>
                     </div>
-                    <h2 className="mt-4 font-display text-3xl font-semibold text-brand-navy">{ppt.title}</h2>
-                    <p className="mt-4 leading-7 text-slate-600">{ppt.description}</p>
+                    <h2 className="mt-4 font-display text-3xl font-semibold text-brand-ink">{ppt.title}</h2>
+                    <p className="mt-4 leading-7 text-brand-slate">{ppt.description}</p>
 
                     <div className="mt-6 grid gap-5 xl:grid-cols-[1fr_0.95fr]">
-                      <div className="rounded-3xl bg-slate-50 p-5">
+                      <div className="rounded-3xl border border-brand-border bg-brand-elevated p-5">
                         <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Actions</p>
                         <div className="mt-4 flex flex-wrap gap-3">
                           <button type="button" className="button-soft px-4 py-2" onClick={() => setActivePreview(ppt)}>
@@ -175,32 +175,32 @@ export default function PptsPage() {
                         </div>
                       </div>
 
-                      <div className="rounded-3xl border border-slate-200 p-5">
+                      <div className="rounded-3xl border border-brand-border bg-brand-surface p-5">
                         <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Related Journal</p>
-                        <h3 className="mt-3 font-display text-2xl font-semibold text-brand-navy">
+                        <h3 className="mt-3 font-display text-2xl font-semibold text-brand-ink">
                           {ppt.journalInfo?.title || ppt.journalTitle || "Journal details unavailable"}
                         </h3>
-                        {ppt.journalInfo?.domainName ? <p className="mt-2 text-sm text-slate-500">{ppt.journalInfo.domainName}</p> : null}
-                        {ppt.journalInfo?.editorName ? <p className="mt-1 text-sm text-slate-500">Managed by {ppt.journalInfo.editorName}</p> : null}
+                        {ppt.journalInfo?.domainName ? <p className="mt-2 text-sm text-brand-slate">{ppt.journalInfo.domainName}</p> : null}
+                        {ppt.journalInfo?.editorName ? <p className="mt-1 text-sm text-brand-slate">Managed by {ppt.journalInfo.editorName}</p> : null}
                         {ppt.journalInfo?.overview ? (
                           <>
                             <p className="mt-4 text-xs uppercase tracking-[0.18em] text-brand-teal">Abstract / Overview</p>
-                            <p className="mt-2 text-sm leading-7 text-slate-600">{ppt.journalInfo.overview}</p>
+                            <p className="mt-2 text-sm leading-7 text-brand-slate">{ppt.journalInfo.overview}</p>
                           </>
                         ) : null}
                         {ppt.journalInfo?.featuredAuthors?.length ? (
-                          <p className="mt-4 text-sm text-slate-600">
-                            <span className="font-semibold text-brand-navy">Authors:</span> {ppt.journalInfo.featuredAuthors.join(", ")}
+                          <p className="mt-4 text-sm text-brand-slate">
+                            <span className="font-semibold text-brand-ink">Authors:</span> {ppt.journalInfo.featuredAuthors.join(", ")}
                           </p>
                         ) : null}
                         {ppt.journalInfo?.featuredArticleTitle ? (
-                          <p className="mt-2 text-sm text-slate-600">
-                            <span className="font-semibold text-brand-navy">Current article:</span> {ppt.journalInfo.featuredArticleTitle}
+                          <p className="mt-2 text-sm text-brand-slate">
+                            <span className="font-semibold text-brand-ink">Current article:</span> {ppt.journalInfo.featuredArticleTitle}
                           </p>
                         ) : null}
                         {ppt.journalInfo?.currentIssueLabel ? (
-                          <p className="mt-2 text-sm text-slate-600">
-                            <span className="font-semibold text-brand-navy">Current issue:</span> {ppt.journalInfo.currentIssueLabel}
+                          <p className="mt-2 text-sm text-brand-slate">
+                            <span className="font-semibold text-brand-ink">Current issue:</span> {ppt.journalInfo.currentIssueLabel}
                           </p>
                         ) : null}
                       </div>

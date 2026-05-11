@@ -1,10 +1,12 @@
 export const companyInfo = {
   name: "medmaxpub",
   email: import.meta.env.VITE_DEFAULT_CONTACT_EMAIL || "contact@medmaxpub.com",
-  phone: import.meta.env.VITE_DEFAULT_CONTACT_PHONE || "+1 (970) 642-3881",
   addressLines: [
-    "7700 E Arapahoe Rd",
-    "Colorado, USA"
+    "Medmax Publishers LLC",
+    "2705 Greystone Drive",
+    "Apt A",
+    "Columbus, Ohio - 43220",
+    "USA"
   ]
 };
 
@@ -258,23 +260,6 @@ export const indexingPartners = [
   "OpenAlex"
 ];
 
-export const scientificReach = [
-  {
-    title: "Global Dialogue",
-    description:
-      "Research communities come together across borders to discuss urgent scientific and technological priorities."
-  },
-  {
-    title: "Collaboration",
-    description:
-      "Conferences connect scholars, innovators, clinicians, engineers, and decision-makers for meaningful collaboration."
-  },
-  {
-    title: "Inspiration",
-    description:
-      "Every gathering is designed to spark ideas, elevate visibility, and inspire the next wave of scientific progress."
-  }
-];
 
 export const conferenceServices = [
   "Event Planning & Management",
