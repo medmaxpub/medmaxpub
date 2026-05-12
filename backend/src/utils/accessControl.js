@@ -2,11 +2,31 @@ import Journal from "../models/Journal.js";
 import { AppError } from "./appError.js";
 
 export function normalizeRole(role) {
-  return role === "admin" || role === "super_admin" ? "admin" : "user";
+  const normalized = String(role || "")
+    .trim()
+    .toLowerCase();
+
+  if (normalized === "super_admin" || normalized === "super_user") {
+    return "super_user";
+  }
+
+  if (normalized === "admin" || normalized === "journal_admin") {
+    return "admin";
+  }
+
+  return "user";
 }
 
 export function isAdmin(user) {
   return normalizeRole(user?.role) === "admin";
+}
+
+export function isSuperUser(user) {
+  return normalizeRole(user?.role) === "super_user";
+}
+
+export function hasElevatedAccess(user) {
+  return normalizeRole(user?.role) === "super_user";
 }
 
 export function getAssignedJournalIds(user) {
@@ -30,7 +50,7 @@ export function getAssignedJournalIds(user) {
 }
 
 export function buildAccessibleJournalFilter(user, fieldName = "journal") {
-  if (isAdmin(user)) {
+  if (hasElevatedAccess(user)) {
     return {};
   }
 
@@ -40,13 +60,19 @@ export function buildAccessibleJournalFilter(user, fieldName = "journal") {
 }
 
 export function ensureSuperAdmin(user) {
-  if (!isAdmin(user)) {
-    throw new AppError("Admin access required", 403);
+  if (!isSuperUser(user)) {
+    throw new AppError("Super user access required", 403);
+  }
+}
+
+export function ensureElevatedAccess(user) {
+  if (!hasElevatedAccess(user)) {
+    throw new AppError("Super user access required", 403);
   }
 }
 
 export async function ensureJournalAccess(user, journalId) {
-  if (isAdmin(user)) {
+  if (hasElevatedAccess(user)) {
     return;
   }
 
@@ -64,7 +90,7 @@ export async function ensureJournalAccess(user, journalId) {
 }
 
 export function ensureUserAccess(user, targetUserId) {
-  if (isAdmin(user)) {
+  if (hasElevatedAccess(user)) {
     return;
   }
 

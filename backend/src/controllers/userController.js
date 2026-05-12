@@ -1,4 +1,5 @@
 import Article from "../models/Article.js";
+import EditorialBoardMember from "../models/EditorialBoardMember.js";
 import Issue from "../models/Issue.js";
 import Journal from "../models/Journal.js";
 import Ppt from "../models/Ppt.js";
@@ -26,6 +27,7 @@ function serializeUser(user, journals = []) {
     journalDomainName: primaryJournal?.journalDomainName || "",
     journalUrl: primaryJournal?.journalUrl || "",
     createdAt: user.createdAt,
+    journalCount: journals.length,
     journals: journals.map((journal) => ({
       id: journal._id,
       managingJournalName: journal.managingJournalName,
@@ -36,6 +38,65 @@ function serializeUser(user, journals = []) {
       firstName: journal.firstName,
       lastName: journal.lastName
     }))
+  };
+}
+
+function compareUsers(orderBy, direction) {
+  const sortDirection = direction === "asc" ? 1 : -1;
+
+  return (left, right) => {
+    if (orderBy === "name") {
+      const leftValue = `${left.firstName} ${left.lastName} ${left.username}`.trim().toLowerCase();
+      const rightValue = `${right.firstName} ${right.lastName} ${right.username}`.trim().toLowerCase();
+      return leftValue.localeCompare(rightValue) * sortDirection;
+    }
+
+    if (orderBy === "date") {
+      const leftValue = new Date(left.createdAt || 0).getTime();
+      const rightValue = new Date(right.createdAt || 0).getTime();
+      return (leftValue - rightValue) * sortDirection;
+    }
+
+    return String(left.id).localeCompare(String(right.id)) * sortDirection;
+  };
+}
+
+function applySuperUserFilters(items, query) {
+  const search = String(query.search || query.q || "")
+    .trim()
+    .toLowerCase();
+  const orderBy = ["id", "name", "date"].includes(String(query.orderBy || "").toLowerCase())
+    ? String(query.orderBy).toLowerCase()
+    : "date";
+  const direction = String(query.direction || query.sort || "").toLowerCase() === "asc" ? "asc" : "desc";
+  const page = Math.max(Number.parseInt(query.page, 10) || 1, 1);
+  const pageSize = Math.min(Math.max(Number.parseInt(query.pageSize, 10) || 10, 1), 100);
+
+  const filtered = search
+    ? items.filter((item) =>
+        [item.username, item.managingJournalName, item.journalDomainName, item.journalUrl]
+          .filter(Boolean)
+          .some((value) => value.toLowerCase().includes(search))
+      )
+    : items;
+
+  const sorted = [...filtered].sort(compareUsers(orderBy, direction));
+  const total = sorted.length;
+  const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * pageSize;
+
+  return {
+    items: sorted.slice(startIndex, startIndex + pageSize),
+    meta: {
+      total,
+      page: currentPage,
+      pageSize,
+      totalPages,
+      orderBy,
+      direction,
+      search
+    }
   };
 }
 
@@ -56,11 +117,18 @@ async function loadUsersWithJournals(filter = {}) {
 
 export const getUsers = asyncHandler(async (req, res) => {
   if (normalizeRole(req.user.role) === "admin") {
-    res.json(await loadUsersWithJournals({ role: { $nin: ["admin", "super_admin"] } }));
+    res.json(await loadUsersWithJournals({ role: { $nin: ["admin", "super_admin", "super_user"] } }));
     return;
   }
 
   res.json(await loadUsersWithJournals({ _id: req.user._id }));
+});
+
+export const getSuperUsers = asyncHandler(async (req, res) => {
+  ensureSuperAdmin(req.user);
+
+  const items = await loadUsersWithJournals({ role: { $nin: ["admin", "super_admin", "super_user"] } });
+  res.json(applySuperUserFilters(items, req.query));
 });
 
 export const createUser = asyncHandler(async (req, res) => {
@@ -97,6 +165,10 @@ export const updateUser = asyncHandler(async (req, res) => {
 
   if (!targetUser) {
     throw new AppError("User not found", 404);
+  }
+
+  if (normalizeRole(targetUser.role) !== "user" && req.user._id.toString() !== targetUser._id.toString()) {
+    throw new AppError("Privileged accounts cannot be edited from this module", 400);
   }
 
   ensureUserAccess(req.user, targetUser._id);
@@ -146,16 +218,14 @@ export const updateUser = asyncHandler(async (req, res) => {
 export const revealUserPassword = asyncHandler(async (req, res) => {
   ensureSuperAdmin(req.user);
 
-  const { adminPassword } = req.body;
-
-  if (!adminPassword || !(await req.user.comparePassword(adminPassword))) {
-    throw new AppError("Admin password verification failed", 401);
-  }
-
   const targetUser = await User.findById(req.params.id);
 
   if (!targetUser) {
     throw new AppError("User not found", 404);
+  }
+
+  if (normalizeRole(targetUser.role) !== "user") {
+    throw new AppError("Only user account passwords can be revealed", 400);
   }
 
   res.json({
@@ -172,8 +242,8 @@ export const deleteUser = asyncHandler(async (req, res) => {
     throw new AppError("User not found", 404);
   }
 
-  if (normalizeRole(targetUser.role) === "admin") {
-    throw new AppError("Admin accounts cannot be deleted from this module", 400);
+  if (normalizeRole(targetUser.role) !== "user") {
+    throw new AppError("Privileged accounts cannot be deleted from this module", 400);
   }
 
   const journals = await Journal.find({ owner: targetUser._id }).select("_id").lean();
@@ -184,6 +254,7 @@ export const deleteUser = asyncHandler(async (req, res) => {
   await Article.deleteMany({
     $or: [{ journal: { $in: journalIds } }, { issue: { $in: issueIds } }]
   });
+  await EditorialBoardMember.deleteMany({ journal: { $in: journalIds } });
   await Issue.deleteMany({ _id: { $in: issueIds } });
   await Ppt.deleteMany({ journal: { $in: journalIds } });
   await Video.deleteMany({ journal: { $in: journalIds } });

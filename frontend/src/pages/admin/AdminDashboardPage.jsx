@@ -1,4 +1,4 @@
-import { Eye, EyeOff, Pencil, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, EyeOff, LogIn, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
@@ -27,6 +27,13 @@ const initialTestimonialForm = {
   designation: "",
   message: "",
   image: null
+};
+
+const initialUserForm = {
+  firstName: "",
+  lastName: "",
+  username: "",
+  password: ""
 };
 
 function normalizeItem(item) {
@@ -62,7 +69,26 @@ function mapTestimonialToForm(item) {
   };
 }
 
-export default function AdminDashboardPage() {
+function mapUserToForm(item) {
+  return {
+    firstName: item?.firstName || "",
+    lastName: item?.lastName || "",
+    username: item?.username || "",
+    password: ""
+  };
+}
+
+const defaultUserMeta = {
+  total: 0,
+  page: 1,
+  pageSize: 10,
+  totalPages: 1,
+  orderBy: "date",
+  direction: "desc",
+  search: ""
+};
+
+export default function AdminDashboardPage({ mode = "admin" }) {
   const { beginImpersonation, user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -70,21 +96,47 @@ export default function AdminDashboardPage() {
   const [journals, setJournals] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState("");
+  const [editingUserId, setEditingUserId] = useState("");
   const [editingJournalId, setEditingJournalId] = useState("");
   const [editingTestimonialId, setEditingTestimonialId] = useState("");
+  const [userForm, setUserForm] = useState(initialUserForm);
   const [journalForm, setJournalForm] = useState(initialJournalForm);
   const [testimonialForm, setTestimonialForm] = useState(initialTestimonialForm);
   const [revealedPasswords, setRevealedPasswords] = useState({});
-  const [passwordPrompt, setPasswordPrompt] = useState({ open: false, userId: "", adminPassword: "", error: "" });
+  const [userEditorOpen, setUserEditorOpen] = useState(false);
+  const [userQuery, setUserQuery] = useState(defaultUserMeta);
+  const [userMeta, setUserMeta] = useState(defaultUserMeta);
   const [journalStatus, setJournalStatus] = useState("");
   const [userStatus, setUserStatus] = useState("");
   const [testimonialStatus, setTestimonialStatus] = useState("");
+  const isSuperPortal = mode === "super";
   const isAdmin = user?.role === "admin";
+  const canManageAll = isAdmin || isSuperPortal;
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
   const loadUsers = async () => {
-    const data = await withFallback(() => api.get("/admin/users"), useDevelopmentFallback ? [] : []);
-    setUsers(data.map(normalizeItem));
+    if (!isSuperPortal) {
+      setUsers([]);
+      setUserMeta(defaultUserMeta);
+      return;
+    }
+
+    const data = await withFallback(
+      () =>
+        api.get("/super/users", {
+          params: {
+            search: userQuery.search,
+            orderBy: userQuery.orderBy,
+            direction: userQuery.direction,
+            page: userQuery.page,
+            pageSize: userQuery.pageSize
+          }
+        }),
+      { items: [], meta: defaultUserMeta }
+    );
+
+    setUsers((data.items || []).map(normalizeItem));
+    setUserMeta({ ...defaultUserMeta, ...(data.meta || {}) });
   };
 
   const loadJournals = async () => {
@@ -101,7 +153,7 @@ export default function AdminDashboardPage() {
     loadUsers();
     loadJournals();
     loadTestimonials();
-  }, [useDevelopmentFallback]);
+  }, [isSuperPortal, useDevelopmentFallback, userQuery.direction, userQuery.orderBy, userQuery.page, userQuery.pageSize, userQuery.search]);
 
   useEffect(() => {
     const targetId = (location.hash || "#journals").replace("#", "");
@@ -119,14 +171,26 @@ export default function AdminDashboardPage() {
   const selectedUser = useMemo(() => users.find((item) => item.id === selectedUserId) || null, [selectedUserId, users]);
 
   const visibleJournals = useMemo(() => {
-    const base = isAdmin ? journals : journals.filter((journal) => journal.ownerUserId?.toString() === user?.id?.toString());
+    const base = canManageAll ? journals : journals.filter((journal) => journal.ownerUserId?.toString() === user?.id?.toString());
 
-    if (isAdmin && selectedUserId) {
+    if (canManageAll && selectedUserId) {
       return base.filter((journal) => journal.ownerUserId?.toString() === selectedUserId.toString());
     }
 
     return base;
-  }, [isAdmin, journals, selectedUserId, user?.id]);
+  }, [canManageAll, journals, selectedUserId, user?.id]);
+
+  const openCreateUserEditor = () => {
+    setEditingUserId("");
+    setUserForm(initialUserForm);
+    setUserEditorOpen(true);
+  };
+
+  const openEditUserEditor = (item) => {
+    setEditingUserId(item.id);
+    setUserForm(mapUserToForm(item));
+    setUserEditorOpen(true);
+  };
 
   const attachJournalMedia = async (journalId, form, managingJournalName, aboutJournal) => {
     const messages = [];
@@ -279,8 +343,38 @@ export default function AdminDashboardPage() {
     try {
       const response = await api.post(`/auth/impersonate/${targetUserId}`);
       beginImpersonation(response.data);
+      navigate("/user/articles-in-press");
     } catch (error) {
       setUserStatus(error.response?.data?.message || "Unable to impersonate this user.");
+    }
+  };
+
+  const submitUser = async (event) => {
+    event.preventDefault();
+    setUserStatus("");
+
+    try {
+      const payload = {
+        firstName: userForm.firstName,
+        lastName: userForm.lastName,
+        username: userForm.username,
+        ...(userForm.password ? { password: userForm.password } : {})
+      };
+
+      if (!editingUserId && !payload.password) {
+        setUserStatus("Password is required for new users.");
+        return;
+      }
+
+      const baseUrl = "/super/users";
+      await api[editingUserId ? "put" : "post"](editingUserId ? `${baseUrl}/${editingUserId}` : baseUrl, payload);
+      setUserStatus(editingUserId ? "User updated successfully." : "User created successfully.");
+      setEditingUserId("");
+      setUserForm(initialUserForm);
+      setUserEditorOpen(false);
+      await Promise.all([loadUsers(), loadJournals()]);
+    } catch (error) {
+      setUserStatus(error.response?.data?.message || "User save failed.");
     }
   };
 
@@ -296,8 +390,7 @@ export default function AdminDashboardPage() {
     }
 
     try {
-      await api.delete(`/admin/users/${targetUser.id}`);
-      setUsers((current) => current.filter((item) => item.id !== targetUser.id));
+      await api.delete(`/super/users/${targetUser.id}`);
       setJournals((current) => current.filter((item) => item.ownerUserId?.toString() !== targetUser.id.toString()));
       setSelectedUserId((current) => (current === targetUser.id ? "" : current));
       setRevealedPasswords((current) => {
@@ -305,46 +398,65 @@ export default function AdminDashboardPage() {
         delete next[targetUser.id];
         return next;
       });
+      setEditingUserId((current) => (current === targetUser.id ? "" : current));
+      setUserEditorOpen((current) => (editingUserId === targetUser.id ? false : current));
       setUserStatus(`User "${targetUser.username}" deleted successfully.`);
+      await loadUsers();
     } catch (error) {
       setUserStatus(error.response?.data?.message || "User delete failed.");
     }
   };
 
-  const confirmRevealPassword = async (event) => {
-    event.preventDefault();
-
+  const revealPassword = async (userId) => {
     try {
-      const response = await api.post(`/admin/users/${passwordPrompt.userId}/reveal-password`, {
-        adminPassword: passwordPrompt.adminPassword
-      });
+      const response = await api.post(`/super/users/${userId}/reveal-password`);
       setRevealedPasswords((current) => ({
         ...current,
-        [passwordPrompt.userId]: response.data.password
+        [userId]: response.data.password
       }));
-      setPasswordPrompt({ open: false, userId: "", adminPassword: "", error: "" });
     } catch (error) {
-      setPasswordPrompt((current) => ({
-        ...current,
-        error: error.response?.data?.message || "Password verification failed."
-      }));
+      setUserStatus(error.response?.data?.message || "Password reveal failed.");
     }
   };
 
   return (
     <div className="space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+      {isSuperPortal ? (
+        <section id="welcome" className="card-panel p-6 sm:p-8">
+          <SectionHeader
+            label="Welcome"
+            title="Super user control center"
+            description="Review every user account, enter user sessions safely, and manage journal and testimonial operations from one privileged workspace."
+          />
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <div className="rounded-3xl border border-brand-border bg-brand-elevated p-5">
+              <p className="text-xs uppercase tracking-[0.2em] text-brand-gold">Users in view</p>
+              <p className="mt-3 text-3xl font-semibold text-brand-ink">{userMeta.total}</p>
+            </div>
+            <div className="rounded-3xl border border-brand-border bg-brand-elevated p-5">
+              <p className="text-xs uppercase tracking-[0.2em] text-brand-gold">Journal records</p>
+              <p className="mt-3 text-3xl font-semibold text-brand-ink">{journals.length}</p>
+            </div>
+            <div className="rounded-3xl border border-brand-border bg-brand-elevated p-5">
+              <p className="text-xs uppercase tracking-[0.2em] text-brand-gold">Testimonials</p>
+              <p className="mt-3 text-3xl font-semibold text-brand-ink">{testimonials.length}</p>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       <section id="journals" className="card-panel p-6 sm:p-8">
         <SectionHeader
           label="Journals"
-          title={isAdmin ? "Journal management" : "Your journals"}
+          title={canManageAll ? "Journal management" : "Your journals"}
           description={
-            isAdmin
+            canManageAll
               ? "Create a journal and its linked user in one form. Updating a journal also updates the linked user credentials."
               : "Manage only the journals linked to your user account, including optional PPT, PDF, and video uploads."
           }
         />
 
-        {isAdmin && selectedUser ? (
+        {canManageAll && selectedUser ? (
           <div className="mt-6 flex flex-wrap items-center gap-3 rounded-3xl border border-brand-border bg-brand-elevated px-5 py-4">
             <p className="text-sm text-brand-ink">
               Filtering journals for <span className="font-semibold">{selectedUser.username}</span>
@@ -511,9 +623,9 @@ export default function AdminDashboardPage() {
               ))
             ) : (
               <EmptyState
-                title={isAdmin ? "No journals available" : "No journals in your account"}
+                title={canManageAll ? "No journals available" : "No journals in your account"}
                 description={
-                  isAdmin
+                  canManageAll
                     ? "Add a journal here and the linked user account will be created automatically."
                     : "Create your first journal or ask an admin to assign one to your account."
                 }
@@ -523,96 +635,186 @@ export default function AdminDashboardPage() {
         </div>
       </section>
 
-      {isAdmin ? (
+      {isSuperPortal ? (
         <section id="users" className="card-panel p-6 sm:p-8">
           <SectionHeader
             label="Users"
-            title="Journal-linked users"
-            description="These user accounts are created from journal credentials. Use View Journals to filter the Journals module or Login as User to enter that user's dashboard."
+            title="Super user users list"
+            description="Search, sort, paginate, reveal passwords directly, edit accounts, delete users, and impersonate a user directly from this privileged table."
           />
 
-          <div className="mt-8 space-y-4">
-            {users.length ? (
-              users.map((item) => (
-                <div key={item.id} className="rounded-3xl border border-brand-border bg-brand-surface p-5">
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                    <div>
-                      <h3 className="text-xl font-semibold text-brand-ink">
-                        {item.firstName} {item.lastName}
-                      </h3>
-                      <p className="mt-1 text-sm text-brand-slate">@{item.username}</p>
-                      <p className="mt-2 text-sm text-brand-slate">
-                        {item.managingJournalName || "No linked journal yet."}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        className="button-soft px-4 py-2"
-                        onClick={() => {
-                          setSelectedUserId(item.id);
-                          navigate("/admin/dashboard#journals");
-                        }}
-                      >
-                        View Journals
-                      </button>
-                      <button type="button" className="button-secondary px-4 py-2" onClick={() => impersonateUser(item.id)}>
-                        Login as User
-                      </button>
-                      <button
-                        type="button"
-                        className="button-secondary px-4 py-2 text-rose-600"
-                        onClick={() => deleteUser(item)}
-                      >
-                        <Trash2 size={16} className="mr-2" />
-                        Delete User
-                      </button>
-                      {revealedPasswords[item.id] ? (
-                        <button
-                          type="button"
-                          className="button-soft px-4 py-2"
-                          onClick={() =>
-                            setRevealedPasswords((current) => {
-                              const next = { ...current };
-                              delete next[item.id];
-                              return next;
-                            })
-                          }
-                        >
-                          <EyeOff size={16} className="mr-2" />
-                          Hide Password
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className="button-soft px-4 py-2"
-                          onClick={() => setPasswordPrompt({ open: true, userId: item.id, adminPassword: "", error: "" })}
-                        >
-                          <Eye size={16} className="mr-2" />
-                          View Password
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <div className="mt-4 grid gap-3 md:grid-cols-2">
-                    <div className="rounded-2xl border border-brand-border bg-brand-elevated px-4 py-3 text-sm text-brand-slate">
-                      Password: {revealedPasswords[item.id] || "******"}
-                    </div>
-                    <div className="rounded-2xl border border-brand-border bg-brand-elevated px-4 py-3 text-sm text-brand-slate">
-                      Journals: {item.journals?.length || 0}
-                    </div>
-                  </div>
+          <div className="mt-8 rounded-3xl border border-brand-border bg-brand-elevated p-4 sm:p-5">
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+              <div className="flex flex-1 flex-col gap-3 md:flex-row">
+                <div className="relative flex-1">
+                  <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-brand-slate" />
+                  <input
+                    className="pl-11"
+                    value={userQuery.search}
+                    onChange={(event) => setUserQuery((current) => ({ ...current, search: event.target.value, page: 1 }))}
+                    placeholder="Search user, journal, domain, or URL"
+                  />
                 </div>
-              ))
-            ) : (
-              <EmptyState title="No users available" description="Users will be created automatically when a journal is added." />
-            )}
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <select
+                    value={userQuery.orderBy}
+                    onChange={(event) => setUserQuery((current) => ({ ...current, orderBy: event.target.value, page: 1 }))}
+                  >
+                    <option value="date">Order By Date</option>
+                    <option value="id">Order By Id</option>
+                    <option value="name">Order By Name</option>
+                  </select>
+                  <select
+                    value={userQuery.direction}
+                    onChange={(event) => setUserQuery((current) => ({ ...current, direction: event.target.value, page: 1 }))}
+                  >
+                    <option value="desc">Desc</option>
+                    <option value="asc">Asc</option>
+                  </select>
+                  <select
+                    value={userQuery.pageSize}
+                    onChange={(event) => setUserQuery((current) => ({ ...current, pageSize: Number(event.target.value), page: 1 }))}
+                  >
+                    <option value={10}>10 / page</option>
+                    <option value={20}>20 / page</option>
+                    <option value={50}>50 / page</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <button type="button" className="button-secondary px-4 py-2" onClick={() => navigate("/superuser/journals")}>
+                  Add New Journal
+                </button>
+                <button type="button" className="button-primary px-4 py-2" onClick={openCreateUserEditor}>
+                  <Plus size={16} className="mr-2" />
+                  Add New User
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 overflow-hidden rounded-3xl border border-brand-border bg-brand-surface">
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left text-sm">
+                <thead className="bg-brand-elevated text-brand-ink">
+                  <tr className="border-b border-brand-border">
+                    <th className="px-4 py-4 font-semibold">S.No</th>
+                    <th className="px-4 py-4 font-semibold">User Name</th>
+                    <th className="px-4 py-4 font-semibold">Managing Journal Name</th>
+                    <th className="px-4 py-4 font-semibold">Journal Domain Name</th>
+                    <th className="px-4 py-4 font-semibold">Journal URL</th>
+                    <th className="px-4 py-4 font-semibold">Password</th>
+                    <th className="px-4 py-4 font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.length ? (
+                    users.map((item, index) => (
+                      <tr key={item.id} className="border-b border-brand-border/60 text-brand-slate">
+                        <td className="px-4 py-4">{(userMeta.page - 1) * userMeta.pageSize + index + 1}</td>
+                        <td className="px-4 py-4">
+                          <div className="font-medium text-brand-ink">{item.username}</div>
+                          <div className="mt-1 text-xs text-brand-slate">
+                            {item.firstName} {item.lastName}
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">{item.managingJournalName || "No journal assigned"}</td>
+                        <td className="px-4 py-4">{item.journalDomainName || "NA"}</td>
+                        <td className="px-4 py-4">{item.journalUrl || "NA"}</td>
+                        <td className="px-4 py-4 font-mono text-brand-ink">{revealedPasswords[item.id] || "******"}</td>
+                        <td className="px-4 py-4">
+                          <div className="flex flex-wrap gap-2">
+                            {revealedPasswords[item.id] ? (
+                              <button
+                                type="button"
+                                className="button-soft min-h-10 px-3 py-2"
+                                onClick={() =>
+                                  setRevealedPasswords((current) => {
+                                    const next = { ...current };
+                                    delete next[item.id];
+                                    return next;
+                                  })
+                                }
+                              >
+                                <EyeOff size={16} />
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                className="button-soft min-h-10 px-3 py-2"
+                                onClick={() => revealPassword(item.id)}
+                              >
+                                <Eye size={16} />
+                              </button>
+                            )}
+                            <button type="button" className="button-soft min-h-10 px-3 py-2" onClick={() => openEditUserEditor(item)}>
+                              <Pencil size={16} />
+                            </button>
+                            <button type="button" className="button-secondary min-h-10 px-3 py-2 text-rose-300" onClick={() => deleteUser(item)}>
+                              <Trash2 size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              className="button-secondary min-h-10 px-3 py-2"
+                              onClick={() => {
+                                setSelectedUserId(item.id);
+                                navigate("/superuser/journals");
+                              }}
+                            >
+                              View Journals
+                            </button>
+                            <button type="button" className="button-primary min-h-10 px-3 py-2" onClick={() => impersonateUser(item.id)}>
+                              <LogIn size={16} className="mr-2" />
+                              Login as User
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-10">
+                        <EmptyState title="No users matched this view" description="Adjust search, sorting, or add a new user record." />
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex flex-col gap-4 border-t border-brand-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-brand-slate">
+                Showing page {userMeta.page} of {userMeta.totalPages} with {userMeta.total} total users
+              </p>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  className="button-secondary min-h-10 px-3 py-2"
+                  disabled={userMeta.page <= 1}
+                  onClick={() => setUserQuery((current) => ({ ...current, page: Math.max(current.page - 1, 1) }))}
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  type="button"
+                  className="button-secondary min-h-10 px-3 py-2"
+                  disabled={userMeta.page >= userMeta.totalPages}
+                  onClick={() =>
+                    setUserQuery((current) => ({ ...current, page: Math.min(current.page + 1, userMeta.totalPages || 1) }))
+                  }
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+
             {userStatus ? <p className="text-sm text-brand-slate">{userStatus}</p> : null}
           </div>
         </section>
       ) : null}
 
-      {isAdmin ? (
+      {canManageAll ? (
         <section id="testimonials" className="card-panel p-6 sm:p-8">
           <SectionHeader
             label="Testimonials"
@@ -701,31 +903,59 @@ export default function AdminDashboardPage() {
         </section>
       ) : null}
 
-      {passwordPrompt.open ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4">
-          <form onSubmit={confirmRevealPassword} className="card-panel w-full max-w-md p-6">
+      {isSuperPortal && userEditorOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4">
+          <form onSubmit={submitUser} className="card-panel w-full max-w-xl p-6">
             <SectionHeader
-              label="Verification"
-              title="Confirm admin password"
-              description="The stored user password is only revealed after successful admin verification."
+              label="Users"
+              title={editingUserId ? "Edit user" : "Add new user"}
+              description="Create or update the journal user account from the super user portal."
             />
-            <input
-              className="mt-6"
-              value={passwordPrompt.adminPassword}
-              onChange={(event) => setPasswordPrompt((current) => ({ ...current, adminPassword: event.target.value, error: "" }))}
-              placeholder="Enter your admin password"
-              type="password"
-              required
-            />
-            {passwordPrompt.error ? <p className="mt-3 text-sm text-rose-500">{passwordPrompt.error}</p> : null}
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <input
+                value={userForm.firstName}
+                onChange={(event) => setUserForm((current) => ({ ...current, firstName: event.target.value }))}
+                placeholder="First Name"
+                required
+              />
+              <input
+                value={userForm.lastName}
+                onChange={(event) => setUserForm((current) => ({ ...current, lastName: event.target.value }))}
+                placeholder="Last Name"
+                required
+              />
+              <input
+                className="sm:col-span-2"
+                value={userForm.username}
+                onChange={(event) => setUserForm((current) => ({ ...current, username: event.target.value }))}
+                placeholder="User Name"
+                required
+              />
+              <input
+                className="sm:col-span-2"
+                value={userForm.password}
+                onChange={(event) => setUserForm((current) => ({ ...current, password: event.target.value }))}
+                placeholder={editingUserId ? "New Password (optional)" : "Password"}
+                type="password"
+                required={!editingUserId}
+              />
+            </div>
+
+            {userStatus ? <p className="mt-4 text-sm text-brand-slate">{userStatus}</p> : null}
+
             <div className="mt-6 flex flex-wrap gap-3">
               <button type="submit" className="button-primary">
-                Verify and Reveal
+                {editingUserId ? "Update User" : "Create User"}
               </button>
               <button
                 type="button"
                 className="button-secondary"
-                onClick={() => setPasswordPrompt({ open: false, userId: "", adminPassword: "", error: "" })}
+                onClick={() => {
+                  setEditingUserId("");
+                  setUserForm(initialUserForm);
+                  setUserEditorOpen(false);
+                }}
               >
                 Cancel
               </button>
@@ -733,6 +963,7 @@ export default function AdminDashboardPage() {
           </form>
         </div>
       ) : null}
+
     </div>
   );
 }

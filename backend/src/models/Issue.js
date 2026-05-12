@@ -9,6 +9,7 @@ const issueSchema = new mongoose.Schema(
     },
     volume: { type: Number, required: true },
     issue: { type: Number, required: true },
+    month: { type: String, default: "" },
     year: { type: Number, required: true },
     isCurrent: { type: Boolean, default: false }
   },
@@ -18,4 +19,3 @@ const issueSchema = new mongoose.Schema(
 const Issue = mongoose.model("Issue", issueSchema);
 
 export default Issue;
-

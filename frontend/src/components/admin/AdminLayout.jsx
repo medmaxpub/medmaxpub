@@ -1,4 +1,4 @@
-import { BookOpenText, LogOut, Quote, Users } from "lucide-react";
+import { BookOpenText, LogOut, Quote } from "lucide-react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
@@ -11,7 +11,6 @@ export default function AdminLayout() {
   const activeHash = location.hash || "#journals";
   const items = [
     { icon: BookOpenText, label: "Journals", hash: "#journals" },
-    ...(isAdmin ? [{ icon: Users, label: "Users", hash: "#users" }] : []),
     ...(isAdmin ? [{ icon: Quote, label: "Testimonials", hash: "#testimonials" }] : [])
   ];
 
@@ -23,6 +22,14 @@ export default function AdminLayout() {
 
     document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  const handleExitImpersonation = () => {
+    const originalRole = user?.impersonator?.role;
+    exitImpersonation();
+    navigate(originalRole === "super_user" ? "/superuser/dashboard" : "/admin/dashboard");
+  };
+
+  const impersonatorLabel = user?.impersonator?.role === "super_user" ? "Super User" : "Admin";
 
   return (
     <div className="min-h-screen bg-brand-mist">
@@ -73,11 +80,11 @@ export default function AdminLayout() {
             <div className="border-b border-brand-gold/30 bg-brand-elevated px-4 py-3 text-sm text-brand-ink sm:px-6 lg:px-8">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p>
-                  Admin is logged in as <span className="font-semibold">{user.userName}</span>
+                  {impersonatorLabel} logged in as <span className="font-semibold">{user.userName}</span>
                 </p>
                 <button
                   type="button"
-                  onClick={exitImpersonation}
+                  onClick={handleExitImpersonation}
                   className="button-secondary border-brand-gold/40 text-brand-ink hover:border-brand-gold hover:bg-brand-surface"
                 >
                   Exit User Mode

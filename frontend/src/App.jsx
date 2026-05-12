@@ -1,9 +1,9 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/common/ProtectedRoute";
-import AdminLayout from "./components/admin/AdminLayout";
 import JournalLayout from "./components/layout/JournalLayout";
+import SuperUserLayout from "./components/super/SuperUserLayout";
+import UserLayout from "./components/user/UserLayout";
 import WebsiteLayout from "./components/layout/WebsiteLayout";
-import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import JournalShell from "./pages/journal/JournalShell";
 import AdminLoginPage from "./pages/public/AdminLoginPage";
 import AboutPage from "./pages/public/AboutPage";
@@ -12,6 +12,20 @@ import HomePage from "./pages/public/HomePage";
 import JournalsPage from "./pages/public/JournalsPage";
 import MembershipPage from "./pages/public/MembershipPage";
 import PptsPage from "./pages/public/PptsPage";
+import SuperUserDashboardPage from "./pages/super/SuperUserDashboardPage";
+import SuperUserJournalsPage from "./pages/super/SuperUserJournalsPage";
+import SuperUserTestimonialsPage from "./pages/super/SuperUserTestimonialsPage";
+import SuperUserUsersPage from "./pages/super/SuperUserUsersPage";
+import UserArchivePagesPage from "./pages/user/UserArchivePagesPage";
+import UserArchiveFormPage from "./pages/user/UserArchiveFormPage";
+import UserArchiveIssuePage from "./pages/user/UserArchiveIssuePage";
+import UserArticlesInPressFormPage from "./pages/user/UserArticlesInPressFormPage";
+import UserArticlesInPressPage from "./pages/user/UserArticlesInPressPage";
+import UserCurrentIssuePage from "./pages/user/UserCurrentIssuePage";
+import UserCurrentIssueFormPage from "./pages/user/UserCurrentIssueFormPage";
+import UserEditorialBoardFormPage from "./pages/user/UserEditorialBoardFormPage";
+import UserEditorialBoardPage from "./pages/user/UserEditorialBoardPage";
+import UserWelcomePage from "./pages/user/UserWelcomePage";
 import SubmitManuscriptPage from "./pages/public/SubmitManuscriptPage";
 import VideosPage from "./pages/public/VideosPage";
 
@@ -35,11 +49,41 @@ export default function App() {
         <Route path="/journals/:journalUrl/:section" element={<JournalShell />} />
       </Route>
 
-      <Route path="/admin/login" element={<AdminLoginPage />} />
-      <Route element={<ProtectedRoute />}>
-        <Route path="/admin" element={<AdminLayout />}>
+      <Route path="/admin/login" element={<Navigate to="/superuser/login" replace />} />
+      <Route path="/admin" element={<Navigate to="/superuser/dashboard" replace />} />
+      <Route path="/admin/*" element={<Navigate to="/superuser/dashboard" replace />} />
+      <Route path="/user/login" element={<AdminLoginPage />} />
+      <Route path="/super/login" element={<Navigate to="/superuser/login" replace />} />
+      <Route path="/superuser/login" element={<AdminLoginPage />} />
+
+      <Route element={<ProtectedRoute allowedRoles={["user"]} redirectTo="/user/login" />}>
+        <Route path="/user" element={<UserLayout />}>
+          <Route index element={<Navigate to="articles-in-press" replace />} />
+          <Route path="welcome" element={<UserWelcomePage />} />
+          <Route path="editorial-board" element={<UserEditorialBoardPage />} />
+          <Route path="editorial-board/add" element={<UserEditorialBoardFormPage />} />
+          <Route path="editorial-board/:memberId/edit" element={<UserEditorialBoardFormPage />} />
+          <Route path="articles-in-press" element={<UserArticlesInPressPage />} />
+          <Route path="articles-in-press/add" element={<UserArticlesInPressFormPage />} />
+          <Route path="articles-in-press/:articleId/edit" element={<UserArticlesInPressFormPage />} />
+          <Route path="current-issue" element={<UserCurrentIssuePage />} />
+          <Route path="current-issue/add" element={<UserCurrentIssueFormPage />} />
+          <Route path="current-issue/:articleId/edit" element={<UserCurrentIssueFormPage />} />
+          <Route path="archive-pages" element={<UserArchivePagesPage />} />
+          <Route path="archive-pages/add" element={<UserArchiveFormPage />} />
+          <Route path="archive-pages/article/:articleId/edit" element={<UserArchiveFormPage />} />
+          <Route path="archive-pages/issue/:year/:volume/:issueNumber" element={<UserArchiveIssuePage />} />
+        </Route>
+      </Route>
+
+      <Route element={<ProtectedRoute allowedRoles={["super_user"]} redirectTo="/superuser/login" />}>
+        <Route path="/super" element={<Navigate to="/superuser/dashboard" replace />} />
+        <Route path="/superuser" element={<SuperUserLayout />}>
           <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route path="dashboard" element={<SuperUserDashboardPage />} />
+          <Route path="users" element={<SuperUserUsersPage />} />
+          <Route path="journals" element={<SuperUserJournalsPage />} />
+          <Route path="testimonials" element={<SuperUserTestimonialsPage />} />
         </Route>
       </Route>
     </Routes>

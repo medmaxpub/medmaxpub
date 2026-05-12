@@ -1,11 +1,13 @@
 import Article from "../models/Article.js";
+import EditorialBoardMember from "../models/EditorialBoardMember.js";
 import Issue from "../models/Issue.js";
 import Journal from "../models/Journal.js";
 import Ppt from "../models/Ppt.js";
 import User from "../models/User.js";
 import Video from "../models/Video.js";
+import { ARTICLE_STATUSES, deriveArticleStatus } from "./articleController.js";
 import { serializePpt } from "../services/pptService.js";
-import { ensureJournalAccess, normalizeRole } from "../utils/accessControl.js";
+import { ensureJournalAccess, hasElevatedAccess, normalizeRole } from "../utils/accessControl.js";
 import { deleteAsset, uploadAsset } from "../utils/assetStorage.js";
 import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -27,6 +29,7 @@ function normalizeJournalUrl(value) {
 
 function buildJournalPayload(body) {
   return {
+    ownerUserId: normalizeText(body.ownerUserId),
     firstName: normalizeText(body.firstName),
     lastName: normalizeText(body.lastName),
     userName: normalizeUserName(body.username || body.userName),
@@ -39,18 +42,22 @@ function buildJournalPayload(body) {
   };
 }
 
-function validateJournalPayload(payload) {
+function validateJournalPayload(payload, options = {}) {
+  const requireLinkedUserFields = options.requireLinkedUserFields ?? !payload.ownerUserId;
   const requiredFields = {
-    firstName: "First name",
-    lastName: "Last name",
-    userName: "User name",
-    password: "Password",
     managingJournalName: "Managing journal name",
     journalDomainName: "Journal domain name",
     journalUrl: "Journal URL",
     aboutJournal: "About journal",
     journalInstructions: "Journal instructions"
   };
+
+  if (requireLinkedUserFields) {
+    requiredFields.firstName = "First name";
+    requiredFields.lastName = "Last name";
+    requiredFields.userName = "User name";
+    requiredFields.password = "Password";
+  }
 
   for (const [field, label] of Object.entries(requiredFields)) {
     if (!payload[field]) {
@@ -90,36 +97,58 @@ async function buildJournalDetails(journal) {
   const issueIds = issues.map((item) => item._id);
   const articles = await Article.find({ issue: { $in: issueIds } }).lean();
 
-  const byIssue = new Map();
+  const currentByIssue = new Map();
+  const archiveByIssue = new Map();
   articles.forEach((article) => {
+    const status = deriveArticleStatus(article);
+
+    if (!article.issue || (status !== ARTICLE_STATUSES.CURRENT_ISSUE && status !== ARTICLE_STATUSES.ARCHIVED)) {
+      return;
+    }
+
     const key = article.issue.toString();
-    const list = byIssue.get(key) || [];
+    const targetMap = status === ARTICLE_STATUSES.CURRENT_ISSUE ? currentByIssue : archiveByIssue;
+    const list = targetMap.get(key) || [];
     list.push({
       id: article._id,
       title: article.title,
       authors: article.authors,
       pdfUrl: article.pdfFile?.secure_url || null
     });
-    byIssue.set(key, list);
+    targetMap.set(key, list);
   });
 
   const formattedIssues = issues.map((issue) => ({
     id: issue._id,
     volume: issue.volume,
     issue: issue.issue,
+    month: issue.month || "",
     year: issue.year,
-    articles: byIssue.get(issue._id.toString()) || []
+    currentArticles: currentByIssue.get(issue._id.toString()) || [],
+    archivedArticles: archiveByIssue.get(issue._id.toString()) || []
   }));
 
-  const currentIssue = formattedIssues.find((item, index) => issues[index].isCurrent) || formattedIssues[0] || null;
+  const visibleCurrentIssues = formattedIssues.filter((item) => item.currentArticles.length);
+  const currentIssue =
+    visibleCurrentIssues.find((item, index) => {
+      const originalIssue = issues.find((issue) => issue._id.toString() === item.id.toString());
+      return originalIssue?.isCurrent;
+    }) ||
+    visibleCurrentIssues[0] ||
+    null;
 
   const archiveMap = new Map();
   formattedIssues.forEach((issueItem) => {
+    if (!issueItem.archivedArticles.length) {
+      return;
+    }
+
     const yearMap = archiveMap.get(issueItem.year) || new Map();
     const volumeList = yearMap.get(issueItem.volume) || [];
     volumeList.push({
       issue: issueItem.issue,
-      articles: issueItem.articles
+      month: issueItem.month,
+      articles: issueItem.archivedArticles
     });
     yearMap.set(issueItem.volume, volumeList);
     archiveMap.set(issueItem.year, yearMap);
@@ -135,7 +164,16 @@ async function buildJournalDetails(journal) {
 
   return {
     ...serializeJournalSummary(journal),
-    currentIssue,
+    currentIssue: currentIssue
+      ? {
+          id: currentIssue.id,
+          volume: currentIssue.volume,
+          issue: currentIssue.issue,
+          month: currentIssue.month,
+          year: currentIssue.year,
+          articles: currentIssue.currentArticles
+        }
+      : null,
     archive,
     ppts: ppts.map((ppt) => serializePpt(ppt)),
     videos: videos.map((video) => ({
@@ -215,6 +253,20 @@ async function upsertLinkedOwner(req, payload, existingJournal = null) {
     return owner;
   }
 
+  if (payload.ownerUserId) {
+    const owner = await User.findById(payload.ownerUserId);
+
+    if (!owner) {
+      throw new AppError("Selected user account not found", 404);
+    }
+
+    if (normalizeRole(owner.role) !== "user") {
+      throw new AppError("Journal can only be attached to a standard user account", 400);
+    }
+
+    return owner;
+  }
+
   await ensureUniqueUserName(payload.userName);
 
   return User.create({
@@ -232,7 +284,7 @@ export const getJournals = asyncHandler(async (req, res) => {
 });
 
 export const getAdminJournals = asyncHandler(async (req, res) => {
-  const filter = normalizeRole(req.user.role) === "admin" ? {} : { owner: req.user._id };
+  const filter = hasElevatedAccess(req.user) ? {} : { owner: req.user._id };
   const journals = await Journal.find(filter).populate("owner", "firstName lastName userName").sort({ createdAt: -1 }).lean();
   res.json(journals.map(serializeJournalSummary));
 });
@@ -256,10 +308,13 @@ export const createJournal = asyncHandler(async (req, res) => {
 
   const owner = await upsertLinkedOwner(req, payload);
 
+  const ownerFirstName = payload.ownerUserId ? owner.firstName : payload.firstName;
+  const ownerLastName = payload.ownerUserId ? owner.lastName : payload.lastName;
+
   const journal = await Journal.create({
     owner: owner._id,
-    firstName: payload.firstName,
-    lastName: payload.lastName,
+    firstName: ownerFirstName,
+    lastName: ownerLastName,
     managingJournalName: payload.managingJournalName,
     journalDomainName: payload.journalDomainName,
     journalUrl: payload.journalUrl,
@@ -321,6 +376,7 @@ export const deleteJournal = asyncHandler(async (req, res) => {
 
   await Article.deleteMany({ journal: journal._id });
   await Issue.deleteMany({ journal: journal._id });
+  await EditorialBoardMember.deleteMany({ journal: journal._id });
   await Ppt.deleteMany({ journal: journal._id });
   await Video.deleteMany({ journal: journal._id });
   await journal.deleteOne();

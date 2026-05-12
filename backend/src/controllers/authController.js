@@ -12,6 +12,7 @@ async function buildOwnedJournalIds(userId) {
 
 async function authResponse(user, extra = {}) {
   const assignedJournalIds = await buildOwnedJournalIds(user._id);
+  const normalizedRole = normalizeRole(user.role);
 
   return {
     token: signToken({ id: user._id }),
@@ -22,7 +23,7 @@ async function authResponse(user, extra = {}) {
       lastName: user.lastName,
       userName: user.userName,
       email: user.email || "",
-      role: normalizeRole(user.role),
+      role: normalizedRole,
       assignedJournalIds,
       impersonator: extra.impersonator || null
     }
@@ -98,7 +99,8 @@ export const impersonateUser = asyncHandler(async (req, res) => {
       impersonator: {
         id: req.user._id,
         userName: req.user.userName,
-        name: [req.user.firstName, req.user.lastName].filter(Boolean).join(" ").trim()
+        name: [req.user.firstName, req.user.lastName].filter(Boolean).join(" ").trim(),
+        role: normalizeRole(req.user.role)
       }
     })
   );

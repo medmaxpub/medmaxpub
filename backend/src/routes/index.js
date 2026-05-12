@@ -1,6 +1,21 @@
 import express from "express";
 import { impersonateUser, login, signupAdmin } from "../controllers/authController.js";
+import {
+  createArticle,
+  deleteArticle,
+  getArticleById,
+  getArticlesByIssue,
+  getUserArticles,
+  updateArticle,
+  updateArticleStatus
+} from "../controllers/articleController.js";
 import { postContactMessage } from "../controllers/contactController.js";
+import {
+  createEditorialBoardMember,
+  deleteEditorialBoardMember,
+  getEditorialBoardMembers,
+  updateEditorialBoardMember
+} from "../controllers/editorialBoardController.js";
 import {
   createJournal,
   deleteJournal,
@@ -12,11 +27,10 @@ import {
   updateJournal
 } from "../controllers/journalController.js";
 import { createIssue } from "../controllers/issueController.js";
-import { createArticle, getArticleById, getArticlesByIssue } from "../controllers/articleController.js";
 import { getAdminPpts, getPptById, getPpts, uploadPpt } from "../controllers/pptController.js";
 import { createVideo, getAdminVideos, getVideos } from "../controllers/videoController.js";
 import { createTestimonial, deleteTestimonial, getTestimonials, updateTestimonial } from "../controllers/testimonialController.js";
-import { createUser, deleteUser, getUsers, revealUserPassword, updateUser } from "../controllers/userController.js";
+import { createUser, deleteUser, getSuperUsers, getUsers, revealUserPassword, updateUser } from "../controllers/userController.js";
 import { protect } from "../middleware/auth.js";
 import { upload } from "../middleware/upload.js";
 
@@ -35,6 +49,11 @@ router.post("/admin/users", protect, createUser);
 router.put("/admin/users/:id", protect, updateUser);
 router.delete("/admin/users/:id", protect, deleteUser);
 router.post("/admin/users/:id/reveal-password", protect, revealUserPassword);
+router.get("/super/users", protect, getSuperUsers);
+router.post("/super/users", protect, createUser);
+router.put("/super/users/:id", protect, updateUser);
+router.delete("/super/users/:id", protect, deleteUser);
+router.post("/super/users/:id/reveal-password", protect, revealUserPassword);
 
 router
   .route("/journals")
@@ -51,9 +70,33 @@ router.get("/journals/:id/issues", getJournalIssues);
 router.post("/journals/:journalId/pdf", protect, upload.single("pdfFile"), uploadJournalPdf);
 
 router.post("/issues", protect, createIssue);
-router.post("/articles", protect, upload.single("pdfFile"), createArticle);
+router.post(
+  "/articles",
+  protect,
+  upload.fields([
+    { name: "pdfFile", maxCount: 1 },
+    { name: "supplementaryFiles", maxCount: 6 }
+  ]),
+  createArticle
+);
 router.get("/issues/:id/articles", getArticlesByIssue);
 router.get("/articles/:id", getArticleById);
+router.get("/user/articles", protect, getUserArticles);
+router.put(
+  "/user/articles/:id",
+  protect,
+  upload.fields([
+    { name: "pdfFile", maxCount: 1 },
+    { name: "supplementaryFiles", maxCount: 6 }
+  ]),
+  updateArticle
+);
+router.patch("/user/articles/:id/status", protect, updateArticleStatus);
+router.delete("/user/articles/:id", protect, deleteArticle);
+router.get("/user/editorial-board", protect, getEditorialBoardMembers);
+router.post("/user/editorial-board", protect, upload.single("profileImage"), createEditorialBoardMember);
+router.put("/user/editorial-board/:id", protect, upload.single("profileImage"), updateEditorialBoardMember);
+router.delete("/user/editorial-board/:id", protect, deleteEditorialBoardMember);
 
 router.post(
   "/journals/:journalId/ppts",

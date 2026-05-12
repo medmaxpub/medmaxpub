@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["admin", "user", "super_admin", "journal_admin"],
+      enum: ["admin", "user", "super_admin", "super_user", "journal_admin"],
       default: "admin"
     },
     assignedJournals: [

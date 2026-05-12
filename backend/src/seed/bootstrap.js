@@ -107,8 +107,9 @@ async function migrateExistingJournalOwners() {
 
 export async function bootstrapAdmin() {
   await repairLegacyUsers();
-  const admins = [
+  const accounts = [
     {
+      role: "admin",
       firstName: process.env.ADMIN_FIRST_NAME || "medmaxpub",
       lastName: process.env.ADMIN_LAST_NAME || "Admin",
       userName: (process.env.ADMIN_USERNAME || "admin").toLowerCase(),
@@ -116,50 +117,51 @@ export async function bootstrapAdmin() {
       password: process.env.ADMIN_PASSWORD || "ChangeMe123!"
     },
     {
-      firstName: process.env.SECOND_SUPER_ADMIN_FIRST_NAME || "medmaxpub",
-      lastName: process.env.SECOND_SUPER_ADMIN_LAST_NAME || "Admin 2",
-      userName: (process.env.SECOND_SUPER_ADMIN_USERNAME || "superadmin2").toLowerCase(),
-      email: process.env.SECOND_SUPER_ADMIN_EMAIL || "superadmin2@medmaxpub.com",
-      password: process.env.SECOND_SUPER_ADMIN_PASSWORD || "ChangeMe123!"
+      role: "super_admin",
+      firstName: process.env.SUPER_USER_FIRST_NAME || process.env.SECOND_SUPER_ADMIN_FIRST_NAME || "medmaxpub",
+      lastName: process.env.SUPER_USER_LAST_NAME || process.env.SECOND_SUPER_ADMIN_LAST_NAME || "Super User",
+      userName: (process.env.SUPER_USER_USERNAME || process.env.SECOND_SUPER_ADMIN_USERNAME || "superuser").toLowerCase(),
+      email: process.env.SUPER_USER_EMAIL || process.env.SECOND_SUPER_ADMIN_EMAIL || "superuser@medmaxpub.com",
+      password: process.env.SUPER_USER_PASSWORD || process.env.SECOND_SUPER_ADMIN_PASSWORD || "ChangeMe123!"
     }
   ];
 
-  for (const admin of admins) {
+  for (const account of accounts) {
     const existingAdmin = await User.findOne({
-      $or: [{ userName: admin.userName }, { email: admin.email }]
+      $or: [{ userName: account.userName }, { email: account.email }]
     });
 
     if (!existingAdmin) {
       await User.create({
-        firstName: admin.firstName,
-        lastName: admin.lastName,
-        userName: admin.userName,
-        email: admin.email,
-        password: admin.password,
-        role: "admin"
+        firstName: account.firstName,
+        lastName: account.lastName,
+        userName: account.userName,
+        email: account.email,
+        password: account.password,
+        role: account.role
       });
       continue;
     }
 
     let shouldSave = false;
 
-    if (normalizeRole(existingAdmin.role) !== "admin") {
-      existingAdmin.role = "admin";
+    if (existingAdmin.role !== account.role) {
+      existingAdmin.role = account.role;
       shouldSave = true;
     }
 
-    if (existingAdmin.firstName !== admin.firstName) {
-      existingAdmin.firstName = admin.firstName;
+    if (existingAdmin.firstName !== account.firstName) {
+      existingAdmin.firstName = account.firstName;
       shouldSave = true;
     }
 
-    if (existingAdmin.lastName !== admin.lastName) {
-      existingAdmin.lastName = admin.lastName;
+    if (existingAdmin.lastName !== account.lastName) {
+      existingAdmin.lastName = account.lastName;
       shouldSave = true;
     }
 
-    if (existingAdmin.userName !== admin.userName) {
-      existingAdmin.userName = admin.userName;
+    if (existingAdmin.userName !== account.userName) {
+      existingAdmin.userName = account.userName;
       shouldSave = true;
     }
 

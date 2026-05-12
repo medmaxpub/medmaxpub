@@ -1,5 +1,5 @@
 import Testimonial from "../models/Testimonial.js";
-import { ensureSuperAdmin } from "../utils/accessControl.js";
+import { ensureElevatedAccess } from "../utils/accessControl.js";
 import { deleteAsset, uploadAsset } from "../utils/assetStorage.js";
 import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -16,7 +16,7 @@ function serializeTestimonial(testimonial) {
 }
 
 export const createTestimonial = asyncHandler(async (req, res) => {
-  ensureSuperAdmin(req.user);
+  ensureElevatedAccess(req.user);
 
   const testimonial = await Testimonial.create({
     name: req.body.name,
@@ -29,7 +29,7 @@ export const createTestimonial = asyncHandler(async (req, res) => {
 });
 
 export const updateTestimonial = asyncHandler(async (req, res) => {
-  ensureSuperAdmin(req.user);
+  ensureElevatedAccess(req.user);
 
   const testimonial = await Testimonial.findById(req.params.id);
 
@@ -51,7 +51,7 @@ export const updateTestimonial = asyncHandler(async (req, res) => {
 });
 
 export const deleteTestimonial = asyncHandler(async (req, res) => {
-  ensureSuperAdmin(req.user);
+  ensureElevatedAccess(req.user);
 
   const testimonial = await Testimonial.findById(req.params.id);
 

@@ -32,7 +32,7 @@ export function AuthProvider({ children }) {
 
   const login = async (identifier, password) => {
     const response = await api.post("/auth/login", { identifier, password });
-    authenticate(response.data);
+    return authenticate(response.data);
   };
 
   const authenticate = (payload) => {
@@ -41,6 +41,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem("medmax-token", payload.token);
     localStorage.setItem("medmax-user", JSON.stringify(normalizedUser));
     setUser(normalizedUser);
+    return normalizedUser;
   };
 
   const logout = () => {
@@ -88,7 +89,8 @@ export function AuthProvider({ children }) {
         beginImpersonation,
         exitImpersonation,
         logout,
-        isAuthenticated: Boolean(user)
+        isAuthenticated: Boolean(user),
+        isSuperUser: user?.role === "super_user"
       }}
     >
       {children}
