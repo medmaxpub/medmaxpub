@@ -7,6 +7,7 @@ import { ensureUploadsDirectory } from "./utils/assetStorage.js";
 dotenv.config();
 
 const port = process.env.PORT || 5000;
+const host = process.env.HOST || "0.0.0.0";
 
 async function startServer() {
   await ensureUploadsDirectory();
@@ -14,8 +15,8 @@ async function startServer() {
   await bootstrapAdmin();
   await seedSampleContent();
 
-  app.listen(port, () => {
-    console.log(`medmaxpub API running on port ${port}`);
+  app.listen(port, host, () => {
+    console.log(`medmaxpub API running on ${host}:${port}`);
   });
 }
 
