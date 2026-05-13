@@ -10,6 +10,7 @@ import IssueAccordion from "../../components/journal/IssueAccordion";
 import { mockJournals } from "../../data/mockData";
 import { normalizePptItem } from "../../utils/pptPreview";
 import { normalizeVideoItem } from "../../utils/videoPlayer";
+import { buildJournalSectionPath, getJournalRouteSlug } from "../../utils/journalLinks";
 
 const sectionTitles = {
   about: "About Journal",
@@ -40,7 +41,9 @@ export default function JournalShell() {
   useEffect(() => {
     withFallback(
       () => api.get(`/journals/${journalUrl}`),
-      useDevelopmentFallback ? mockJournals.find((item) => item.journalUrl === journalUrl) : null
+      useDevelopmentFallback
+        ? mockJournals.find((item) => getJournalRouteSlug(item.publicJournalUrl || item.journalUrl) === journalUrl)
+        : null
     ).then(setJournal);
   }, [journalUrl, useDevelopmentFallback]);
 
@@ -256,7 +259,7 @@ export default function JournalShell() {
       <div className="container-shell">
         <div className="card-panel overflow-hidden">
           <div className="border-b border-brand-border px-5 py-5 sm:px-8 sm:py-6">
-            <JournalMenu journalUrl={journal.journalUrl} />
+            <JournalMenu journalUrl={journal.publicJournalUrl || journal.journalUrl} />
           </div>
           <div className="grid gap-6 px-5 py-5 sm:px-8 sm:py-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-8">
             <div className="rounded-3xl border border-brand-border bg-brand-elevated p-6">

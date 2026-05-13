@@ -6,6 +6,7 @@ import SectionHeader from "../../components/common/SectionHeader";
 import JournalEditorModal from "../../components/super/JournalEditorModal";
 import { getSuperUserJournalsFallback } from "./superUserFallbacks";
 import { initialJournalForm, mapJournalToForm, normalizeItem } from "../../components/super/superUserShared";
+import { buildJournalSectionPath } from "../../utils/journalLinks";
 
 export default function SuperUserJournalsPage() {
   const [journals, setJournals] = useState([]);
@@ -182,7 +183,7 @@ export default function SuperUserJournalsPage() {
                       <td className="px-4 py-4">
                         <div className="flex flex-wrap gap-2">
                           <a
-                            href={`/journals/${journal.journalUrl}/about`}
+                            href={buildJournalSectionPath(journal.publicJournalUrl || journal.journalUrl, "about")}
                             className="button-secondary min-h-10 px-3 py-2"
                             target="_blank"
                             rel="noreferrer"

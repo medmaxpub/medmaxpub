@@ -6,6 +6,7 @@ import EmptyState from "../../components/common/EmptyState";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockJournals, mockVideos } from "../../data/mockData";
 import { buildJournalArchiveInfo, getAssetJournalUrl } from "../../utils/journalArchive";
+import { buildJournalSectionPath } from "../../utils/journalLinks";
 import { hasEmbeddedVideo, normalizeVideoItem } from "../../utils/videoPlayer";
 
 export default function VideosPage() {
@@ -166,7 +167,10 @@ export default function VideosPage() {
                           </a>
                         ) : null}
                         {video.journalInfo?.journalUrl ? (
-                          <Link to={`/journals/${video.journalInfo.journalUrl}/about`} className="button-secondary px-4 py-2">
+                          <Link
+                            to={buildJournalSectionPath(video.journalInfo.publicJournalUrl || video.journalInfo.journalUrl, "about")}
+                            className="button-secondary px-4 py-2"
+                          >
                             Open Journal
                           </Link>
                         ) : null}

@@ -1,3 +1,5 @@
+import { getJournalRouteSlug } from "./journalLinks";
+
 function stripHtml(value = "") {
   return value.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
 }
@@ -20,6 +22,7 @@ export function buildJournalArchiveInfo(journal = {}) {
   return {
     id: journal.id || journal._id,
     journalUrl: journal.journalUrl || "",
+    publicJournalUrl: journal.publicJournalUrl || getJournalRouteSlug(journal.slug || journal.journalUrl || ""),
     title: journal.managingJournalName || "Untitled journal",
     domainName: journal.journalDomainName || "",
     editorName: [journal.firstName, journal.lastName].filter(Boolean).join(" "),
@@ -31,5 +34,5 @@ export function buildJournalArchiveInfo(journal = {}) {
 }
 
 export function getAssetJournalUrl(item = {}) {
-  return item.journalUrl || item.journal?.journalUrl || "";
+  return item.publicJournalUrl || item.journal?.publicJournalUrl || item.journalUrl || item.journal?.journalUrl || "";
 }

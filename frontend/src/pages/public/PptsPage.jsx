@@ -7,6 +7,7 @@ import PptPreviewModal from "../../components/common/PptPreviewModal";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockJournals, mockPpts } from "../../data/mockData";
 import { buildJournalArchiveInfo, getAssetJournalUrl } from "../../utils/journalArchive";
+import { buildJournalSectionPath } from "../../utils/journalLinks";
 import { normalizePptItem } from "../../utils/pptPreview";
 
 export default function PptsPage() {
@@ -168,7 +169,10 @@ export default function PptsPage() {
                             Download PPT
                           </a>
                           {ppt.journalInfo?.journalUrl ? (
-                            <Link to={`/journals/${ppt.journalInfo.journalUrl}/about`} className="button-secondary px-4 py-2">
+                            <Link
+                              to={buildJournalSectionPath(ppt.journalInfo.publicJournalUrl || ppt.journalInfo.journalUrl, "about")}
+                              className="button-secondary px-4 py-2"
+                            >
                               Open Journal
                             </Link>
                           ) : null}

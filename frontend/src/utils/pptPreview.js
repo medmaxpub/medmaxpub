@@ -1,3 +1,5 @@
+import { getJournalRouteSlug } from "./journalLinks";
+
 function isLocalHostname(hostname) {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0";
 }
@@ -143,6 +145,10 @@ export function normalizePptItem(item = {}) {
     fileUrl: pptUrl,
     previewUrl: previewPdfUrl || googleViewerUrl || officeViewerUrl,
     journalTitle: item.journalTitle || item.journal?.managingJournalName || "",
-    journalUrl: item.journalUrl || item.journal?.journalUrl || ""
+    journalUrl: item.journalUrl || item.journal?.journalUrl || "",
+    publicJournalUrl:
+      item.publicJournalUrl ||
+      item.journal?.publicJournalUrl ||
+      getJournalRouteSlug(item.journalUrl || item.journal?.journalUrl || "")
   };
 }

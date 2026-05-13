@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { buildJournalSectionPath } from "../../utils/journalLinks";
 
 const items = [
   { label: "About Journal", slug: "about" },
@@ -16,7 +17,7 @@ export default function JournalMenu({ journalUrl }) {
       {items.map((item) => (
         <NavLink
           key={item.slug}
-          to={`/journals/${journalUrl}/${item.slug}`}
+          to={buildJournalSectionPath(journalUrl, item.slug)}
           className={({ isActive }) =>
             `journal-nav-link ${
               isActive ? "journal-nav-link-active" : ""

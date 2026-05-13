@@ -17,15 +17,44 @@ function normalizeText(value) {
   return String(value || "").trim();
 }
 
+function safeDecode(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function extractJournalValue(value) {
+  const normalized = safeDecode(normalizeText(value)).replace(/\\/g, "/");
+
+  if (!normalized) {
+    return "";
+  }
+
+  const withoutProtocol = normalized.replace(/^https?:\/+/i, "").replace(/^www\./i, "");
+  const journalMatch = withoutProtocol.match(/(?:^|\/)journal\/([^/?#]+)/i);
+
+  if (journalMatch?.[1]) {
+    return journalMatch[1];
+  }
+
+  return withoutProtocol.split("/").filter(Boolean).pop() || withoutProtocol;
+}
+
 function normalizeUserName(value) {
   return normalizeText(value).toLowerCase();
 }
 
 function normalizeJournalUrl(value) {
-  return normalizeText(value)
+  return extractJournalValue(value)
     .toLowerCase()
-    .replace(/^\/+|\/+$/g, "")
-    .replace(/\s+/g, "-");
+    .replace(/%20/g, "-")
+    .replace(/\s+/g, "-")
+    .replace(/-?home-[a-z0-9-]+$/i, "")
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 function normalizeJournalSlug(value) {
@@ -106,6 +135,7 @@ function serializeJournalSummary(journal) {
         ? normalizeText(journal.owner.userName)
         : normalizeText(journal.userName),
     slug: normalizeText(journal.slug),
+    publicJournalUrl: normalizeJournalUrl(journal.slug || journal.journalUrl || journal.managingJournalName),
     managingJournalName: normalizeText(journal.managingJournalName),
     journalDomainName: normalizeText(journal.journalDomainName),
     journalUrl: normalizeText(journal.journalUrl),
@@ -236,6 +266,10 @@ async function ensureUniqueJournalUrl(journalUrl, currentJournalId = null) {
   }
 }
 
+function escapeRegExp(value) {
+  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 async function ensureUniqueUserName(userName, currentUserId = null) {
   const existingUser = await User.findOne({ userName });
 
@@ -336,9 +370,29 @@ export const getAdminJournals = asyncHandler(async (req, res) => {
 });
 
 export const getJournalByUrl = asyncHandler(async (req, res) => {
-  const journal = await Journal.findOne({ journalUrl: normalizeJournalUrl(req.params.journalUrl) })
+  const normalizedRequestedUrl = normalizeJournalUrl(req.params.journalUrl);
+
+  let journal = await Journal.findOne({
+    $or: [{ journalUrl: normalizedRequestedUrl }, { slug: normalizedRequestedUrl }]
+  })
     .populate("owner", "firstName lastName userName")
     .lean();
+
+  if (!journal) {
+    const looseCandidates = await Journal.find({
+      $or: [
+        { journalUrl: { $regex: escapeRegExp(normalizedRequestedUrl), $options: "i" } },
+        { slug: { $regex: escapeRegExp(normalizedRequestedUrl), $options: "i" } }
+      ]
+    })
+      .populate("owner", "firstName lastName userName")
+      .lean();
+
+    journal =
+      looseCandidates.find(
+        (item) => normalizeJournalUrl(item.slug || item.journalUrl || item.managingJournalName) === normalizedRequestedUrl
+      ) || null;
+  }
 
   if (!journal) {
     throw new AppError("Journal not found", 404);

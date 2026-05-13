@@ -1,3 +1,5 @@
+import { getJournalRouteSlug } from "./journalLinks";
+
 export function normalizeVideoItem(video = {}) {
   return {
     ...video,
@@ -8,7 +10,11 @@ export function normalizeVideoItem(video = {}) {
     thumbnailUrl: video.thumbnailUrl || video.thumbnail?.secure_url || "",
     videoUrl: video.videoUrl || video.videoFile?.secure_url || "",
     journalTitle: video.journal?.managingJournalName || video.journalTitle || "",
-    journalUrl: video.journal?.journalUrl || video.journalUrl || ""
+    journalUrl: video.journal?.journalUrl || video.journalUrl || "",
+    publicJournalUrl:
+      video.publicJournalUrl ||
+      video.journal?.publicJournalUrl ||
+      getJournalRouteSlug(video.journal?.journalUrl || video.journalUrl || "")
   };
 }
 
