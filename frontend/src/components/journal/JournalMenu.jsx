@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 const items = [
   { label: "About Journal", slug: "about" },
   { label: "Journal Instructions", slug: "instructions" },
+  { label: "Journal PDFs", slug: "pdfs" },
   { label: "Journal PPTs", slug: "ppts" },
   { label: "Journal Videos", slug: "videos" },
   { label: "Current Issue", slug: "current-issue" },

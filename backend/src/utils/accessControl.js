@@ -6,19 +6,15 @@ export function normalizeRole(role) {
     .trim()
     .toLowerCase();
 
-  if (normalized === "super_admin" || normalized === "super_user") {
+  if (normalized === "super_admin" || normalized === "super_user" || normalized === "admin") {
     return "super_user";
-  }
-
-  if (normalized === "admin" || normalized === "journal_admin") {
-    return "admin";
   }
 
   return "user";
 }
 
 export function isAdmin(user) {
-  return normalizeRole(user?.role) === "admin";
+  return normalizeRole(user?.role) === "super_user";
 }
 
 export function isSuperUser(user) {

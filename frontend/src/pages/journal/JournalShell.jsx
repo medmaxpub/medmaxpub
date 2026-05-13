@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
+import PdfPreviewModal from "../../components/common/PdfPreviewModal";
 import PptPreviewModal from "../../components/common/PptPreviewModal";
 import JournalMenu from "../../components/journal/JournalMenu";
 import IssueAccordion from "../../components/journal/IssueAccordion";
@@ -13,6 +14,7 @@ import { normalizeVideoItem } from "../../utils/videoPlayer";
 const sectionTitles = {
   about: "About Journal",
   instructions: "Journal Instructions",
+  pdfs: "Journal PDFs",
   ppts: "Journal PPTs",
   videos: "Journal Videos",
   "current-issue": "Current Issue",
@@ -31,6 +33,7 @@ export default function JournalShell() {
   const { journalUrl, section = "about" } = useParams();
   const [journal, setJournal] = useState(null);
   const [activePreview, setActivePreview] = useState(null);
+  const [activePdfPreview, setActivePdfPreview] = useState(null);
   const [activeVideoId, setActiveVideoId] = useState(null);
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
@@ -120,6 +123,37 @@ export default function JournalShell() {
 
     if (section === "archive") {
       return <IssueAccordion archive={journal.archive} />;
+    }
+
+    if (section === "pdfs") {
+      const pdfFiles = journal.pdfFiles || [];
+
+      if (!pdfFiles.length) {
+        return <EmptyState title="No journal PDFs available" description="This journal has not published any PDF resources yet." />;
+      }
+
+      return (
+        <div className="grid gap-6 lg:grid-cols-2">
+          {pdfFiles.map((pdf) => (
+            <article key={pdf.id} className="rounded-3xl border border-brand-border bg-brand-surface p-5">
+              <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">
+                Uploaded {pdf.uploadedAt ? new Date(pdf.uploadedAt).toLocaleDateString() : "recently"}
+              </p>
+              <h4 className="mt-3 text-xl font-semibold text-brand-ink">{pdf.title}</h4>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <button type="button" className="button-soft px-4 py-2" onClick={() => setActivePdfPreview(pdf)}>
+                  <ExternalLink size={16} className="mr-2" />
+                  View PDF
+                </button>
+                <a href={pdf.fileUrl} target="_blank" rel="noreferrer" className="button-primary px-4 py-2">
+                  <Download size={16} className="mr-2" />
+                  Download PDF
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      );
     }
 
     if (section === "ppts") {
@@ -241,7 +275,16 @@ export default function JournalShell() {
                   <p className="mt-2 text-lg font-semibold text-brand-ink">{journal.journalUrl}</p>
                 </div>
               </div>
-              {journal.pdfFileUrl ? (
+              {journal.pdfFiles?.length ? (
+                <div className="mt-5 flex flex-wrap gap-3">
+                  {journal.pdfFiles.map((item) => (
+                    <a key={item.id} href={item.fileUrl} target="_blank" rel="noreferrer" className="button-secondary inline-flex px-4 py-2">
+                      <FileText size={16} className="mr-2" />
+                      {item.title}
+                    </a>
+                  ))}
+                </div>
+              ) : journal.pdfFileUrl ? (
                 <a href={journal.pdfFileUrl} target="_blank" rel="noreferrer" className="button-secondary mt-5 inline-flex px-4 py-2">
                   <FileText size={16} className="mr-2" />
                   Open Journal PDF
@@ -258,6 +301,7 @@ export default function JournalShell() {
         </div>
       </div>
       <PptPreviewModal ppt={activePreview} onClose={() => setActivePreview(null)} />
+      <PdfPreviewModal pdf={activePdfPreview} onClose={() => setActivePdfPreview(null)} />
     </div>
   );
 }

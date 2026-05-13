@@ -10,7 +10,7 @@ export default function AdminLoginPage() {
   const { login, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const requestedSuperPortal = location.pathname.startsWith("/superuser") || location.pathname.startsWith("/super");
+  const requestedUserPortal = location.pathname.startsWith("/user");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -20,16 +20,16 @@ export default function AdminLoginPage() {
     try {
       const authenticatedUser = await login(identifier, password);
 
-      if (authenticatedUser?.role === "super_user") {
-        navigate("/superuser/dashboard");
+      if (authenticatedUser?.role === "super_user" || authenticatedUser?.role === "admin") {
+        navigate("/admin/dashboard");
       } else if (authenticatedUser?.role === "user") {
-        navigate("/user/articles-in-press");
+        navigate("/user/dashboard");
       } else {
         logout();
-        setError("Regular admin accounts are disabled. Use the super user dashboard only.");
+        setError("This account does not have access to the portal.");
       }
     } catch (requestError) {
-      setError("Login failed. Make sure the backend is running and the super user account exists.");
+      setError(requestError.response?.data?.message || "Login failed. Please check your username and password.");
     } finally {
       setIsSubmitting(false);
     }
@@ -39,9 +39,9 @@ export default function AdminLoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-brand-mist px-4 py-12">
       <form onSubmit={handleSubmit} className="card-panel w-full max-w-md p-8">
         <img src="/medmax-logo.png" alt="Medmax Publishers" className="h-16 w-auto" />
-        <span className="eyebrow">{requestedSuperPortal ? "Super User Portal" : "Admin Portal"}</span>
+        <span className="eyebrow">{requestedUserPortal ? "User Portal" : "Portal Login"}</span>
         <h1 className="font-display text-4xl font-semibold text-brand-ink">Secure Login</h1>
-        <p className="mt-4 text-brand-slate">JWT authentication protects super-user, admin, and journal publishing workflows.</p>
+        <p className="mt-4 text-brand-slate">Use the same login for admin and journal user accounts. Access is routed automatically after sign in.</p>
 
         <div className="mt-8 space-y-4">
           <input value={identifier} onChange={(event) => setIdentifier(event.target.value)} placeholder="User Name or Email" required />

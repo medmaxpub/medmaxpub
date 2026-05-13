@@ -23,19 +23,19 @@ export default function UserLayout() {
   const handleExitImpersonation = () => {
     const originalRole = user?.impersonator?.role;
     exitImpersonation();
-    navigate(originalRole === "super_user" ? "/superuser/dashboard" : "/admin/dashboard");
+    navigate(originalRole === "super_user" ? "/admin/dashboard" : "/admin/dashboard");
   };
 
   return (
-    <div className="min-h-screen bg-brand-mist">
+    <div className="min-h-screen bg-white">
       <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
-        <aside className="border-r border-brand-border/70 bg-brand-surface/80 px-6 py-8 backdrop-blur-xl">
-          <div className="inline-flex rounded-[1.15rem] border border-brand-border/70 bg-brand-elevated/80 px-4 py-3 shadow-panel">
+        <aside className="border-r border-brand-border bg-white px-6 py-8">
+          <div className="inline-flex rounded-[1.15rem] border border-brand-border bg-brand-elevated px-4 py-3 shadow-panel">
             <img src="/medmax-logo.png" alt="Medmax Publishers" className="h-12 w-auto" />
           </div>
           <p className="mt-3 text-xs font-semibold uppercase tracking-[0.26em] text-brand-navy">Journal User Portal</p>
 
-          <div className="mt-8 rounded-[1.15rem] border border-brand-border/70 bg-brand-elevated/70 p-4 shadow-panel">
+          <div className="mt-8 rounded-[1.15rem] border border-brand-border bg-brand-elevated p-4 shadow-panel">
             <p className="text-sm text-brand-slate">Signed in as</p>
             <p className="mt-1 text-lg font-semibold text-brand-ink">{user?.name || "Journal User"}</p>
             <p className="mt-1 text-sm text-brand-slate">@{user?.userName}</p>
@@ -49,8 +49,8 @@ export default function UserLayout() {
                 className={({ isActive }) =>
                   `flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium transition ${
                     isActive
-                      ? "border-brand-navy/60 bg-brand-navy/10 text-brand-ink shadow-[0_0_0_1px_rgba(88,166,255,0.12),0_20px_34px_rgba(2,6,23,0.3)]"
-                      : "border-transparent bg-transparent text-brand-slate hover:border-brand-border/60 hover:bg-brand-surface/50 hover:text-brand-ink"
+                      ? "border-brand-navy/30 bg-blue-50 text-brand-ink shadow-[0_10px_24px_rgba(37,99,235,0.08)]"
+                      : "border-transparent bg-transparent text-brand-slate hover:border-brand-border hover:bg-brand-sky hover:text-brand-ink"
                   }`
                 }
               >
@@ -68,7 +68,7 @@ export default function UserLayout() {
 
         <div className="overflow-x-hidden">
           {isImpersonating ? (
-            <div className="border-b border-brand-gold/30 bg-brand-elevated px-4 py-3 text-sm text-brand-ink sm:px-6 lg:px-8">
+            <div className="border-b border-brand-border bg-brand-elevated px-4 py-3 text-sm text-brand-ink sm:px-6 lg:px-8">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p>
                   Super User logged in as <span className="font-semibold">{user?.userName}</span>
@@ -80,7 +80,7 @@ export default function UserLayout() {
             </div>
           ) : null}
 
-          <header className="border-b border-brand-border/70 bg-brand-surface/55 px-4 py-5 backdrop-blur-xl sm:px-6 lg:px-8">
+          <header className="border-b border-brand-border bg-white px-4 py-5 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-brand-navy">Publishing Workspace</p>

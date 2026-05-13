@@ -79,16 +79,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       clearAuthState();
-
-      if (window.location.pathname.startsWith("/superuser")) {
-        window.location.href = "/superuser/login";
-      } else if (window.location.pathname.startsWith("/super")) {
-        window.location.href = "/superuser/login";
-      } else if (window.location.pathname.startsWith("/user")) {
-        window.location.href = "/user/login";
-      } else if (window.location.pathname.startsWith("/admin")) {
-        window.location.href = "/superuser/login";
-      }
+      window.location.href = "/login";
     }
 
     return Promise.reject(error);

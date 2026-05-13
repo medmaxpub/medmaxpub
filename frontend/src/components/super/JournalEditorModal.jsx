@@ -1,4 +1,5 @@
 import SectionHeader from "../common/SectionHeader";
+import { X } from "lucide-react";
 
 export default function JournalEditorModal({
   open,
@@ -8,15 +9,25 @@ export default function JournalEditorModal({
   status,
   onSubmit,
   onClose,
-  isCreateForExistingUser = false
+  isCreateForExistingUser = false,
+  ownerNotice = ""
 }) {
   if (!open) {
     return null;
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6">
-      <form onSubmit={onSubmit} className="card-panel w-full max-w-4xl p-6">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 px-4 py-6">
+      <div className="flex min-h-full items-start justify-center">
+        <form onSubmit={onSubmit} className="card-panel relative my-2 w-full max-w-4xl max-h-[calc(100vh-2rem)] overflow-y-auto p-6 sm:p-7">
+          <button
+            type="button"
+            className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-brand-border bg-white text-brand-slate hover:border-brand-crimson hover:text-brand-crimson"
+            onClick={onClose}
+            aria-label="Close journal editor"
+          >
+            <X size={18} />
+          </button>
         <SectionHeader
           label="Journals"
           title={modeLabel}
@@ -27,7 +38,7 @@ export default function JournalEditorModal({
           }
         />
 
-        {!isCreateForExistingUser ? (
+        {!isCreateForExistingUser && !ownerNotice ? (
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <input
               value={form.firstName}
@@ -57,7 +68,11 @@ export default function JournalEditorModal({
           </div>
         ) : (
           <div className="mt-6 rounded-3xl border border-brand-border bg-brand-elevated p-4 text-sm text-brand-slate">
-            Journal will be added for user <span className="font-semibold text-brand-ink">@{form.username}</span>.
+            {ownerNotice || (
+              <>
+                Journal will be added for user <span className="font-semibold text-brand-ink">@{form.username}</span>.
+              </>
+            )}
           </div>
         )}
 
@@ -135,7 +150,8 @@ export default function JournalEditorModal({
             Cancel
           </button>
         </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

@@ -49,16 +49,16 @@ export default function App() {
         <Route path="/journals/:journalUrl/:section" element={<JournalShell />} />
       </Route>
 
-      <Route path="/admin/login" element={<Navigate to="/superuser/login" replace />} />
-      <Route path="/admin" element={<Navigate to="/superuser/dashboard" replace />} />
-      <Route path="/admin/*" element={<Navigate to="/superuser/dashboard" replace />} />
+      <Route path="/login" element={<AdminLoginPage />} />
+      <Route path="/admin/login" element={<AdminLoginPage />} />
       <Route path="/user/login" element={<AdminLoginPage />} />
-      <Route path="/super/login" element={<Navigate to="/superuser/login" replace />} />
+      <Route path="/super/login" element={<AdminLoginPage />} />
       <Route path="/superuser/login" element={<AdminLoginPage />} />
 
-      <Route element={<ProtectedRoute allowedRoles={["user"]} redirectTo="/user/login" />}>
+      <Route element={<ProtectedRoute allowedRoles={["user"]} redirectTo="/login" />}>
         <Route path="/user" element={<UserLayout />}>
-          <Route index element={<Navigate to="articles-in-press" replace />} />
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<Navigate to="/user/articles-in-press" replace />} />
           <Route path="welcome" element={<UserWelcomePage />} />
           <Route path="editorial-board" element={<UserEditorialBoardPage />} />
           <Route path="editorial-board/add" element={<UserEditorialBoardFormPage />} />
@@ -76,7 +76,9 @@ export default function App() {
         </Route>
       </Route>
 
-      <Route element={<ProtectedRoute allowedRoles={["super_user"]} redirectTo="/superuser/login" />}>
+      <Route element={<ProtectedRoute allowedRoles={["super_user"]} redirectTo="/login" />}>
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/admin/dashboard" element={<Navigate to="/superuser/dashboard" replace />} />
         <Route path="/super" element={<Navigate to="/superuser/dashboard" replace />} />
         <Route path="/superuser" element={<SuperUserLayout />}>
           <Route index element={<Navigate to="dashboard" replace />} />

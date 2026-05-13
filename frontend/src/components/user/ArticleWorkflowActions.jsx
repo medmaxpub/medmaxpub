@@ -1,25 +1,25 @@
 function getStatusClasses(tone) {
   if (tone === "current") {
-    return "border-cyan-400/40 bg-cyan-400/10 text-cyan-100";
+    return "border-cyan-200 bg-cyan-50 text-cyan-700";
   }
 
   if (tone === "archived") {
-    return "border-amber-400/40 bg-amber-400/10 text-amber-100";
+    return "border-amber-200 bg-amber-50 text-amber-700";
   }
 
-  return "border-violet-400/40 bg-violet-400/10 text-violet-100";
+  return "border-violet-200 bg-violet-50 text-violet-700";
 }
 
 function getActionClasses(variant) {
   if (variant === "danger") {
-    return "border-rose-500/30 bg-rose-500/10 text-rose-100 hover:border-rose-400 hover:bg-rose-500/20";
+    return "border-rose-200 bg-rose-50 text-rose-700 hover:border-rose-300 hover:bg-rose-100";
   }
 
   if (variant === "muted") {
-    return "border-brand-border bg-brand-surface text-brand-slate hover:border-brand-teal hover:text-brand-ink";
+    return "border-brand-border bg-white text-brand-slate hover:border-brand-teal hover:bg-brand-sky hover:text-brand-ink";
   }
 
-  return "border-brand-teal/40 bg-brand-sky text-brand-ink hover:border-brand-teal hover:bg-brand-elevated";
+  return "border-brand-navy/20 bg-blue-50 text-brand-ink hover:border-brand-navy/40 hover:bg-blue-100";
 }
 
 export default function ArticleWorkflowActions({ statusLabel, statusTone = "in-press", actions = [] }) {
@@ -27,7 +27,7 @@ export default function ArticleWorkflowActions({ statusLabel, statusTone = "in-p
     <div className="flex flex-col gap-3">
       {statusLabel ? (
         <span
-          className={`inline-flex w-fit rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${getStatusClasses(statusTone)}`}
+          className={`inline-flex w-fit rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] ${getStatusClasses(statusTone)}`}
         >
           {statusLabel}
         </span>
@@ -41,7 +41,9 @@ export default function ArticleWorkflowActions({ statusLabel, statusTone = "in-p
             <button
               key={action.label}
               type="button"
-              className={`inline-flex items-center rounded-full border px-3 py-2 text-xs font-semibold transition ${getActionClasses(action.variant)}`}
+              className={`inline-flex min-h-10 items-center rounded-full border px-3 py-2 text-xs font-semibold transition ${getActionClasses(
+                action.variant
+              )}`}
               onClick={action.onClick}
             >
               {Icon ? <Icon size={13} className="mr-2" /> : null}

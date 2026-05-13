@@ -27,13 +27,13 @@ export default function AboutMedmaxSection() {
               </div>
             ))}
 
-            <div className="card-panel bg-brand-navy p-6 text-white">
-              <p className="text-xs uppercase tracking-[0.22em] text-brand-gold">Coverage</p>
+            <div className="card-panel p-6">
+              <p className="text-xs uppercase tracking-[0.22em] text-brand-crimson">Coverage</p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 {aboutMedmaxCoverage.map((item) => (
                   <div
                     key={item}
-                    className="rounded-2xl border border-brand-gold/30 bg-white/5 px-4 py-3 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+                    className="rounded-2xl border border-brand-border bg-brand-elevated px-4 py-3 text-sm font-semibold text-brand-ink"
                   >
                     {item}
                   </div>

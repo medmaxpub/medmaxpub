@@ -54,7 +54,7 @@ async function repairLegacyUsers() {
       { _id: user._id },
       {
         $set: {
-          firstName: fallbackName(user.firstName, normalizeRole(user.role) === "admin" ? "Admin" : "Journal"),
+          firstName: fallbackName(user.firstName, normalizeRole(user.role) === "super_user" ? "Admin" : "Journal"),
           lastName: fallbackName(user.lastName, derivedBase || "User")
         }
       }

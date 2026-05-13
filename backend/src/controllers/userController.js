@@ -6,7 +6,7 @@ import Ppt from "../models/Ppt.js";
 import User from "../models/User.js";
 import Video from "../models/Video.js";
 import { decryptPassword } from "../utils/passwordVault.js";
-import { ensureSuperAdmin, ensureUserAccess, normalizeRole } from "../utils/accessControl.js";
+import { ensureSuperAdmin, ensureUserAccess, hasElevatedAccess, normalizeRole } from "../utils/accessControl.js";
 import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -116,7 +116,7 @@ async function loadUsersWithJournals(filter = {}) {
 }
 
 export const getUsers = asyncHandler(async (req, res) => {
-  if (normalizeRole(req.user.role) === "admin") {
+  if (hasElevatedAccess(req.user)) {
     res.json(await loadUsersWithJournals({ role: { $nin: ["admin", "super_admin", "super_user"] } }));
     return;
   }

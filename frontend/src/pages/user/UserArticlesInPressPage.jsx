@@ -1,10 +1,12 @@
-import { Archive, ArrowRightLeft, Eye, Pencil, Plus, Trash2 } from "lucide-react";
+import { Archive, ArrowRightLeft, Eye, FileText, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import SectionHeader from "../../components/common/SectionHeader";
 import ArticlePreviewModal from "../../components/user/ArticlePreviewModal";
+import UserJournalCreateAction from "../../components/user/UserJournalCreateAction";
+import JournalPdfUploadModal from "../../components/user/JournalPdfUploadModal";
 import ArticleWorkflowActions from "../../components/user/ArticleWorkflowActions";
 import UserJournalSelector from "../../components/user/UserJournalSelector";
 import { ARTICLE_STATUSES, stripHtml } from "../../components/user/userPortalShared";
@@ -18,11 +20,13 @@ export default function UserArticlesInPressPage() {
     selectedJournalId,
     setSelectedJournalId,
     loading: journalLoading,
-    error: journalError
+    error: journalError,
+    reloadJournal
   } = useManagedJournal();
   const [articles, setArticles] = useState([]);
   const [statusMessage, setStatusMessage] = useState("");
   const [previewArticle, setPreviewArticle] = useState(null);
+  const [pdfModalOpen, setPdfModalOpen] = useState(false);
 
   const currentMonthLabel = new Intl.DateTimeFormat("en-US", {
     month: "long",
@@ -92,10 +96,17 @@ export default function UserArticlesInPressPage() {
             title="Journal workspace unavailable"
             description={journalError || "No managed journal is linked to this account yet."}
           />
-          <div className="mt-6">
+          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <EmptyState
               title="No journal assigned"
               description="Assign a journal to this user account first. Once a journal is linked, article workflow pages will load automatically."
+            />
+            <UserJournalCreateAction
+              onCreated={async (savedJournal, message) => {
+                await reloadJournal();
+                setSelectedJournalId(savedJournal.id);
+                setStatusMessage(message);
+              }}
             />
           </div>
         </section>
@@ -115,21 +126,35 @@ export default function UserArticlesInPressPage() {
               <UserJournalSelector journals={journals} selectedJournalId={selectedJournalId} onChange={setSelectedJournalId} />
             </div>
 
-            <button
-              type="button"
-              className="button-primary px-4 py-2"
-              onClick={() =>
-                navigate("/user/articles-in-press/add", {
-                  state: {
-                    journalId: selectedJournalId,
-                    returnTo: "/user/articles-in-press"
-                  }
-                })
-              }
-            >
-              <Plus size={16} className="mr-2" />
-              Add Article
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <UserJournalCreateAction
+                className="button-secondary px-4 py-2"
+                onCreated={async (savedJournal, message) => {
+                  await reloadJournal();
+                  setSelectedJournalId(savedJournal.id);
+                  setStatusMessage(message);
+                }}
+              />
+              <button type="button" className="button-secondary px-4 py-2" onClick={() => setPdfModalOpen(true)}>
+                <FileText size={16} className="mr-2" />
+                Add PDF
+              </button>
+              <button
+                type="button"
+                className="button-primary px-4 py-2"
+                onClick={() =>
+                  navigate("/user/articles-in-press/add", {
+                    state: {
+                      journalId: selectedJournalId,
+                      returnTo: "/user/articles-in-press"
+                    }
+                  })
+                }
+              >
+                <Plus size={16} className="mr-2" />
+                Add Article
+              </button>
+            </div>
           </div>
         </div>
 
@@ -177,9 +202,7 @@ export default function UserArticlesInPressPage() {
                         {article.releaseMonth || "NA"}-{article.releaseYear || "NA"}
                       </td>
                       <td className="px-4 py-4">
-                        <span className="inline-flex rounded-full border border-violet-400/40 bg-violet-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-violet-100">
-                          In Press
-                        </span>
+                        <ArticleWorkflowActions statusLabel="In Press" statusTone="in-press" />
                       </td>
                       <td className="px-4 py-4">
                         <ArticleWorkflowActions
@@ -245,6 +268,13 @@ export default function UserArticlesInPressPage() {
       </section>
 
       <ArticlePreviewModal article={previewArticle} onClose={() => setPreviewArticle(null)} />
+      <JournalPdfUploadModal
+        open={pdfModalOpen}
+        journalId={selectedJournalId}
+        journalName={journal?.managingJournalName}
+        onClose={() => setPdfModalOpen(false)}
+        onUploaded={(message) => setStatusMessage(message)}
+      />
     </div>
   );
 }

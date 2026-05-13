@@ -5,14 +5,14 @@ function getJournalCoverImage(journal) {
     return journal.coverImage;
   }
 
-  return `https://placehold.co/640x820/1b2438/f8fafc?text=${encodeURIComponent(journal.managingJournalName || "Medmax Journal")}`;
+  return `https://placehold.co/640x820/ffffff/111827?text=${encodeURIComponent(journal.managingJournalName || "Medmax Journal")}`;
 }
 
 export default function JournalCard({ journal }) {
   return (
     <Link key={journal.id} to={`/journals/${journal.journalUrl}/about`} className="journal-card-link">
       <article className="card-panel h-full overflow-hidden p-0">
-        <div className="aspect-[4/5] overflow-hidden bg-brand-elevated">
+        <div className="aspect-[4/5] overflow-hidden bg-brand-sky">
           <img
             src={getJournalCoverImage(journal)}
             alt={`${journal.managingJournalName} cover`}

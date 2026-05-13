@@ -67,7 +67,7 @@ router
 
 router.get("/journals/:journalUrl", getJournalByUrl);
 router.get("/journals/:id/issues", getJournalIssues);
-router.post("/journals/:journalId/pdf", protect, upload.single("pdfFile"), uploadJournalPdf);
+router.post("/journals/:journalId/pdf", protect, upload.array("pdfFile"), uploadJournalPdf);
 
 router.post("/issues", protect, createIssue);
 router.post(

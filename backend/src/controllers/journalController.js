@@ -2,6 +2,7 @@ import Article from "../models/Article.js";
 import EditorialBoardMember from "../models/EditorialBoardMember.js";
 import Issue from "../models/Issue.js";
 import Journal from "../models/Journal.js";
+import JournalPdf from "../models/JournalPdf.js";
 import Ppt from "../models/Ppt.js";
 import User from "../models/User.js";
 import Video from "../models/Video.js";
@@ -27,7 +28,16 @@ function normalizeJournalUrl(value) {
     .replace(/\s+/g, "-");
 }
 
+function normalizeJournalSlug(value) {
+  return normalizeJournalUrl(value)
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 function buildJournalPayload(body) {
+  const normalizedJournalUrl = normalizeJournalUrl(body.journalUrl);
+
   return {
     ownerUserId: normalizeText(body.ownerUserId),
     firstName: normalizeText(body.firstName),
@@ -36,7 +46,8 @@ function buildJournalPayload(body) {
     password: normalizeText(body.password),
     managingJournalName: normalizeText(body.managingJournalName),
     journalDomainName: normalizeText(body.journalDomainName),
-    journalUrl: normalizeJournalUrl(body.journalUrl),
+    journalUrl: normalizedJournalUrl,
+    slug: normalizeJournalSlug(body.slug || normalizedJournalUrl || body.managingJournalName),
     aboutJournal: normalizeText(body.aboutJournal),
     journalInstructions: normalizeText(body.journalInstructions)
   };
@@ -47,6 +58,7 @@ function validateJournalPayload(payload, options = {}) {
   const requiredFields = {
     managingJournalName: "Managing journal name",
     journalDomainName: "Journal domain name",
+    slug: "Journal slug",
     journalUrl: "Journal URL",
     aboutJournal: "About journal",
     journalInstructions: "Journal instructions"
@@ -67,6 +79,18 @@ function validateJournalPayload(payload, options = {}) {
 }
 
 function serializeJournalSummary(journal) {
+  const legacyPdfFiles =
+    journal.pdfFile && !(journal.pdfFiles || []).length
+      ? [
+          {
+            id: `legacy-${journal._id}`,
+            title: `${normalizeText(journal.managingJournalName) || "Journal"} PDF`,
+            fileUrl: journal.pdfFile?.secure_url || "",
+            uploadedAt: journal.pdfFile?.uploaded_at || ""
+          }
+        ]
+      : [];
+
   return {
     id: journal._id,
     ownerUserId: journal.owner?._id || journal.owner,
@@ -81,18 +105,29 @@ function serializeJournalSummary(journal) {
       journal.owner && typeof journal.owner === "object"
         ? normalizeText(journal.owner.userName)
         : normalizeText(journal.userName),
+    slug: normalizeText(journal.slug),
     managingJournalName: normalizeText(journal.managingJournalName),
     journalDomainName: normalizeText(journal.journalDomainName),
     journalUrl: normalizeText(journal.journalUrl),
     aboutJournal: normalizeText(journal.aboutJournal),
     journalInstructions: normalizeText(journal.journalInstructions),
-    pdfFileUrl: journal.pdfFile?.secure_url || ""
+    pdfFileUrl: journal.pdfFile?.secure_url || "",
+    pdfFiles: [
+      ...(journal.pdfFiles || []).map((item) => ({
+        id: item._id,
+        title: item.title,
+        fileUrl: item.file?.secure_url || "",
+        uploadedAt: item.createdAt || item.file?.uploaded_at || ""
+      })),
+      ...legacyPdfFiles
+    ]
   };
 }
 
 async function buildJournalDetails(journal) {
   const issues = await Issue.find({ journal: journal._id }).sort({ year: -1, volume: -1, issue: -1 }).lean();
   const ppts = await Ppt.find({ journal: journal._id }).sort({ createdAt: -1 }).lean();
+  const pdfFiles = await JournalPdf.find({ journal: journal._id }).sort({ createdAt: -1 }).lean();
   const videos = await Video.find({ journal: journal._id }).sort({ createdAt: -1 }).lean();
   const issueIds = issues.map((item) => item._id);
   const articles = await Article.find({ issue: { $in: issueIds } }).lean();
@@ -175,6 +210,12 @@ async function buildJournalDetails(journal) {
         }
       : null,
     archive,
+    pdfFiles: pdfFiles.map((item) => ({
+      id: item._id,
+      title: item.title,
+      fileUrl: item.file?.secure_url || "",
+      uploadedAt: item.createdAt || item.file?.uploaded_at || ""
+    })),
     ppts: ppts.map((ppt) => serializePpt(ppt)),
     videos: videos.map((video) => ({
       id: video._id,
@@ -226,11 +267,16 @@ async function upsertLinkedOwner(req, payload, existingJournal = null) {
       throw new AppError("User account not found", 404);
     }
 
-    await ensureUniqueUserName(payload.userName, owner._id);
-    owner.firstName = payload.firstName;
-    owner.lastName = payload.lastName;
-    owner.userName = payload.userName;
-    owner.password = payload.password;
+    const nextUserName = payload.userName || owner.userName;
+    await ensureUniqueUserName(nextUserName, owner._id);
+    owner.firstName = payload.firstName || owner.firstName;
+    owner.lastName = payload.lastName || owner.lastName;
+    owner.userName = nextUserName;
+
+    if (payload.password) {
+      owner.password = payload.password;
+    }
+
     owner.role = "user";
     await owner.save();
     return owner;
@@ -303,18 +349,20 @@ export const getJournalByUrl = asyncHandler(async (req, res) => {
 
 export const createJournal = asyncHandler(async (req, res) => {
   const payload = buildJournalPayload(req.body);
-  validateJournalPayload(payload);
+  const isUserOwnedCreate = normalizeRole(req.user.role) === "user";
+  validateJournalPayload(payload, { requireLinkedUserFields: !isUserOwnedCreate && !payload.ownerUserId });
   await ensureUniqueJournalUrl(payload.journalUrl);
 
   const owner = await upsertLinkedOwner(req, payload);
 
-  const ownerFirstName = payload.ownerUserId ? owner.firstName : payload.firstName;
-  const ownerLastName = payload.ownerUserId ? owner.lastName : payload.lastName;
+  const ownerFirstName = isUserOwnedCreate || payload.ownerUserId ? owner.firstName : payload.firstName;
+  const ownerLastName = isUserOwnedCreate || payload.ownerUserId ? owner.lastName : payload.lastName;
 
   const journal = await Journal.create({
     owner: owner._id,
     firstName: ownerFirstName,
     lastName: ownerLastName,
+    slug: payload.slug,
     managingJournalName: payload.managingJournalName,
     journalDomainName: payload.journalDomainName,
     journalUrl: payload.journalUrl,
@@ -337,15 +385,17 @@ export const updateJournal = asyncHandler(async (req, res) => {
   await ensureJournalAccess(req.user, journal._id);
 
   const payload = buildJournalPayload(req.body);
-  validateJournalPayload(payload);
+  const isUserOwnedUpdate = normalizeRole(req.user.role) === "user";
+  validateJournalPayload(payload, { requireLinkedUserFields: !isUserOwnedUpdate && !payload.ownerUserId });
   await ensureUniqueJournalUrl(payload.journalUrl, journal._id);
 
   const previousOwnerId = journal.owner?.toString();
   const owner = await upsertLinkedOwner(req, payload, journal);
 
   journal.owner = owner._id;
-  journal.firstName = payload.firstName;
-  journal.lastName = payload.lastName;
+  journal.firstName = isUserOwnedUpdate || payload.ownerUserId ? owner.firstName : payload.firstName;
+  journal.lastName = isUserOwnedUpdate || payload.ownerUserId ? owner.lastName : payload.lastName;
+  journal.slug = payload.slug;
   journal.managingJournalName = payload.managingJournalName;
   journal.journalDomainName = payload.journalDomainName;
   journal.journalUrl = payload.journalUrl;
@@ -402,15 +452,41 @@ export const uploadJournalPdf = asyncHandler(async (req, res) => {
 
   await ensureJournalAccess(req.user, journal._id);
 
-  if (journal.pdfFile) {
-    await deleteAsset(journal.pdfFile, "raw");
+  const uploadedFiles = Array.isArray(req.files) ? req.files : req.file ? [req.file] : [];
+
+  if (!uploadedFiles.length) {
+    throw new AppError("At least one PDF file is required", 400);
   }
 
-  journal.pdfFile = await uploadAsset(req.file, "medmaxpub/journal-pdfs", "raw", req);
-  await journal.save();
+  const createdItems = [];
+
+  for (const file of uploadedFiles) {
+    const asset = await uploadAsset(file, "medmaxpub/journal-pdfs", "raw", req);
+    const title = normalizeText(req.body.title) || file.originalname?.replace(/\.[^.]+$/, "") || "Journal PDF";
+
+    const createdItem = await JournalPdf.create({
+      journal: journal._id,
+      title,
+      file: asset
+    });
+
+    createdItems.push(createdItem);
+  }
+
+  if (!journal.pdfFile && createdItems[0]?.file) {
+    if (!journal.slug) {
+      journal.slug = normalizeJournalSlug(journal.journalUrl || journal.managingJournalName);
+    }
+    journal.pdfFile = createdItems[0].file;
+    await journal.save();
+  }
 
   res.json({
-    id: journal._id,
-    pdfFileUrl: journal.pdfFile?.secure_url || ""
+    items: createdItems.map((item) => ({
+      id: item._id,
+      title: item.title,
+      fileUrl: item.file?.secure_url || "",
+      uploadedAt: item.createdAt
+    }))
   });
 });

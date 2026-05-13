@@ -26,6 +26,7 @@ const journalSchema = new mongoose.Schema(
     lastName: { type: String, required: true, trim: true },
     managingJournalName: { type: String, required: true, trim: true },
     journalDomainName: { type: String, required: true, trim: true },
+    slug: { type: String, required: true, unique: true, trim: true, lowercase: true },
     journalUrl: { type: String, required: true, unique: true, trim: true, lowercase: true },
     aboutJournal: { type: String, required: true, trim: true },
     journalInstructions: { type: String, required: true, trim: true },
@@ -33,6 +34,24 @@ const journalSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+function normalizeSlug(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/^\/+|\/+$/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+journalSchema.pre("validate", function (next) {
+  if (!this.slug) {
+    this.slug = normalizeSlug(this.journalUrl || this.managingJournalName);
+  }
+
+  next();
+});
 
 const Journal = mongoose.model("Journal", journalSchema);
 

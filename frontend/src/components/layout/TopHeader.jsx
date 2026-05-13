@@ -12,24 +12,8 @@ export default function TopHeader({ searchTerm, setSearchTerm, onSearch }) {
           </Link>
         </div>
 
-        <div className="w-full lg:max-w-2xl">
-          <form
-            onSubmit={onSearch}
-            className="ml-auto flex w-full items-center gap-3 rounded-full border border-slate-200 bg-white px-3 py-2 shadow-[0_18px_40px_rgba(15,23,42,0.08)]"
-          >
-            <Search size={18} className="shrink-0 text-slate-500" />
-            <input
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Search journals, PPT archives, videos, and topics"
-              className="!border-none !bg-transparent !p-0 !text-sm !text-slate-800 !shadow-none placeholder:!text-slate-400 focus:!ring-0"
-            />
-            <button className="button-primary min-h-10 shrink-0 bg-brand-crimson px-4 py-2 hover:bg-brand-gold" type="submit">
-              Search
-            </button>
-          </form>
-
-          <div className="mt-3 flex flex-col gap-2 text-sm text-slate-600 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-2 lg:justify-end">
+        <div className="flex w-full flex-col gap-3 lg:max-w-md lg:items-end">
+          <div className="flex flex-col gap-2 text-sm text-slate-600 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-2 lg:justify-end">
             <a
               href={`mailto:${companyInfo.email}`}
               className="flex items-center gap-2 break-all transition hover:text-brand-crimson sm:break-normal"
@@ -42,6 +26,22 @@ export default function TopHeader({ searchTerm, setSearchTerm, onSearch }) {
               {companyInfo.phone}
             </a>
           </div>
+
+          <form
+            onSubmit={onSearch}
+            className="flex w-full max-w-[22rem] items-center gap-3 rounded-full border border-slate-200 bg-white px-3 py-2 shadow-[0_18px_40px_rgba(15,23,42,0.08)]"
+          >
+            <Search size={18} className="shrink-0 text-slate-500" />
+            <input
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Search journals"
+              className="!border-none !bg-transparent !p-0 !text-sm !text-slate-800 !shadow-none placeholder:!text-slate-400 focus:!ring-0"
+            />
+            <button className="button-primary min-h-10 shrink-0 px-4 py-2" type="submit">
+              Search
+            </button>
+          </form>
         </div>
       </div>
     </div>
