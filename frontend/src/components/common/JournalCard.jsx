@@ -11,7 +11,7 @@ function getJournalCoverImage(journal) {
 
 export default function JournalCard({ journal }) {
   return (
-    <Link key={journal.id} to={buildJournalSectionPath(journal.publicJournalUrl || journal.journalUrl, "about")} className="journal-card-link">
+    <Link key={journal.id} to={buildJournalSectionPath(journal.publicJournalUrl || journal.journalUrl, "home")} className="journal-card-link">
       <article className="card-panel h-full overflow-hidden p-0">
         <div className="aspect-[4/5] overflow-hidden bg-brand-sky">
           <img

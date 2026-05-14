@@ -45,7 +45,7 @@ export default function App() {
 
       <Route element={<JournalLayout />}>
         <Route path="/journals" element={<JournalsPage />} />
-        <Route path="/journals/:journalUrl" element={<Navigate to="about" replace />} />
+        <Route path="/journals/:journalUrl" element={<Navigate to="home" replace />} />
         <Route path="/journals/:journalUrl/:section" element={<JournalShell />} />
       </Route>
 

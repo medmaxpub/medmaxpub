@@ -8,7 +8,7 @@ import User from "../models/User.js";
 import Video from "../models/Video.js";
 import { ARTICLE_STATUSES, deriveArticleStatus } from "./articleController.js";
 import { serializePpt } from "../services/pptService.js";
-import { ensureJournalAccess, hasElevatedAccess, normalizeRole } from "../utils/accessControl.js";
+import { ensureJournalAccess, ensureSuperAdmin, hasElevatedAccess } from "../utils/accessControl.js";
 import { deleteAsset, uploadAsset } from "../utils/assetStorage.js";
 import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -159,13 +159,34 @@ async function buildJournalDetails(journal) {
   const ppts = await Ppt.find({ journal: journal._id }).sort({ createdAt: -1 }).lean();
   const pdfFiles = await JournalPdf.find({ journal: journal._id }).sort({ createdAt: -1 }).lean();
   const videos = await Video.find({ journal: journal._id }).sort({ createdAt: -1 }).lean();
+  const editorialBoard = await EditorialBoardMember.find({ journal: journal._id }).sort({ createdAt: -1 }).lean();
   const issueIds = issues.map((item) => item._id);
-  const articles = await Article.find({ issue: { $in: issueIds } }).lean();
+  const articles = await Article.find({
+    $or: [{ journal: journal._id }, issueIds.length ? { issue: { $in: issueIds } } : null].filter(Boolean)
+  }).lean();
+
+  const serializePublicArticle = (article) => ({
+    id: article._id,
+    title: article.title,
+    authors: article.authors || [],
+    volume: article.volume ?? null,
+    issueNumber: article.issueNumber ?? null,
+    releaseMonth: article.releaseMonth || "",
+    releaseYear: article.releaseYear ?? null,
+    abstractText: article.abstractText || "",
+    doiNumber: article.doiNumber || "",
+    pdfUrl: article.pdfFile?.secure_url || null
+  });
 
   const currentByIssue = new Map();
   const archiveByIssue = new Map();
+  const inPressArticles = [];
   articles.forEach((article) => {
     const status = deriveArticleStatus(article);
+
+    if (status === ARTICLE_STATUSES.IN_PRESS) {
+      inPressArticles.push(serializePublicArticle(article));
+    }
 
     if (!article.issue || (status !== ARTICLE_STATUSES.CURRENT_ISSUE && status !== ARTICLE_STATUSES.ARCHIVED)) {
       return;
@@ -174,12 +195,7 @@ async function buildJournalDetails(journal) {
     const key = article.issue.toString();
     const targetMap = status === ARTICLE_STATUSES.CURRENT_ISSUE ? currentByIssue : archiveByIssue;
     const list = targetMap.get(key) || [];
-    list.push({
-      id: article._id,
-      title: article.title,
-      authors: article.authors,
-      pdfUrl: article.pdfFile?.secure_url || null
-    });
+    list.push(serializePublicArticle(article));
     targetMap.set(key, list);
   });
 
@@ -240,6 +256,19 @@ async function buildJournalDetails(journal) {
         }
       : null,
     archive,
+    inPressArticles,
+    editorialBoard: editorialBoard.map((item) => ({
+      id: item._id,
+      editorType: item.editorType || item.designation || "",
+      name: item.name || "",
+      designation: item.designation || "",
+      department: item.department || "",
+      country: item.country || "",
+      editorDescription: item.editorDescription || "",
+      editorBiography: item.editorBiography || "",
+      profileUrl: item.profileUrl || "",
+      profileImageUrl: item.profileImage?.secure_url || null
+    })),
     pdfFiles: pdfFiles.map((item) => ({
       id: item._id,
       title: item.title,
@@ -293,34 +322,24 @@ async function syncUserJournals(userId) {
   return journals;
 }
 
-async function upsertLinkedOwner(req, payload, existingJournal = null) {
-  if (normalizeRole(req.user.role) === "user") {
-    const owner = await User.findById(req.user._id);
+async function ensureSingleJournalPerUser(userId, currentJournalId = null) {
+  const existingJournal = await Journal.findOne({ owner: userId }).select("_id").lean();
 
-    if (!owner) {
-      throw new AppError("User account not found", 404);
-    }
-
-    const nextUserName = payload.userName || owner.userName;
-    await ensureUniqueUserName(nextUserName, owner._id);
-    owner.firstName = payload.firstName || owner.firstName;
-    owner.lastName = payload.lastName || owner.lastName;
-    owner.userName = nextUserName;
-
-    if (payload.password) {
-      owner.password = payload.password;
-    }
-
-    owner.role = "user";
-    await owner.save();
-    return owner;
+  if (existingJournal && existingJournal._id.toString() !== currentJournalId?.toString()) {
+    throw new AppError("Each user can only have one journal", 400);
   }
+}
 
+async function upsertLinkedOwner(req, payload, existingJournal = null) {
   if (existingJournal?.owner) {
     const owner = await User.findById(existingJournal.owner);
 
     if (!owner) {
       throw new AppError("Linked user account not found", 404);
+    }
+
+    if (payload.ownerUserId && payload.ownerUserId !== owner._id.toString()) {
+      throw new AppError("Changing the linked user for an existing journal is not allowed", 400);
     }
 
     await ensureUniqueUserName(payload.userName, owner._id);
@@ -334,17 +353,7 @@ async function upsertLinkedOwner(req, payload, existingJournal = null) {
   }
 
   if (payload.ownerUserId) {
-    const owner = await User.findById(payload.ownerUserId);
-
-    if (!owner) {
-      throw new AppError("Selected user account not found", 404);
-    }
-
-    if (normalizeRole(owner.role) !== "user") {
-      throw new AppError("Journal can only be attached to a standard user account", 400);
-    }
-
-    return owner;
+    throw new AppError("Create the user and journal together in a single step", 400);
   }
 
   await ensureUniqueUserName(payload.userName);
@@ -402,20 +411,19 @@ export const getJournalByUrl = asyncHandler(async (req, res) => {
 });
 
 export const createJournal = asyncHandler(async (req, res) => {
+  ensureSuperAdmin(req.user);
+
   const payload = buildJournalPayload(req.body);
-  const isUserOwnedCreate = normalizeRole(req.user.role) === "user";
-  validateJournalPayload(payload, { requireLinkedUserFields: !isUserOwnedCreate && !payload.ownerUserId });
+  validateJournalPayload(payload, { requireLinkedUserFields: true });
   await ensureUniqueJournalUrl(payload.journalUrl);
 
   const owner = await upsertLinkedOwner(req, payload);
-
-  const ownerFirstName = isUserOwnedCreate || payload.ownerUserId ? owner.firstName : payload.firstName;
-  const ownerLastName = isUserOwnedCreate || payload.ownerUserId ? owner.lastName : payload.lastName;
+  await ensureSingleJournalPerUser(owner._id);
 
   const journal = await Journal.create({
     owner: owner._id,
-    firstName: ownerFirstName,
-    lastName: ownerLastName,
+    firstName: payload.firstName,
+    lastName: payload.lastName,
     slug: payload.slug,
     managingJournalName: payload.managingJournalName,
     journalDomainName: payload.journalDomainName,
@@ -430,25 +438,24 @@ export const createJournal = asyncHandler(async (req, res) => {
 });
 
 export const updateJournal = asyncHandler(async (req, res) => {
+  ensureSuperAdmin(req.user);
+
   const journal = await Journal.findById(req.params.id);
 
   if (!journal) {
     throw new AppError("Journal not found", 404);
   }
 
-  await ensureJournalAccess(req.user, journal._id);
-
   const payload = buildJournalPayload(req.body);
-  const isUserOwnedUpdate = normalizeRole(req.user.role) === "user";
-  validateJournalPayload(payload, { requireLinkedUserFields: !isUserOwnedUpdate && !payload.ownerUserId });
+  validateJournalPayload(payload, { requireLinkedUserFields: true });
   await ensureUniqueJournalUrl(payload.journalUrl, journal._id);
 
-  const previousOwnerId = journal.owner?.toString();
   const owner = await upsertLinkedOwner(req, payload, journal);
+  await ensureSingleJournalPerUser(owner._id, journal._id);
 
   journal.owner = owner._id;
-  journal.firstName = isUserOwnedUpdate || payload.ownerUserId ? owner.firstName : payload.firstName;
-  journal.lastName = isUserOwnedUpdate || payload.ownerUserId ? owner.lastName : payload.lastName;
+  journal.firstName = payload.firstName;
+  journal.lastName = payload.lastName;
   journal.slug = payload.slug;
   journal.managingJournalName = payload.managingJournalName;
   journal.journalDomainName = payload.journalDomainName;
@@ -459,22 +466,18 @@ export const updateJournal = asyncHandler(async (req, res) => {
 
   await syncUserJournals(owner._id);
 
-  if (previousOwnerId && previousOwnerId !== owner._id.toString()) {
-    await syncUserJournals(previousOwnerId);
-  }
-
   const populatedJournal = await Journal.findById(journal._id).populate("owner", "firstName lastName userName").lean();
   res.json(serializeJournalSummary(populatedJournal));
 });
 
 export const deleteJournal = asyncHandler(async (req, res) => {
+  ensureSuperAdmin(req.user);
+
   const journal = await Journal.findById(req.params.id);
 
   if (!journal) {
     throw new AppError("Journal not found", 404);
   }
-
-  await ensureJournalAccess(req.user, journal._id);
 
   const ownerId = journal.owner?.toString();
 

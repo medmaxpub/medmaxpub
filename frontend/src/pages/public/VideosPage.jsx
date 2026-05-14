@@ -1,10 +1,11 @@
 import { PlayCircle, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockJournals, mockVideos } from "../../data/mockData";
+import useAutoRefresh from "../../hooks/useAutoRefresh";
 import { buildJournalArchiveInfo, getAssetJournalUrl } from "../../utils/journalArchive";
 import { buildJournalSectionPath } from "../../utils/journalLinks";
 import { hasEmbeddedVideo, normalizeVideoItem } from "../../utils/videoPlayer";
@@ -15,49 +16,44 @@ export default function VideosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
-  useEffect(() => {
-    let ignore = false;
+  const loadItems = useCallback(async () => {
+    setIsLoading(true);
+    const data = await withFallback(() => api.get("/videos"), useDevelopmentFallback ? mockVideos : []);
+    const normalized = data.map(normalizeVideoItem);
+    const journalLookup = {};
 
-    const loadItems = async () => {
-      setIsLoading(true);
-      const data = await withFallback(() => api.get("/videos"), useDevelopmentFallback ? mockVideos : []);
-      const normalized = data.map(normalizeVideoItem);
-      const journalLookup = {};
+    if (useDevelopmentFallback) {
+      mockJournals.forEach((journal) => {
+        journalLookup[journal.journalUrl] = buildJournalArchiveInfo(journal);
+      });
+    } else {
+      const journalUrls = [...new Set(normalized.map(getAssetJournalUrl).filter(Boolean))];
+      const journalResults = await Promise.all(
+        journalUrls.map(async (url) => {
+          const journal = await withFallback(() => api.get(`/journals/${url}`), null);
+          return journal ? [url, buildJournalArchiveInfo(journal)] : null;
+        })
+      );
 
-      if (useDevelopmentFallback) {
-        mockJournals.forEach((journal) => {
-          journalLookup[journal.journalUrl] = buildJournalArchiveInfo(journal);
-        });
-      } else {
-        const journalUrls = [...new Set(normalized.map(getAssetJournalUrl).filter(Boolean))];
-        const journalResults = await Promise.all(
-          journalUrls.map(async (url) => {
-            const journal = await withFallback(() => api.get(`/journals/${url}`), null);
-            return journal ? [url, buildJournalArchiveInfo(journal)] : null;
-          })
-        );
+      journalResults.filter(Boolean).forEach(([url, journal]) => {
+        journalLookup[url] = journal;
+      });
+    }
 
-        journalResults.filter(Boolean).forEach(([url, journal]) => {
-          journalLookup[url] = journal;
-        });
-      }
-
-      if (!ignore) {
-        setItems(
-          normalized.map((item) => ({
-            ...item,
-            journalInfo: journalLookup[getAssetJournalUrl(item)] || null
-          }))
-        );
-        setIsLoading(false);
-      }
-    };
-
-    loadItems();
-    return () => {
-      ignore = true;
-    };
+    setItems(
+      normalized.map((item) => ({
+        ...item,
+        journalInfo: journalLookup[getAssetJournalUrl(item)] || null
+      }))
+    );
+    setIsLoading(false);
   }, [useDevelopmentFallback]);
+
+  useEffect(() => {
+    loadItems();
+  }, [loadItems]);
+
+  useAutoRefresh(loadItems, { intervalMs: 15000 });
 
   const filteredItems = items.filter((video) => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -168,7 +164,7 @@ export default function VideosPage() {
                         ) : null}
                         {video.journalInfo?.journalUrl ? (
                           <Link
-                            to={buildJournalSectionPath(video.journalInfo.publicJournalUrl || video.journalInfo.journalUrl, "about")}
+                            to={buildJournalSectionPath(video.journalInfo.publicJournalUrl || video.journalInfo.journalUrl, "home")}
                             className="button-secondary px-4 py-2"
                           >
                             Open Journal

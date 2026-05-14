@@ -1,9 +1,10 @@
 import { ExternalLink, Pencil, Search, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import SectionHeader from "../../components/common/SectionHeader";
 import JournalEditorModal from "../../components/super/JournalEditorModal";
+import useAutoRefresh from "../../hooks/useAutoRefresh";
 import { getSuperUserJournalsFallback } from "./superUserFallbacks";
 import { initialJournalForm, mapJournalToForm, normalizeItem } from "../../components/super/superUserShared";
 import { buildJournalSectionPath } from "../../utils/journalLinks";
@@ -17,14 +18,16 @@ export default function SuperUserJournalsPage() {
   const [journalStatus, setJournalStatus] = useState("");
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
-  const loadJournals = async () => {
+  const loadJournals = useCallback(async () => {
     const data = await withFallback(() => api.get("/admin/journals"), useDevelopmentFallback ? getSuperUserJournalsFallback() : []);
     setJournals(data.map(normalizeItem));
-  };
+  }, [useDevelopmentFallback]);
 
   useEffect(() => {
     loadJournals();
-  }, [useDevelopmentFallback]);
+  }, [loadJournals]);
+
+  useAutoRefresh(loadJournals, { intervalMs: 15000 });
 
   const filteredJournals = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -183,7 +186,7 @@ export default function SuperUserJournalsPage() {
                       <td className="px-4 py-4">
                         <div className="flex flex-wrap gap-2">
                           <a
-                            href={buildJournalSectionPath(journal.publicJournalUrl || journal.journalUrl, "about")}
+                            href={buildJournalSectionPath(journal.publicJournalUrl || journal.journalUrl, "home")}
                             className="button-secondary min-h-10 px-3 py-2"
                             target="_blank"
                             rel="noreferrer"

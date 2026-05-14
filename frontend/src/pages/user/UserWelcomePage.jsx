@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../api/client";
 import SectionHeader from "../../components/common/SectionHeader";
-import UserJournalCreateAction from "../../components/user/UserJournalCreateAction";
 import { ARTICLE_STATUSES } from "../../components/user/userPortalShared";
 
 export default function UserWelcomePage() {
@@ -11,7 +10,6 @@ export default function UserWelcomePage() {
     archived: 0,
     editorialBoard: 0
   });
-  const [statusMessage, setStatusMessage] = useState("");
 
   useEffect(() => {
     const loadStats = async () => {
@@ -47,14 +45,6 @@ export default function UserWelcomePage() {
       <section className="card-panel p-6 sm:p-8">
         <SectionHeader label="Welcome" />
 
-        <div className="mt-6 flex justify-end">
-          <UserJournalCreateAction
-            onCreated={async (_savedJournal, message) => {
-              setStatusMessage(message);
-            }}
-          />
-        </div>
-
         <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-3xl border border-brand-border bg-brand-elevated p-5">
             <p className="text-xs uppercase tracking-[0.2em] text-brand-gold">Articles in Press</p>
@@ -73,8 +63,6 @@ export default function UserWelcomePage() {
             <p className="mt-3 text-3xl font-semibold text-brand-ink">{stats.editorialBoard}</p>
           </div>
         </div>
-
-        {statusMessage ? <p className="mt-4 text-sm text-brand-slate">{statusMessage}</p> : null}
       </section>
     </div>
   );

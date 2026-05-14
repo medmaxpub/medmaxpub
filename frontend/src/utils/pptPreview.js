@@ -104,12 +104,75 @@ export function buildOfficeViewerUrl(url) {
   return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`;
 }
 
-export function buildPdfViewerUrl(url) {
+export function buildPdfViewerUrl(url, options = {}) {
   if (!isEmbeddableUrl(url)) {
     return null;
   }
 
-  return `${url}#toolbar=1&navpanes=0&view=FitH`;
+  const {
+    toolbar = 1,
+    navpanes = 0,
+    scrollbar = 1,
+    page = 1,
+    zoom = "page-width",
+    view = "FitH"
+  } = options;
+
+  try {
+    const parsed = new URL(url);
+    parsed.hash = `toolbar=${toolbar}&navpanes=${navpanes}&scrollbar=${scrollbar}&page=${page}&zoom=${encodeURIComponent(
+      zoom
+    )}&view=${encodeURIComponent(view)}`;
+    return parsed.toString();
+  } catch {
+    return `${url}#toolbar=${toolbar}&navpanes=${navpanes}&scrollbar=${scrollbar}&page=${page}&zoom=${encodeURIComponent(
+      zoom
+    )}&view=${encodeURIComponent(view)}`;
+  }
+}
+
+const warmedPreviewUrls = new Set();
+const warmedOrigins = new Set();
+
+export function warmPreviewUrl(url) {
+  if (typeof window === "undefined" || !isEmbeddableUrl(url)) {
+    return;
+  }
+
+  let parsedUrl;
+
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    return;
+  }
+
+  const origin = parsedUrl.origin;
+
+  if (!warmedOrigins.has(origin)) {
+    warmedOrigins.add(origin);
+
+    const preconnectLink = document.createElement("link");
+    preconnectLink.rel = "preconnect";
+    preconnectLink.href = origin;
+    document.head.appendChild(preconnectLink);
+  }
+
+  if (warmedPreviewUrls.has(url)) {
+    return;
+  }
+
+  warmedPreviewUrls.add(url);
+
+  const prefetchLink = document.createElement("link");
+  prefetchLink.rel = "prefetch";
+  prefetchLink.href = url;
+  document.head.appendChild(prefetchLink);
+
+  window.fetch(url, {
+    mode: "no-cors",
+    cache: "force-cache"
+  }).catch(() => {});
 }
 
 export function normalizePptItem(item = {}) {

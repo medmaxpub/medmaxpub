@@ -1,11 +1,12 @@
 import { ChevronLeft, ChevronRight, Eye, EyeOff, LogIn, Pencil, Plus, Search, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import SectionHeader from "../../components/common/SectionHeader";
 import { useAuth } from "../../context/AuthContext";
 import { mockJournals, mockTestimonials } from "../../data/mockData";
+import useAutoRefresh from "../../hooks/useAutoRefresh";
 
 const initialJournalForm = {
   firstName: "",
@@ -114,7 +115,7 @@ export default function AdminDashboardPage({ mode = "admin" }) {
   const canManageAll = isAdmin || isSuperPortal;
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     if (!isSuperPortal) {
       setUsers([]);
       setUserMeta(defaultUserMeta);
@@ -137,23 +138,27 @@ export default function AdminDashboardPage({ mode = "admin" }) {
 
     setUsers((data.items || []).map(normalizeItem));
     setUserMeta({ ...defaultUserMeta, ...(data.meta || {}) });
-  };
+  }, [isSuperPortal, userQuery.direction, userQuery.orderBy, userQuery.page, userQuery.pageSize, userQuery.search]);
 
-  const loadJournals = async () => {
+  const loadJournals = useCallback(async () => {
     const data = await withFallback(() => api.get("/admin/journals"), useDevelopmentFallback ? mockJournals : []);
     setJournals(data.map(normalizeItem));
-  };
+  }, [useDevelopmentFallback]);
 
-  const loadTestimonials = async () => {
+  const loadTestimonials = useCallback(async () => {
     const data = await withFallback(() => api.get("/testimonials"), useDevelopmentFallback ? mockTestimonials : []);
     setTestimonials(data.map(normalizeItem));
-  };
+  }, [useDevelopmentFallback]);
+
+  const refreshDashboardData = useCallback(() => {
+    return Promise.all([loadUsers(), loadJournals(), loadTestimonials()]);
+  }, [loadJournals, loadTestimonials, loadUsers]);
 
   useEffect(() => {
-    loadUsers();
-    loadJournals();
-    loadTestimonials();
-  }, [isSuperPortal, useDevelopmentFallback, userQuery.direction, userQuery.orderBy, userQuery.page, userQuery.pageSize, userQuery.search]);
+    refreshDashboardData();
+  }, [refreshDashboardData]);
+
+  useAutoRefresh(refreshDashboardData, { intervalMs: 15000 });
 
   useEffect(() => {
     const targetId = (location.hash || "#journals").replace("#", "");
@@ -179,12 +184,6 @@ export default function AdminDashboardPage({ mode = "admin" }) {
 
     return base;
   }, [canManageAll, journals, selectedUserId, user?.id]);
-
-  const openCreateUserEditor = () => {
-    setEditingUserId("");
-    setUserForm(initialUserForm);
-    setUserEditorOpen(true);
-  };
 
   const openEditUserEditor = (item) => {
     setEditingUserId(item.id);
@@ -260,7 +259,7 @@ export default function AdminDashboardPage({ mode = "admin" }) {
       ).catch((error) => [`Media upload warning: ${error.response?.data?.message || error.message}`]);
 
       setJournalStatus(
-        `${editingJournalId ? "Journal updated" : "Journal created"} successfully. ${mediaMessages.join(" ")}`.trim()
+        `${editingJournalId ? "Journal updated" : "User and journal created"} successfully. ${mediaMessages.join(" ")}`.trim()
       );
 
       setEditingJournalId("");
@@ -353,6 +352,11 @@ export default function AdminDashboardPage({ mode = "admin" }) {
     event.preventDefault();
     setUserStatus("");
 
+    if (!editingUserId) {
+      setUserStatus("Create the user and journal together from the journal management section.");
+      return;
+    }
+
     try {
       const payload = {
         firstName: userForm.firstName,
@@ -361,14 +365,9 @@ export default function AdminDashboardPage({ mode = "admin" }) {
         ...(userForm.password ? { password: userForm.password } : {})
       };
 
-      if (!editingUserId && !payload.password) {
-        setUserStatus("Password is required for new users.");
-        return;
-      }
-
       const baseUrl = "/super/users";
-      await api[editingUserId ? "put" : "post"](editingUserId ? `${baseUrl}/${editingUserId}` : baseUrl, payload);
-      setUserStatus(editingUserId ? "User updated successfully." : "User created successfully.");
+      await api.put(`${baseUrl}/${editingUserId}`, payload);
+      setUserStatus("User updated successfully.");
       setEditingUserId("");
       setUserForm(initialUserForm);
       setUserEditorOpen(false);
@@ -382,7 +381,7 @@ export default function AdminDashboardPage({ mode = "admin" }) {
     setUserStatus("");
 
     const confirmed = window.confirm(
-      `Delete user "${targetUser.username}" and all linked journals, issues, articles, PPTs, and videos?`
+      `Delete user "${targetUser.username}" and its linked journal, issues, articles, PPTs, and videos?`
     );
 
     if (!confirmed) {
@@ -563,7 +562,7 @@ export default function AdminDashboardPage({ mode = "admin" }) {
               </div>
               <div className="flex flex-wrap gap-3">
                 <button type="submit" className="button-primary">
-                  {editingJournalId ? "Update Journal" : "Add Journal"}
+                  {editingJournalId ? "Update Journal" : "Add User & Journal"}
                 </button>
                 {editingJournalId ? (
                   <button
@@ -637,11 +636,11 @@ export default function AdminDashboardPage({ mode = "admin" }) {
 
       {isSuperPortal ? (
         <section id="users" className="card-panel p-6 sm:p-8">
-          <SectionHeader
-            label="Users"
-            title="Super user users list"
-            description="Search, sort, paginate, reveal passwords directly, edit accounts, delete users, and impersonate a user directly from this privileged table."
-          />
+        <SectionHeader
+          label="Users"
+          title="Super user users list"
+          description="Search, sort, paginate, reveal passwords directly, edit existing accounts, delete users, and impersonate a user directly from this privileged table."
+        />
 
           <div className="mt-8 rounded-3xl border border-brand-border bg-brand-elevated p-4 sm:p-5">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
@@ -682,15 +681,14 @@ export default function AdminDashboardPage({ mode = "admin" }) {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-3">
-                <button type="button" className="button-secondary px-4 py-2" onClick={() => navigate("/superuser/journals")}>
-                  Add New Journal
-                </button>
-                <button type="button" className="button-primary px-4 py-2" onClick={openCreateUserEditor}>
-                  <Plus size={16} className="mr-2" />
-                  Add New User
-                </button>
-              </div>
+              <button
+                type="button"
+                className="button-primary px-4 py-2"
+                onClick={() => document.getElementById("journals")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              >
+                <Plus size={16} className="mr-2" />
+                Add User & Journal
+              </button>
             </div>
           </div>
 
@@ -762,7 +760,7 @@ export default function AdminDashboardPage({ mode = "admin" }) {
                                 navigate("/superuser/journals");
                               }}
                             >
-                              View Journals
+                              View Journal
                             </button>
                             <button type="button" className="button-primary min-h-10 px-3 py-2" onClick={() => impersonateUser(item.id)}>
                               <LogIn size={16} className="mr-2" />
@@ -774,10 +772,10 @@ export default function AdminDashboardPage({ mode = "admin" }) {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={7} className="px-4 py-10">
-                        <EmptyState title="No users matched this view" description="Adjust search, sorting, or add a new user record." />
-                      </td>
-                    </tr>
+                    <td colSpan={7} className="px-4 py-10">
+                        <EmptyState title="No users matched this view" description="Adjust search, sorting, or create a new user and journal pair." />
+                    </td>
+                  </tr>
                   )}
                 </tbody>
               </table>
@@ -908,8 +906,8 @@ export default function AdminDashboardPage({ mode = "admin" }) {
           <form onSubmit={submitUser} className="card-panel w-full max-w-xl p-6">
             <SectionHeader
               label="Users"
-              title={editingUserId ? "Edit user" : "Add new user"}
-              description="Create or update the journal user account from the super user portal."
+              title="Edit user"
+              description="Update the linked user account details for an existing journal."
             />
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -936,9 +934,9 @@ export default function AdminDashboardPage({ mode = "admin" }) {
                 className="sm:col-span-2"
                 value={userForm.password}
                 onChange={(event) => setUserForm((current) => ({ ...current, password: event.target.value }))}
-                placeholder={editingUserId ? "New Password (optional)" : "Password"}
+                placeholder="New Password (optional)"
                 type="password"
-                required={!editingUserId}
+                required={false}
               />
             </div>
 
@@ -946,7 +944,7 @@ export default function AdminDashboardPage({ mode = "admin" }) {
 
             <div className="mt-6 flex flex-wrap gap-3">
               <button type="submit" className="button-primary">
-                {editingUserId ? "Update User" : "Create User"}
+                Update User
               </button>
               <button
                 type="button"

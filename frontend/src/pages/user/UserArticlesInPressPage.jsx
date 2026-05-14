@@ -5,7 +5,6 @@ import api from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import SectionHeader from "../../components/common/SectionHeader";
 import ArticlePreviewModal from "../../components/user/ArticlePreviewModal";
-import UserJournalCreateAction from "../../components/user/UserJournalCreateAction";
 import JournalPdfUploadModal from "../../components/user/JournalPdfUploadModal";
 import ArticleWorkflowActions from "../../components/user/ArticleWorkflowActions";
 import UserJournalSelector from "../../components/user/UserJournalSelector";
@@ -20,8 +19,7 @@ export default function UserArticlesInPressPage() {
     selectedJournalId,
     setSelectedJournalId,
     loading: journalLoading,
-    error: journalError,
-    reloadJournal
+    error: journalError
   } = useManagedJournal();
   const [articles, setArticles] = useState([]);
   const [statusMessage, setStatusMessage] = useState("");
@@ -96,17 +94,10 @@ export default function UserArticlesInPressPage() {
             title="Journal workspace unavailable"
             description={journalError || "No managed journal is linked to this account yet."}
           />
-          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-6">
             <EmptyState
               title="No journal assigned"
-              description="Assign a journal to this user account first. Once a journal is linked, article workflow pages will load automatically."
-            />
-            <UserJournalCreateAction
-              onCreated={async (savedJournal, message) => {
-                await reloadJournal();
-                setSelectedJournalId(savedJournal.id);
-                setStatusMessage(message);
-              }}
+              description="An admin must create your user account together with its journal before article workflow pages can be used."
             />
           </div>
         </section>
@@ -127,14 +118,6 @@ export default function UserArticlesInPressPage() {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <UserJournalCreateAction
-                className="button-secondary px-4 py-2"
-                onCreated={async (savedJournal, message) => {
-                  await reloadJournal();
-                  setSelectedJournalId(savedJournal.id);
-                  setStatusMessage(message);
-                }}
-              />
               <button type="button" className="button-secondary px-4 py-2" onClick={() => setPdfModalOpen(true)}>
                 <FileText size={16} className="mr-2" />
                 Add PDF

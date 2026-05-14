@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import SectionHeader from "../../components/common/SectionHeader";
+import useAutoRefresh from "../../hooks/useAutoRefresh";
 import {
   getSuperUserJournalsFallback,
   getSuperUserTestimonialsFallback,
@@ -11,8 +12,8 @@ export default function SuperUserDashboardPage() {
   const [stats, setStats] = useState({ users: 0, journals: 0, testimonials: 0 });
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
-  useEffect(() => {
-    Promise.all([
+  const loadStats = useCallback(() => {
+    return Promise.all([
       withFallback(() => api.get("/super/users", { params: { page: 1, pageSize: 1 } }), getSuperUserUsersFallback()),
       withFallback(() => api.get("/admin/journals"), useDevelopmentFallback ? getSuperUserJournalsFallback() : []),
       withFallback(() => api.get("/testimonials"), useDevelopmentFallback ? getSuperUserTestimonialsFallback() : [])
@@ -24,6 +25,12 @@ export default function SuperUserDashboardPage() {
       });
     });
   }, [useDevelopmentFallback]);
+
+  useEffect(() => {
+    loadStats();
+  }, [loadStats]);
+
+  useAutoRefresh(loadStats, { intervalMs: 15000 });
 
   return (
     <div className="space-y-8 px-4 py-8 sm:px-6 lg:px-8">

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { notifyDataChanged } from "../utils/dataRefresh";
 
 const LOCAL_API_BASE_URL = "http://localhost:5000/api";
 const PRODUCTION_API_BASE_URL = "https://medmaxpub.onrender.com/api";
@@ -75,7 +76,18 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const method = response.config?.method?.toLowerCase();
+
+    if (["post", "put", "patch", "delete"].includes(method || "")) {
+      notifyDataChanged({
+        method,
+        url: response.config?.url || ""
+      });
+    }
+
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       clearAuthState();

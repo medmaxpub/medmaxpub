@@ -34,7 +34,7 @@ export function getJournalRouteSlug(value) {
     .replace(/^-|-$/g, "");
 }
 
-export function buildJournalSectionPath(journalUrl, section = "about") {
+export function buildJournalSectionPath(journalUrl, section = "home") {
   const slug = getJournalRouteSlug(journalUrl);
   return slug ? `/journals/${slug}/${section}` : "/journals";
 }

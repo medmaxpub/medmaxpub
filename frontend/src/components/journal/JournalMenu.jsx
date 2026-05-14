@@ -2,11 +2,12 @@ import { NavLink } from "react-router-dom";
 import { buildJournalSectionPath } from "../../utils/journalLinks";
 
 const items = [
-  { label: "About Journal", slug: "about" },
-  { label: "Journal Instructions", slug: "instructions" },
-  { label: "Journal PDFs", slug: "pdfs" },
-  { label: "Journal PPTs", slug: "ppts" },
-  { label: "Journal Videos", slug: "videos" },
+  { label: "Home", slug: "home" },
+  { label: "About", slug: "about" },
+  { label: "Aim & Scope", slug: "aim-scope" },
+  { label: "Editorial Board", slug: "editorial-board" },
+  { label: "Author Guidelines", slug: "author-guidelines" },
+  { label: "Article in Press", slug: "article-in-press" },
   { label: "Current Issue", slug: "current-issue" },
   { label: "Archive", slug: "archive" }
 ];

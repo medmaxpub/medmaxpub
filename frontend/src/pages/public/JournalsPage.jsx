@@ -1,11 +1,12 @@
 import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import JournalCard from "../../components/common/JournalCard";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockJournals } from "../../data/mockData";
+import useAutoRefresh from "../../hooks/useAutoRefresh";
 
 export default function JournalsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -13,9 +14,15 @@ export default function JournalsPage() {
   const [query, setQuery] = useState(searchParams.get("search") || "");
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
-  useEffect(() => {
-    withFallback(() => api.get("/journals"), useDevelopmentFallback ? mockJournals : []).then(setJournals);
+  const loadJournals = useCallback(() => {
+    return withFallback(() => api.get("/journals"), useDevelopmentFallback ? mockJournals : []).then(setJournals);
   }, [useDevelopmentFallback]);
+
+  useEffect(() => {
+    loadJournals();
+  }, [loadJournals]);
+
+  useAutoRefresh(loadJournals, { intervalMs: 15000 });
 
   const filtered = journals.filter((journal) => {
     const normalizedQuery = query.toLowerCase();

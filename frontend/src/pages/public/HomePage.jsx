@@ -1,11 +1,12 @@
 import { BookOpen, CalendarDays, Database, FileText } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import dnaImage from "../../assets/DNA.png";
 import AboutMedmaxSection from "../../components/common/AboutMedmaxSection";
 import JournalCard from "../../components/common/JournalCard";
 import SectionHeader from "../../components/common/SectionHeader";
+import useAutoRefresh from "../../hooks/useAutoRefresh";
 import {
   heroShowcaseImages,
   indexingPartners,
@@ -22,11 +23,17 @@ export default function HomePage() {
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
   const statIcons = [BookOpen, FileText, CalendarDays, Database];
 
-  useEffect(() => {
-    withFallback(() => api.get("/testimonials"), useDevelopmentFallback ? mockTestimonials : []).then((data) =>
+  const loadTestimonials = useCallback(() => {
+    return withFallback(() => api.get("/testimonials"), useDevelopmentFallback ? mockTestimonials : []).then((data) =>
       setTestimonials(data.length ? data : mockTestimonials)
     );
   }, [useDevelopmentFallback]);
+
+  useEffect(() => {
+    loadTestimonials();
+  }, [loadTestimonials]);
+
+  useAutoRefresh(loadTestimonials, { intervalMs: 20000 });
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {

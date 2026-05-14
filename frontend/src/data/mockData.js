@@ -113,8 +113,38 @@ function buildJournal(
     coverImage,
     aboutJournal:
       `${managingJournalName} is a peer-reviewed publication stream supporting global researchers, conference presenters, clinicians, engineers, and interdisciplinary scholars.`,
+    homeContent:
+      `${managingJournalName} welcomes original research, reviews, and clinically relevant scholarship for a global audience across ${journalDomainName}.`,
+    aimScope:
+      `This journal focuses on ${journalDomainName} and prioritizes rigorous, peer-reviewed work that supports translational impact, interdisciplinary collaboration, and evidence-led publication outcomes.`,
     journalInstructions:
       "Prepare complete author metadata, submit all required files in the requested format, and follow the editor-assigned review workflow for publication processing.",
+    authorGuidelines:
+      "Submit complete author details, structure the manuscript clearly, upload all required files, and ensure the corresponding author information is accurate before final submission.",
+    editorialBoard: [
+      {
+        id: `${id}-editor-1`,
+        editorType: "Editor in Chief",
+        name: `${firstName} ${lastName}`,
+        designation: "Senior Editor",
+        department: journalDomainName,
+        country: "USA",
+        editorDescription: `Leads the editorial direction for ${managingJournalName}.`
+      }
+    ],
+    inPressArticles: [
+      {
+        id: `${id}-inpress-1`,
+        title: "Accepted Manuscript Workflow for High-Trust Scholarly Publishing",
+        authors: ["Alicia Carter", "Samuel Reed"],
+        volume: 5,
+        issueNumber: 3,
+        releaseMonth: "May",
+        releaseYear: 2026,
+        abstractText: "An accepted article record awaiting placement into the current issue.",
+        pdfUrl: "https://example.com/in-press-1.pdf"
+      }
+    ],
     currentIssue: {
       volume: 5,
       issue: 2,

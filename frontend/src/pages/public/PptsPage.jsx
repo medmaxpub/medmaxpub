@@ -1,14 +1,15 @@
 import { Download, Eye, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import PptPreviewModal from "../../components/common/PptPreviewModal";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockJournals, mockPpts } from "../../data/mockData";
+import useAutoRefresh from "../../hooks/useAutoRefresh";
 import { buildJournalArchiveInfo, getAssetJournalUrl } from "../../utils/journalArchive";
 import { buildJournalSectionPath } from "../../utils/journalLinks";
-import { normalizePptItem } from "../../utils/pptPreview";
+import { normalizePptItem, warmPreviewUrl } from "../../utils/pptPreview";
 
 export default function PptsPage() {
   const [items, setItems] = useState([]);
@@ -17,49 +18,44 @@ export default function PptsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
-  useEffect(() => {
-    let ignore = false;
+  const loadItems = useCallback(async () => {
+    setIsLoading(true);
+    const data = await withFallback(() => api.get("/ppts"), useDevelopmentFallback ? mockPpts : []);
+    const normalized = data.map(normalizePptItem);
+    const journalLookup = {};
 
-    const loadItems = async () => {
-      setIsLoading(true);
-      const data = await withFallback(() => api.get("/ppts"), useDevelopmentFallback ? mockPpts : []);
-      const normalized = data.map(normalizePptItem);
-      const journalLookup = {};
+    if (useDevelopmentFallback) {
+      mockJournals.forEach((journal) => {
+        journalLookup[journal.journalUrl] = buildJournalArchiveInfo(journal);
+      });
+    } else {
+      const journalUrls = [...new Set(normalized.map(getAssetJournalUrl).filter(Boolean))];
+      const journalResults = await Promise.all(
+        journalUrls.map(async (url) => {
+          const journal = await withFallback(() => api.get(`/journals/${url}`), null);
+          return journal ? [url, buildJournalArchiveInfo(journal)] : null;
+        })
+      );
 
-      if (useDevelopmentFallback) {
-        mockJournals.forEach((journal) => {
-          journalLookup[journal.journalUrl] = buildJournalArchiveInfo(journal);
-        });
-      } else {
-        const journalUrls = [...new Set(normalized.map(getAssetJournalUrl).filter(Boolean))];
-        const journalResults = await Promise.all(
-          journalUrls.map(async (url) => {
-            const journal = await withFallback(() => api.get(`/journals/${url}`), null);
-            return journal ? [url, buildJournalArchiveInfo(journal)] : null;
-          })
-        );
+      journalResults.filter(Boolean).forEach(([url, journal]) => {
+        journalLookup[url] = journal;
+      });
+    }
 
-        journalResults.filter(Boolean).forEach(([url, journal]) => {
-          journalLookup[url] = journal;
-        });
-      }
-
-      if (!ignore) {
-        setItems(
-          normalized.map((item) => ({
-            ...item,
-            journalInfo: journalLookup[getAssetJournalUrl(item)] || null
-          }))
-        );
-        setIsLoading(false);
-      }
-    };
-
-    loadItems();
-    return () => {
-      ignore = true;
-    };
+    setItems(
+      normalized.map((item) => ({
+        ...item,
+        journalInfo: journalLookup[getAssetJournalUrl(item)] || null
+      }))
+    );
+    setIsLoading(false);
   }, [useDevelopmentFallback]);
+
+  useEffect(() => {
+    loadItems();
+  }, [loadItems]);
+
+  useAutoRefresh(loadItems, { intervalMs: 15000 });
 
   useEffect(() => {
     const handleEscape = (event) => {
@@ -160,7 +156,13 @@ export default function PptsPage() {
                       <div className="rounded-3xl border border-brand-border bg-brand-elevated p-5">
                         <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Actions</p>
                         <div className="mt-4 flex flex-wrap gap-3">
-                          <button type="button" className="button-soft px-4 py-2" onClick={() => setActivePreview(ppt)}>
+                          <button
+                            type="button"
+                            className="button-soft px-4 py-2"
+                            onMouseEnter={() => warmPreviewUrl(ppt.previewPdfUrl || ppt.previewUrl || ppt.downloadUrl)}
+                            onFocus={() => warmPreviewUrl(ppt.previewPdfUrl || ppt.previewUrl || ppt.downloadUrl)}
+                            onClick={() => setActivePreview(ppt)}
+                          >
                             <Eye size={16} className="mr-2" />
                             Preview
                           </button>
@@ -170,7 +172,7 @@ export default function PptsPage() {
                           </a>
                           {ppt.journalInfo?.journalUrl ? (
                             <Link
-                              to={buildJournalSectionPath(ppt.journalInfo.publicJournalUrl || ppt.journalInfo.journalUrl, "about")}
+                              to={buildJournalSectionPath(ppt.journalInfo.publicJournalUrl || ppt.journalInfo.journalUrl, "home")}
                               className="button-secondary px-4 py-2"
                             >
                               Open Journal

@@ -1,4 +1,4 @@
-import { Archive, ArrowLeftRight, Eye, Pencil, Plus, Trash2 } from "lucide-react";
+import { Archive, ArrowLeftRight, Eye, FileText, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/client";
@@ -6,6 +6,7 @@ import EmptyState from "../../components/common/EmptyState";
 import SectionHeader from "../../components/common/SectionHeader";
 import ArticlePreviewModal from "../../components/user/ArticlePreviewModal";
 import ArticleWorkflowActions from "../../components/user/ArticleWorkflowActions";
+import JournalPdfUploadModal from "../../components/user/JournalPdfUploadModal";
 import UserJournalSelector from "../../components/user/UserJournalSelector";
 import { ARTICLE_STATUSES, stripHtml } from "../../components/user/userPortalShared";
 import useManagedJournal from "../../hooks/useManagedJournal";
@@ -23,6 +24,7 @@ export default function UserCurrentIssuePage() {
   const [articles, setArticles] = useState([]);
   const [statusMessage, setStatusMessage] = useState("");
   const [previewArticle, setPreviewArticle] = useState(null);
+  const [pdfModalOpen, setPdfModalOpen] = useState(false);
 
   const currentMonthLabel = new Intl.DateTimeFormat("en-US", {
     month: "long",
@@ -95,7 +97,7 @@ export default function UserCurrentIssuePage() {
           <div className="mt-6">
             <EmptyState
               title="No journal assigned"
-              description="Assign a journal to this user account first. Once a journal is linked, current issue pages will load automatically."
+              description="An admin must create your user account together with its journal before current issue pages can be used."
             />
           </div>
         </section>
@@ -114,21 +116,27 @@ export default function UserCurrentIssuePage() {
               <h3 className="text-2xl font-semibold text-brand-ink">Current Month is: "{currentMonthLabel}"</h3>
               <UserJournalSelector journals={journals} selectedJournalId={selectedJournalId} onChange={setSelectedJournalId} />
             </div>
-            <button
-              type="button"
-              className="button-primary px-4 py-2"
-              onClick={() =>
-                navigate("/user/current-issue/add", {
-                  state: {
-                    journalId: selectedJournalId,
-                    returnTo: "/user/current-issue"
-                  }
-                })
-              }
-            >
-              <Plus size={16} className="mr-2" />
-              Add Article
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button type="button" className="button-secondary px-4 py-2" onClick={() => setPdfModalOpen(true)}>
+                <FileText size={16} className="mr-2" />
+                Add PDF
+              </button>
+              <button
+                type="button"
+                className="button-primary px-4 py-2"
+                onClick={() =>
+                  navigate("/user/current-issue/add", {
+                    state: {
+                      journalId: selectedJournalId,
+                      returnTo: "/user/current-issue"
+                    }
+                  })
+                }
+              >
+                <Plus size={16} className="mr-2" />
+                Add Article
+              </button>
+            </div>
           </div>
         </div>
 
@@ -242,6 +250,13 @@ export default function UserCurrentIssuePage() {
       </section>
 
       <ArticlePreviewModal article={previewArticle} onClose={() => setPreviewArticle(null)} />
+      <JournalPdfUploadModal
+        open={pdfModalOpen}
+        journalId={selectedJournalId}
+        journalName={journal?.managingJournalName}
+        onClose={() => setPdfModalOpen(false)}
+        onUploaded={(message) => setStatusMessage(message)}
+      />
     </div>
   );
 }

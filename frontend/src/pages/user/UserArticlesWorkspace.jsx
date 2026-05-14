@@ -173,7 +173,7 @@ export default function UserArticlesWorkspace({ status, title, description }) {
           <div className="mt-6">
             <EmptyState
               title="No journal assigned"
-              description="Assign a journal to this user account first. Once a journal is linked, article workflow pages will load automatically."
+              description="An admin must create your user account together with its journal before article workflow pages can be used."
             />
           </div>
         </section>

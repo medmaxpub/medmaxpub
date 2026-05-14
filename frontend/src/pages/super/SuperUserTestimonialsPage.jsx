@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import SectionHeader from "../../components/common/SectionHeader";
 import { getSuperUserTestimonialsFallback } from "./superUserFallbacks";
 import { initialTestimonialForm, mapTestimonialToForm, normalizeItem } from "../../components/super/superUserShared";
+import useAutoRefresh from "../../hooks/useAutoRefresh";
 
 export default function SuperUserTestimonialsPage() {
   const [testimonials, setTestimonials] = useState([]);
@@ -12,17 +13,19 @@ export default function SuperUserTestimonialsPage() {
   const [testimonialStatus, setTestimonialStatus] = useState("");
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
-  const loadTestimonials = async () => {
+  const loadTestimonials = useCallback(async () => {
     const data = await withFallback(
       () => api.get("/testimonials"),
       useDevelopmentFallback ? getSuperUserTestimonialsFallback() : []
     );
     setTestimonials(data.map(normalizeItem));
-  };
+  }, [useDevelopmentFallback]);
 
   useEffect(() => {
     loadTestimonials();
-  }, [useDevelopmentFallback]);
+  }, [loadTestimonials]);
+
+  useAutoRefresh(loadTestimonials, { intervalMs: 15000 });
 
   const submitTestimonial = async (event) => {
     event.preventDefault();

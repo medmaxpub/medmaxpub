@@ -18,8 +18,8 @@ export default function UserEditorModal({
       <form onSubmit={onSubmit} className="card-panel w-full max-w-xl p-6">
         <SectionHeader
           label="Users"
-          title={editingUserId ? "Edit user" : "Add new user"}
-          description="Create or update a journal user account from the super user portal."
+          title="Edit user"
+          description="Update the linked user account details for an existing journal."
         />
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -46,9 +46,9 @@ export default function UserEditorModal({
             className="sm:col-span-2"
             value={form.password}
             onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
-            placeholder={editingUserId ? "New Password (optional)" : "Password"}
+            placeholder="New Password (optional)"
             type="password"
-            required={!editingUserId}
+            required={false}
           />
         </div>
 
@@ -56,7 +56,7 @@ export default function UserEditorModal({
 
         <div className="mt-6 flex flex-wrap gap-3">
           <button type="submit" className="button-primary">
-            {editingUserId ? "Update User" : "Create User"}
+            Update User
           </button>
           <button type="button" className="button-secondary" onClick={onClose}>
             Cancel

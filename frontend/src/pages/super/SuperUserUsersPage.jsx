@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Eye, EyeOff, LogIn, Pencil, Plus, Search, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
@@ -7,12 +7,12 @@ import SectionHeader from "../../components/common/SectionHeader";
 import JournalEditorModal from "../../components/super/JournalEditorModal";
 import UserEditorModal from "../../components/super/UserEditorModal";
 import { useAuth } from "../../context/AuthContext";
+import useAutoRefresh from "../../hooks/useAutoRefresh";
 import { getSuperUserUsersFallback } from "./superUserFallbacks";
 import {
   defaultUserMeta,
   initialJournalForm,
   initialUserForm,
-  mapJournalFromUser,
   mapUserToForm,
   normalizeItem
 } from "../../components/super/superUserShared";
@@ -33,7 +33,7 @@ export default function SuperUserUsersPage() {
   const [journalStatus, setJournalStatus] = useState("");
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     const data = await withFallback(
       () =>
         api.get("/super/users", {
@@ -50,17 +50,18 @@ export default function SuperUserUsersPage() {
 
     setUsers((data.items || []).map(normalizeItem));
     setUserMeta({ ...defaultUserMeta, ...(data.meta || {}) });
-  };
+  }, [userQuery.direction, userQuery.orderBy, userQuery.page, userQuery.pageSize, userQuery.search]);
 
   useEffect(() => {
     loadUsers();
-  }, [userQuery.direction, userQuery.orderBy, userQuery.page, userQuery.pageSize, userQuery.search]);
+  }, [loadUsers]);
 
-  const openCreateUserEditor = () => {
-    setEditingUserId("");
-    setUserForm(initialUserForm);
-    setUserEditorOpen(true);
-    setUserStatus("");
+  useAutoRefresh(loadUsers, { intervalMs: 15000 });
+
+  const openCreateAccountEditor = () => {
+    setJournalForm(initialJournalForm);
+    setJournalEditorOpen(true);
+    setJournalStatus("");
   };
 
   const openEditUserEditor = (item) => {
@@ -68,12 +69,6 @@ export default function SuperUserUsersPage() {
     setUserForm(mapUserToForm(item));
     setUserEditorOpen(true);
     setUserStatus("");
-  };
-
-  const openAddJournalEditor = (item) => {
-    setJournalForm(mapJournalFromUser(item));
-    setJournalEditorOpen(true);
-    setJournalStatus("");
   };
 
   const submitUser = async (event) => {
@@ -109,7 +104,7 @@ export default function SuperUserUsersPage() {
     setUserStatus("");
 
     const confirmed = window.confirm(
-      `Delete user "${targetUser.username}" and all linked journals, issues, articles, PPTs, and videos?`
+      `Delete user "${targetUser.username}" and its linked journal, issues, articles, PPTs, and videos?`
     );
 
     if (!confirmed) {
@@ -192,7 +187,10 @@ export default function SuperUserUsersPage() {
 
     try {
       const payload = {
-        ownerUserId: journalForm.ownerUserId,
+        firstName: journalForm.firstName,
+        lastName: journalForm.lastName,
+        username: journalForm.username,
+        password: journalForm.password,
         managingJournalName: journalForm.managingJournalName,
         journalDomainName: journalForm.journalDomainName,
         journalUrl: journalForm.journalUrl,
@@ -206,7 +204,7 @@ export default function SuperUserUsersPage() {
         `Media upload warning: ${error.response?.data?.message || error.message}`
       ]);
 
-      setJournalStatus(`Journal created successfully. ${mediaMessages.join(" ")}`.trim());
+      setJournalStatus(`User and journal created successfully. ${mediaMessages.join(" ")}`.trim());
       setJournalEditorOpen(false);
       setJournalForm(initialJournalForm);
       await loadUsers();
@@ -221,7 +219,7 @@ export default function SuperUserUsersPage() {
         <SectionHeader
           label="Users"
           title="Super user users list"
-          description="Search, sort, paginate, reveal passwords directly, edit accounts, delete users, impersonate users, and add journals directly from each row."
+          description="Search, sort, paginate, reveal passwords, edit existing users, delete accounts, impersonate users, and create each new user together with one journal."
         />
 
         <div className="mt-8 rounded-3xl border border-brand-border bg-brand-elevated p-4 sm:p-5">
@@ -263,9 +261,9 @@ export default function SuperUserUsersPage() {
               </div>
             </div>
 
-            <button type="button" className="button-primary px-4 py-2" onClick={openCreateUserEditor}>
+            <button type="button" className="button-primary px-4 py-2" onClick={openCreateAccountEditor}>
               <Plus size={16} className="mr-2" />
-              Add New User
+              Add User & Journal
             </button>
           </div>
         </div>
@@ -327,10 +325,6 @@ export default function SuperUserUsersPage() {
                           <button type="button" className="button-soft min-h-10 px-3 py-2" onClick={() => openEditUserEditor(item)}>
                             <Pencil size={16} />
                           </button>
-                          <button type="button" className="button-secondary min-h-10 px-3 py-2" onClick={() => openAddJournalEditor(item)}>
-                            <Plus size={16} className="mr-2" />
-                            Add Journal
-                          </button>
                           <button type="button" className="button-primary min-h-10 px-3 py-2" onClick={() => impersonateUser(item.id)}>
                             <LogIn size={16} className="mr-2" />
                             Login as User
@@ -345,7 +339,7 @@ export default function SuperUserUsersPage() {
                 ) : (
                   <tr>
                     <td colSpan={7} className="px-4 py-10">
-                      <EmptyState title="No users matched this view" description="Adjust search, sorting, or add a new user record." />
+                      <EmptyState title="No users matched this view" description="Adjust search, sorting, or create a new user and journal pair." />
                     </td>
                   </tr>
                 )}
@@ -400,7 +394,7 @@ export default function SuperUserUsersPage() {
 
       <JournalEditorModal
         open={journalEditorOpen}
-        modeLabel="Add journal for user"
+        modeLabel="Create user and journal"
         form={journalForm}
         setForm={setJournalForm}
         status={journalStatus}
@@ -409,7 +403,7 @@ export default function SuperUserUsersPage() {
           setJournalEditorOpen(false);
           setJournalForm(initialJournalForm);
         }}
-        isCreateForExistingUser
+        description="Create the user account and its single linked journal together. Existing users cannot be assigned an extra journal later."
       />
     </div>
   );

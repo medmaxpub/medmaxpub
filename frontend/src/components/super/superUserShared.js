@@ -72,16 +72,6 @@ export function mapJournalToForm(journal) {
   };
 }
 
-export function mapJournalFromUser(user) {
-  return {
-    ...initialJournalForm,
-    ownerUserId: user?.id || "",
-    firstName: user?.firstName || "",
-    lastName: user?.lastName || "",
-    username: user?.username || ""
-  };
-}
-
 export function mapTestimonialToForm(item) {
   return {
     name: item?.name || "",

@@ -133,31 +133,7 @@ export const getSuperUsers = asyncHandler(async (req, res) => {
 
 export const createUser = asyncHandler(async (req, res) => {
   ensureSuperAdmin(req.user);
-
-  const firstName = normalizeText(req.body.firstName);
-  const lastName = normalizeText(req.body.lastName);
-  const username = normalizeText(req.body.username).toLowerCase();
-  const password = normalizeText(req.body.password);
-
-  if (!firstName || !lastName || !username || !password) {
-    throw new AppError("First name, last name, username, and password are required", 400);
-  }
-
-  const existingUser = await User.findOne({ userName: username });
-
-  if (existingUser) {
-    throw new AppError("Username is already in use", 400);
-  }
-
-  const user = await User.create({
-    firstName,
-    lastName,
-    userName: username,
-    password,
-    role: "user"
-  });
-
-  res.status(201).json(serializeUser(user, []));
+  throw new AppError("Create the user and journal together from the journal management workflow", 400);
 });
 
 export const updateUser = asyncHandler(async (req, res) => {

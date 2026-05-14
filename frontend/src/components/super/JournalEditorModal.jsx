@@ -10,11 +10,15 @@ export default function JournalEditorModal({
   onSubmit,
   onClose,
   isCreateForExistingUser = false,
-  ownerNotice = ""
+  ownerNotice = "",
+  description = ""
 }) {
   if (!open) {
     return null;
   }
+
+  const normalizedModeLabel = String(modeLabel || "").toLowerCase();
+  const isCreateMode = !normalizedModeLabel.includes("edit") && !normalizedModeLabel.includes("update");
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 px-4 py-6">
@@ -32,9 +36,11 @@ export default function JournalEditorModal({
           label="Journals"
           title={modeLabel}
           description={
-            isCreateForExistingUser
+            description || (isCreateForExistingUser
               ? "Create a journal and map it directly to the selected user account."
-              : "Update the selected journal record and its linked user metadata."
+              : isCreateMode
+                ? "Create the journal and its linked user account in a single step."
+                : "Update the selected journal record and its linked user metadata.")
           }
         />
 
