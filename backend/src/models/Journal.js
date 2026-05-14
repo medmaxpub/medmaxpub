@@ -30,6 +30,7 @@ const journalSchema = new mongoose.Schema(
     journalUrl: { type: String, required: true, unique: true, trim: true, lowercase: true },
     aboutJournal: { type: String, required: true, trim: true },
     journalInstructions: { type: String, required: true, trim: true },
+    coverImage: assetSchema,
     pdfFile: assetSchema
   },
   { timestamps: true }

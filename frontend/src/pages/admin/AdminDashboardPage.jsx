@@ -234,28 +234,34 @@ export default function AdminDashboardPage({ mode = "admin" }) {
     setJournalStatus("");
 
     try {
-      const payload = {
-        firstName: journalForm.firstName,
-        lastName: journalForm.lastName,
-        username: journalForm.username,
-        password: journalForm.password,
-        managingJournalName: journalForm.managingJournalName,
-        journalDomainName: journalForm.journalDomainName,
-        journalUrl: journalForm.journalUrl,
-        aboutJournal: journalForm.aboutJournal,
-        journalInstructions: journalForm.journalInstructions
-      };
+      const payload = new FormData();
+      payload.append("firstName", journalForm.firstName);
+      payload.append("lastName", journalForm.lastName);
+      payload.append("username", journalForm.username);
+      payload.append("password", journalForm.password);
+      payload.append("managingJournalName", journalForm.managingJournalName);
+      payload.append("journalDomainName", journalForm.journalDomainName);
+      payload.append("journalUrl", journalForm.journalUrl);
+      payload.append("aboutJournal", journalForm.aboutJournal);
+      payload.append("journalInstructions", journalForm.journalInstructions);
+
+      if (journalForm.coverImageFile) {
+        payload.append("coverImage", journalForm.coverImageFile);
+      }
 
       const response = await api[editingJournalId ? "put" : "post"](
         editingJournalId ? `/journals/${editingJournalId}` : "/journals",
-        payload
+        payload,
+        {
+          headers: { "Content-Type": "multipart/form-data" }
+        }
       );
       const savedJournal = normalizeItem(response.data);
       const mediaMessages = await attachJournalMedia(
         savedJournal.id,
         journalForm,
-        payload.managingJournalName,
-        payload.aboutJournal
+        journalForm.managingJournalName,
+        journalForm.aboutJournal
       ).catch((error) => [`Media upload warning: ${error.response?.data?.message || error.message}`]);
 
       setJournalStatus(

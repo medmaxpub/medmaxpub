@@ -16,6 +16,8 @@ export const initialJournalForm = {
   lastName: "",
   username: "",
   password: "",
+  coverImage: "",
+  coverImageFile: null,
   pptFile: null,
   pdfFile: null,
   videoFile: null
@@ -62,6 +64,8 @@ export function mapJournalToForm(journal) {
     journalUrl: journal?.journalUrl || "",
     aboutJournal: journal?.aboutJournal || "",
     journalInstructions: journal?.journalInstructions || "",
+    coverImage: journal?.coverImage || "",
+    coverImageFile: null,
     firstName: journal?.firstName || "",
     lastName: journal?.lastName || "",
     username: journal?.username || journal?.ownerUsername || "",

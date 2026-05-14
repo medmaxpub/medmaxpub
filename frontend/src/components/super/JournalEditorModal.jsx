@@ -118,6 +118,20 @@ export default function JournalEditorModal({
           <div className="rounded-3xl border border-brand-border bg-brand-surface p-5">
             <p className="text-sm font-semibold text-brand-ink">Optional Uploads</p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className="mb-2 block text-sm font-medium text-brand-slate">Journal Cover Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => setForm((current) => ({ ...current, coverImageFile: event.target.files?.[0] || null }))}
+                />
+                {form.coverImage ? (
+                  <div className="mt-3 flex items-center gap-3 rounded-2xl border border-brand-border bg-white p-3">
+                    <img src={form.coverImage} alt="Current journal cover" className="h-20 w-16 rounded-xl object-cover" />
+                    <p className="text-sm text-brand-slate">Current cover image will stay unless you upload a new one.</p>
+                  </div>
+                ) : null}
+              </div>
               <div>
                 <label className="mb-2 block text-sm font-medium text-brand-slate">PPT</label>
                 <input

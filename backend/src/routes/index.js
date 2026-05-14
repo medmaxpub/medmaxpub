@@ -58,11 +58,11 @@ router.post("/super/users/:id/reveal-password", protect, revealUserPassword);
 router
   .route("/journals")
   .get(getJournals)
-  .post(protect, createJournal);
+  .post(protect, upload.single("coverImage"), createJournal);
 
 router
   .route("/journals/:id")
-  .put(protect, updateJournal)
+  .put(protect, upload.single("coverImage"), updateJournal)
   .delete(protect, deleteJournal);
 
 router.get("/journals/:journalUrl", getJournalByUrl);

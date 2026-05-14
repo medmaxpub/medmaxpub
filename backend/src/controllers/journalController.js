@@ -141,6 +141,7 @@ function serializeJournalSummary(journal) {
     journalUrl: normalizeText(journal.journalUrl),
     aboutJournal: normalizeText(journal.aboutJournal),
     journalInstructions: normalizeText(journal.journalInstructions),
+    coverImage: normalizeStoredAssetUrl(journal.coverImage?.secure_url || "", journal.coverImage),
     pdfFileUrl: normalizeStoredAssetUrl(journal.pdfFile?.secure_url || "", journal.pdfFile),
     pdfFiles: [
       ...(journal.pdfFiles || []).map((item) => ({
@@ -261,6 +262,7 @@ async function buildJournalDetails(journal, req) {
       : null,
     archive,
     inPressArticles,
+    coverImage: normalizeStoredAssetUrl(journal.coverImage?.secure_url || "", journal.coverImage),
     editorialBoard: editorialBoard.map((item) => ({
       id: item._id,
       editorType: item.editorType || item.designation || "",
@@ -423,6 +425,7 @@ export const createJournal = asyncHandler(async (req, res) => {
 
   const owner = await upsertLinkedOwner(req, payload);
   await ensureSingleJournalPerUser(owner._id);
+  const coverImage = await uploadAsset(req.file, "medmaxpub/journals", "image", req);
 
   const journal = await Journal.create({
     owner: owner._id,
@@ -433,7 +436,8 @@ export const createJournal = asyncHandler(async (req, res) => {
     journalDomainName: payload.journalDomainName,
     journalUrl: payload.journalUrl,
     aboutJournal: payload.aboutJournal,
-    journalInstructions: payload.journalInstructions
+    journalInstructions: payload.journalInstructions,
+    coverImage
   });
 
   await syncUserJournals(owner._id);
@@ -456,6 +460,7 @@ export const updateJournal = asyncHandler(async (req, res) => {
 
   const owner = await upsertLinkedOwner(req, payload, journal);
   await ensureSingleJournalPerUser(owner._id, journal._id);
+  const nextCoverImage = req.file ? await uploadAsset(req.file, "medmaxpub/journals", "image", req) : null;
 
   journal.owner = owner._id;
   journal.firstName = payload.firstName;
@@ -466,6 +471,12 @@ export const updateJournal = asyncHandler(async (req, res) => {
   journal.journalUrl = payload.journalUrl;
   journal.aboutJournal = payload.aboutJournal;
   journal.journalInstructions = payload.journalInstructions;
+
+  if (nextCoverImage) {
+    await deleteAsset(journal.coverImage, "image");
+    journal.coverImage = nextCoverImage;
+  }
+
   await journal.save();
 
   await syncUserJournals(owner._id);
@@ -484,12 +495,21 @@ export const deleteJournal = asyncHandler(async (req, res) => {
   }
 
   const ownerId = journal.owner?.toString();
+  const journalPdfFiles = await JournalPdf.find({ journal: journal._id }).lean();
 
   await Article.deleteMany({ journal: journal._id });
   await Issue.deleteMany({ journal: journal._id });
   await EditorialBoardMember.deleteMany({ journal: journal._id });
+  await JournalPdf.deleteMany({ journal: journal._id });
   await Ppt.deleteMany({ journal: journal._id });
   await Video.deleteMany({ journal: journal._id });
+
+  for (const item of journalPdfFiles) {
+    await deleteAsset(item.file, "raw");
+  }
+
+  await deleteAsset(journal.coverImage, "image");
+  await deleteAsset(journal.pdfFile, "raw");
   await journal.deleteOne();
 
   if (ownerId) {

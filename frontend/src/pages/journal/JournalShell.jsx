@@ -355,9 +355,24 @@ export default function JournalShell() {
           </div>
           <div className="grid gap-6 px-5 py-5 sm:px-8 sm:py-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-8">
             <div className="rounded-3xl border border-brand-border bg-brand-elevated p-6">
-              <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">Managing Journal Name</p>
-              <h1 className="mt-3 font-display text-3xl font-semibold text-brand-ink sm:text-4xl">{journal.managingJournalName}</h1>
-              <p className="mt-4 text-sm text-brand-slate">Managed by {journal.firstName} {journal.lastName}</p>
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+                {journal.coverImage ? (
+                  <img
+                    src={journal.coverImage}
+                    alt={`${journal.managingJournalName} cover`}
+                    className="h-52 w-40 rounded-3xl border border-brand-border object-cover shadow-panel"
+                  />
+                ) : (
+                  <div className="flex h-52 w-40 items-center justify-center rounded-3xl border border-brand-border bg-brand-surface p-4 text-center text-sm font-semibold text-brand-slate shadow-panel">
+                    Journal Cover
+                  </div>
+                )}
+                <div className="flex-1">
+                  <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">Managing Journal Name</p>
+                  <h1 className="mt-3 font-display text-3xl font-semibold text-brand-ink sm:text-4xl">{journal.managingJournalName}</h1>
+                  <p className="mt-4 text-sm text-brand-slate">Managed by {journal.firstName} {journal.lastName}</p>
+                </div>
+              </div>
             </div>
             <div className="rounded-3xl border border-brand-border bg-brand-surface p-6">
               <div className="grid gap-5 sm:grid-cols-2">
