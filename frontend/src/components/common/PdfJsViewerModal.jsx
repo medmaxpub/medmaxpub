@@ -101,9 +101,19 @@ export default function PdfJsViewerModal({
       setError("");
 
       try {
+        const response = await fetch(fileUrl, {
+          method: "GET",
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch PDF (${response.status})`);
+        }
+
+        const pdfBytes = new Uint8Array(await response.arrayBuffer());
+
         loadingTask = pdfJs.getDocument({
-          url: fileUrl,
-          withCredentials: false
+          data: pdfBytes
         });
 
         const nextDoc = await loadingTask.promise;
