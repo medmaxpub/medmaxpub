@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { medmaxTransparentLogo } from "../../assets/branding";
 import { useAuth } from "../../context/AuthContext";
 
 export default function AdminLoginPage() {
@@ -38,7 +39,7 @@ export default function AdminLoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-brand-mist px-4 py-12">
       <form onSubmit={handleSubmit} className="card-panel w-full max-w-md p-8">
-        <img src="/medmax-logo.png" alt="Medmax Publishers" className="h-16 w-auto" />
+        <img src={medmaxTransparentLogo} alt="Medmax Publishers" className="h-16 w-auto" />
         <span className="eyebrow">{requestedUserPortal ? "User Portal" : "Portal Login"}</span>
         <h1 className="font-display text-4xl font-semibold text-brand-ink">Secure Login</h1>
         <p className="mt-4 text-brand-slate">Use the same login for admin and journal user accounts. Access is routed automatically after sign in.</p>

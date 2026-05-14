@@ -57,22 +57,7 @@ export default function FloatingContactActions() {
       ) : null}
 
       <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 px-4 sm:bottom-6 sm:px-6">
-        <div className="mx-auto flex max-w-7xl items-end justify-between gap-4">
-          <div className="pointer-events-auto">
-            <Tooltip label="Chat on WhatsApp">
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noreferrer"
-                title="Chat on WhatsApp"
-                aria-label="Chat on WhatsApp"
-                className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_20px_45px_rgba(37,211,102,0.35)] transition duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:shadow-[0_26px_55px_rgba(37,211,102,0.45)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#25D366]/30"
-              >
-                <WhatsAppIcon className="h-7 w-7" />
-              </a>
-            </Tooltip>
-          </div>
-
+        <div className="mx-auto flex max-w-7xl items-end justify-end gap-4">
           <div className="pointer-events-auto flex flex-col items-end gap-3">
             {chatOpen ? (
               <div
@@ -112,17 +97,32 @@ export default function FloatingContactActions() {
               </div>
             ) : null}
 
-            <Tooltip label="Live Chat Support" align="right">
-              <button
-                type="button"
-                title="Live Chat Support"
-                aria-label="Open live chat support popup"
-                onClick={() => setChatOpen((current) => !current)}
-                className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-brand-crimson text-white shadow-[0_20px_45px_rgba(198,40,40,0.32)] transition duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:shadow-[0_26px_55px_rgba(198,40,40,0.42)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-crimson/30"
-              >
-                <MessageSquare size={24} />
-              </button>
-            </Tooltip>
+            <div className="flex items-center gap-3">
+              <Tooltip label="Chat on WhatsApp" align="right">
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Chat on WhatsApp"
+                  aria-label="Chat on WhatsApp"
+                  className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_20px_45px_rgba(37,211,102,0.35)] transition duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:shadow-[0_26px_55px_rgba(37,211,102,0.45)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#25D366]/30"
+                >
+                  <WhatsAppIcon className="h-7 w-7" />
+                </a>
+              </Tooltip>
+
+              <Tooltip label="Live Chat Support" align="right">
+                <button
+                  type="button"
+                  title="Live Chat Support"
+                  aria-label="Open live chat support popup"
+                  onClick={() => setChatOpen((current) => !current)}
+                  className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-brand-crimson text-white shadow-[0_20px_45px_rgba(198,40,40,0.32)] transition duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:shadow-[0_26px_55px_rgba(198,40,40,0.42)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-crimson/30"
+                >
+                  <MessageSquare size={24} />
+                </button>
+              </Tooltip>
+            </div>
           </div>
         </div>
       </div>

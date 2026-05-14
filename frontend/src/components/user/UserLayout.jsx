@@ -1,5 +1,6 @@
 import { Archive, BookOpenCheck, FileClock, LayoutGrid, LogOut, Users } from "lucide-react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { medmaxTransparentLogo } from "../../assets/branding";
 import { useAuth } from "../../context/AuthContext";
 
 const navItems = [
@@ -31,7 +32,7 @@ export default function UserLayout() {
       <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
         <aside className="border-r border-brand-border bg-white px-6 py-8">
           <div className="inline-flex rounded-[1.15rem] border border-brand-border bg-brand-elevated px-4 py-3 shadow-panel">
-            <img src="/medmax-logo.png" alt="Medmax Publishers" className="h-12 w-auto" />
+            <img src={medmaxTransparentLogo} alt="Medmax Publishers" className="h-12 w-auto" />
           </div>
           <p className="mt-3 text-xs font-semibold uppercase tracking-[0.26em] text-brand-navy">Journal User Portal</p>
 

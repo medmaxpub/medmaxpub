@@ -7,7 +7,7 @@ import Ppt from "../models/Ppt.js";
 import User from "../models/User.js";
 import Video from "../models/Video.js";
 import { ARTICLE_STATUSES, deriveArticleStatus } from "./articleController.js";
-import { serializePpt } from "../services/pptService.js";
+import { ensurePptPreviewAsset, normalizeStoredAssetUrl, serializePpt } from "../services/pptService.js";
 import { ensureJournalAccess, ensureSuperAdmin, hasElevatedAccess } from "../utils/accessControl.js";
 import { deleteAsset, uploadAsset } from "../utils/assetStorage.js";
 import { AppError } from "../utils/appError.js";
@@ -114,7 +114,7 @@ function serializeJournalSummary(journal) {
           {
             id: `legacy-${journal._id}`,
             title: `${normalizeText(journal.managingJournalName) || "Journal"} PDF`,
-            fileUrl: journal.pdfFile?.secure_url || "",
+            fileUrl: normalizeStoredAssetUrl(journal.pdfFile?.secure_url || "", journal.pdfFile),
             uploadedAt: journal.pdfFile?.uploaded_at || ""
           }
         ]
@@ -141,12 +141,12 @@ function serializeJournalSummary(journal) {
     journalUrl: normalizeText(journal.journalUrl),
     aboutJournal: normalizeText(journal.aboutJournal),
     journalInstructions: normalizeText(journal.journalInstructions),
-    pdfFileUrl: journal.pdfFile?.secure_url || "",
+    pdfFileUrl: normalizeStoredAssetUrl(journal.pdfFile?.secure_url || "", journal.pdfFile),
     pdfFiles: [
       ...(journal.pdfFiles || []).map((item) => ({
         id: item._id,
         title: item.title,
-        fileUrl: item.file?.secure_url || "",
+        fileUrl: normalizeStoredAssetUrl(item.file?.secure_url || "", item.file),
         uploadedAt: item.createdAt || item.file?.uploaded_at || ""
       })),
       ...legacyPdfFiles
@@ -154,9 +154,9 @@ function serializeJournalSummary(journal) {
   };
 }
 
-async function buildJournalDetails(journal) {
+async function buildJournalDetails(journal, req) {
   const issues = await Issue.find({ journal: journal._id }).sort({ year: -1, volume: -1, issue: -1 }).lean();
-  const ppts = await Ppt.find({ journal: journal._id }).sort({ createdAt: -1 }).lean();
+  const ppts = await Ppt.find({ journal: journal._id }).sort({ createdAt: -1 });
   const pdfFiles = await JournalPdf.find({ journal: journal._id }).sort({ createdAt: -1 }).lean();
   const videos = await Video.find({ journal: journal._id }).sort({ createdAt: -1 }).lean();
   const editorialBoard = await EditorialBoardMember.find({ journal: journal._id }).sort({ createdAt: -1 }).lean();
@@ -243,6 +243,10 @@ async function buildJournalDetails(journal) {
     }))
   }));
 
+  for (const ppt of ppts) {
+    await ensurePptPreviewAsset(ppt, req);
+  }
+
   return {
     ...serializeJournalSummary(journal),
     currentIssue: currentIssue
@@ -272,10 +276,10 @@ async function buildJournalDetails(journal) {
     pdfFiles: pdfFiles.map((item) => ({
       id: item._id,
       title: item.title,
-      fileUrl: item.file?.secure_url || "",
+      fileUrl: normalizeStoredAssetUrl(item.file?.secure_url || "", item.file),
       uploadedAt: item.createdAt || item.file?.uploaded_at || ""
     })),
-    ppts: ppts.map((ppt) => serializePpt(ppt)),
+    ppts: ppts.map((ppt) => serializePpt(ppt.toObject())),
     videos: videos.map((video) => ({
       id: video._id,
       title: video.title,
@@ -407,7 +411,7 @@ export const getJournalByUrl = asyncHandler(async (req, res) => {
     throw new AppError("Journal not found", 404);
   }
 
-  res.json(await buildJournalDetails(journal));
+  res.json(await buildJournalDetails(journal, req));
 });
 
 export const createJournal = asyncHandler(async (req, res) => {
@@ -542,7 +546,7 @@ export const uploadJournalPdf = asyncHandler(async (req, res) => {
     items: createdItems.map((item) => ({
       id: item._id,
       title: item.title,
-      fileUrl: item.file?.secure_url || "",
+      fileUrl: normalizeStoredAssetUrl(item.file?.secure_url || "", item.file),
       uploadedAt: item.createdAt
     }))
   });

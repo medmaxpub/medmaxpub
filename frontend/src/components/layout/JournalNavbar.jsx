@@ -1,6 +1,7 @@
 import { Menu, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
+import { medmaxTransparentLogo } from "../../assets/branding";
 
 const journalNavItems = [
   { label: "Back", to: "/home" }
@@ -30,7 +31,9 @@ export default function JournalNavbar() {
     <div className="sticky top-0 z-30 border-b border-brand-border bg-brand-mist/95 backdrop-blur">
       <div className="container-shell flex items-center justify-between py-4">
         <div className="flex items-center">
-          <img src="/medmax-logo.png" alt="Medmax Publishers" className="h-20 w-auto sm:h-24 lg:h-24" />
+          <Link to="/" className="inline-flex items-center">
+            <img src={medmaxTransparentLogo} alt="Medmax Publishers" className="h-20 w-auto sm:h-24 lg:h-24" />
+          </Link>
         </div>
 
         <nav className="hidden flex-wrap items-center gap-2 lg:flex">

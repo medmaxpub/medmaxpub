@@ -11,6 +11,7 @@ import ContactPage from "./pages/public/ContactPage";
 import HomePage from "./pages/public/HomePage";
 import JournalsPage from "./pages/public/JournalsPage";
 import MembershipPage from "./pages/public/MembershipPage";
+import PolicyPage from "./pages/public/PolicyPage";
 import PptsPage from "./pages/public/PptsPage";
 import SuperUserDashboardPage from "./pages/super/SuperUserDashboardPage";
 import SuperUserJournalsPage from "./pages/super/SuperUserJournalsPage";
@@ -41,6 +42,9 @@ export default function App() {
         <Route path="/submit-manuscript" element={<SubmitManuscriptPage />} />
         <Route path="/membership" element={<MembershipPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/terms-and-conditions" element={<PolicyPage policyKey="terms" />} />
+        <Route path="/withdraw-policy" element={<PolicyPage policyKey="withdraw" />} />
+        <Route path="/privacy-policy" element={<PolicyPage policyKey="privacy" />} />
       </Route>
 
       <Route element={<JournalLayout />}>

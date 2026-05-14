@@ -1,5 +1,6 @@
 import { BookOpenText, LogOut, Quote } from "lucide-react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { medmaxTransparentLogo } from "../../assets/branding";
 import { useAuth } from "../../context/AuthContext";
 
 export default function AdminLayout() {
@@ -37,7 +38,7 @@ export default function AdminLayout() {
         <aside className="border-r border-brand-border bg-white px-6 py-8 text-brand-ink">
           <div>
             <div className="inline-flex rounded-3xl border border-brand-border bg-brand-elevated px-4 py-3 shadow-panel">
-              <img src="/medmax-logo.png" alt="Medmax Publishers" className="h-12 w-auto" />
+              <img src={medmaxTransparentLogo} alt="Medmax Publishers" className="h-12 w-auto" />
             </div>
             <p className="mt-2 text-sm text-brand-slate">{isAdmin ? "Admin Portal" : "User Portal"}</p>
           </div>

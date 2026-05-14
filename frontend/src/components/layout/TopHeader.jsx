@@ -1,5 +1,6 @@
 import { Mail, Phone, Search } from "lucide-react";
 import { Link } from "react-router-dom";
+import { medmaxTransparentLogo } from "../../assets/branding";
 import { companyInfo } from "../../data/mockData";
 
 export default function TopHeader({ searchTerm, setSearchTerm, onSearch }) {
@@ -8,7 +9,7 @@ export default function TopHeader({ searchTerm, setSearchTerm, onSearch }) {
       <div className="container-shell flex flex-col gap-4 py-3 sm:py-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex justify-start">
           <Link to="/" className="inline-flex items-center">
-            <img src="/medmax-logo.png" alt="Medmax Publishers" className="h-14 w-auto sm:h-16 lg:h-20" />
+            <img src={medmaxTransparentLogo} alt="Medmax Publishers" className="h-14 w-auto sm:h-16 lg:h-20" />
           </Link>
         </div>
 
