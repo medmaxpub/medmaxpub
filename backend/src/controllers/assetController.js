@@ -30,7 +30,7 @@ function getAllowedHosts(req) {
   return hosts;
 }
 
-function isAllowedPdfTarget(targetUrl, req) {
+function isAllowedAssetTarget(targetUrl, req) {
   try {
     const parsed = new URL(targetUrl);
     const allowedHosts = getAllowedHosts(req);
@@ -40,7 +40,7 @@ function isAllowedPdfTarget(targetUrl, req) {
     }
 
     if (allowedHosts.has(parsed.hostname)) {
-      return parsed.pathname.toLowerCase().endsWith(".pdf") || parsed.pathname.includes("/uploads/");
+      return parsed.pathname.includes("/upload") || parsed.pathname.includes("/uploads/");
     }
 
     return false;
@@ -57,6 +57,34 @@ function resolveFilename(targetUrl) {
   }
 }
 
+function resolveContentType(targetUrl, upstreamContentType = "") {
+  const normalizedType = String(upstreamContentType || "").split(";")[0].trim().toLowerCase();
+
+  if (normalizedType) {
+    return normalizedType;
+  }
+
+  const lowerPath = String(targetUrl || "").toLowerCase();
+
+  if (lowerPath.endsWith(".pdf")) {
+    return "application/pdf";
+  }
+
+  if (lowerPath.endsWith(".ppt")) {
+    return "application/vnd.ms-powerpoint";
+  }
+
+  if (lowerPath.endsWith(".pptx")) {
+    return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+  }
+
+  if (lowerPath.endsWith(".odp")) {
+    return "application/vnd.oasis.opendocument.presentation";
+  }
+
+  return "application/octet-stream";
+}
+
 export const proxyPdfAsset = asyncHandler(async (req, res) => {
   const targetUrl = String(req.query.url || "").trim();
   const shouldDownload = String(req.query.download || "").trim() === "1";
@@ -65,7 +93,7 @@ export const proxyPdfAsset = asyncHandler(async (req, res) => {
     throw new AppError("PDF URL is required", 400);
   }
 
-  if (!isAllowedPdfTarget(targetUrl, req)) {
+  if (!isAllowedAssetTarget(targetUrl, req)) {
     throw new AppError("PDF URL is not allowed", 400);
   }
 
@@ -91,4 +119,42 @@ export const proxyPdfAsset = asyncHandler(async (req, res) => {
   res.set("Content-Type", "application/pdf");
   res.set("Content-Disposition", `${shouldDownload ? "attachment" : "inline"}; filename="${filename}"`);
   res.send(pdfBuffer);
+});
+
+export const proxyFileAsset = asyncHandler(async (req, res) => {
+  const targetUrl = String(req.query.url || "").trim();
+  const shouldDownload = String(req.query.download || "").trim() === "1";
+
+  if (!targetUrl) {
+    throw new AppError("File URL is required", 400);
+  }
+
+  if (!isAllowedAssetTarget(targetUrl, req)) {
+    throw new AppError("File URL is not allowed", 400);
+  }
+
+  const response = await fetch(targetUrl, {
+    redirect: "follow"
+  });
+
+  if (!response.ok) {
+    throw new AppError(`Failed to load file asset (${response.status})`, 502);
+  }
+
+  const fileBuffer = Buffer.from(await response.arrayBuffer());
+  const filename = resolveFilename(targetUrl);
+  const contentType = resolveContentType(targetUrl, response.headers.get("content-type"));
+
+  console.info("[file-proxy] serve", {
+    targetUrl,
+    status: response.status,
+    bytes: fileBuffer.length,
+    contentType,
+    download: shouldDownload
+  });
+
+  res.set("Cache-Control", "no-store");
+  res.set("Content-Type", contentType);
+  res.set("Content-Disposition", `${shouldDownload ? "attachment" : "inline"}; filename="${filename}"`);
+  res.send(fileBuffer);
 });

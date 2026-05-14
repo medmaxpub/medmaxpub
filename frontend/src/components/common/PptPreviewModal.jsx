@@ -10,7 +10,7 @@ import {
   MonitorPlay,
   X
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import api from "../../api/client";
 import { buildPdfProxyUrl } from "../../utils/pdfProxy";
 import { buildPdfViewerUrl, normalizePptItem, warmPreviewUrl } from "../../utils/pptPreview";
@@ -36,6 +36,7 @@ const pdfViewModes = {
 
 export default function PptPreviewModal({ ppt, onClose }) {
   const [resolvedPpt, setResolvedPpt] = useState(ppt ? normalizePptItem(ppt) : null);
+  const [activeViewerIndex, setActiveViewerIndex] = useState(0);
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [pdfViewMode, setPdfViewMode] = useState("width");
   const [presentationMode, setPresentationMode] = useState(false);
@@ -48,7 +49,17 @@ export default function PptPreviewModal({ ppt, onClose }) {
   const activePpt = resolvedPpt || (ppt ? normalizePptItem(ppt) : null);
   const previewPdfUrl = activePpt?.previewPdfUrl || null;
   const inlinePreviewPdfUrl = buildPdfProxyUrl(previewPdfUrl);
-  const isPdfViewer = Boolean(previewPdfUrl);
+  const viewerCandidates = useMemo(
+    () =>
+      [
+        inlinePreviewPdfUrl ? { label: "PDF Preview", type: "pdf", url: inlinePreviewPdfUrl } : null,
+        activePpt?.googleViewerUrl ? { label: "Google Viewer", type: "external", url: activePpt.googleViewerUrl } : null,
+        activePpt?.officeViewerUrl ? { label: "Alternate Viewer", type: "external", url: activePpt.officeViewerUrl } : null
+      ].filter(Boolean),
+    [activePpt?.googleViewerUrl, activePpt?.officeViewerUrl, inlinePreviewPdfUrl]
+  );
+  const activeViewer = viewerCandidates[activeViewerIndex] || null;
+  const isPdfViewer = activeViewer?.type === "pdf" && Boolean(activeViewer?.url);
 
   useEffect(() => {
     if (ppt) {
@@ -62,6 +73,7 @@ export default function PptPreviewModal({ ppt, onClose }) {
     }
 
     setResolvedPpt(ppt ? normalizePptItem(ppt) : null);
+    setActiveViewerIndex(0);
     setIframeLoaded(false);
     setPdfViewMode("width");
     setPresentationMode(false);
@@ -135,22 +147,27 @@ export default function PptPreviewModal({ ppt, onClose }) {
   }, [activePpt?.id, activePpt?.previewPdfUrl]);
 
   useEffect(() => {
-    if (!inlinePreviewPdfUrl) {
+    if (!activeViewer?.url) {
       return undefined;
     }
 
-    warmPreviewUrl(inlinePreviewPdfUrl);
+    warmPreviewUrl(activeViewer.url);
     setIframeLoaded(false);
     setPdfError("");
 
     const timeoutId = window.setTimeout(() => {
       if (!iframeLoaded) {
-        setPdfError("");
+        if (!isPdfViewer && activeViewerIndex < viewerCandidates.length - 1) {
+          setActiveViewerIndex((current) => current + 1);
+          return;
+        }
+
+        setPdfError(isPdfViewer ? "" : "Embedded PPT preview is unavailable. Try another viewer or download the PPT.");
       }
-    }, 10000);
+    }, isPdfViewer ? 10000 : 5000);
 
     return () => window.clearTimeout(timeoutId);
-  }, [iframeLoaded, inlinePreviewPdfUrl]);
+  }, [activeViewer, activeViewerIndex, iframeLoaded, isPdfViewer, viewerCandidates.length]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -223,7 +240,7 @@ export default function PptPreviewModal({ ppt, onClose }) {
 
   const pageLabel = isPdfViewer ? `Page ${pdfPageNumber}` : "";
   const pdfViewerUrl = isPdfViewer
-    ? buildPdfViewerUrl(inlinePreviewPdfUrl, {
+    ? buildPdfViewerUrl(activeViewer?.url, {
         ...(pdfViewModes[pdfViewMode]?.options || pdfViewModes.width.options),
         navpanes: outlineOpen && !presentationMode ? 1 : 0,
         toolbar: presentationMode ? 0 : 1,
@@ -263,68 +280,91 @@ export default function PptPreviewModal({ ppt, onClose }) {
         ) : null}
 
         <div ref={viewerShellRef} className="flex-1 bg-slate-950">
-          {isPdfViewer && pdfViewerUrl ? (
+          {activeViewer?.url ? (
             <div className={`flex h-full flex-col ${presentationMode ? "group/presentation" : ""}`}>
               {!presentationMode ? (
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-white px-6 py-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-brand-violet px-3 py-2 text-sm text-white">PDF Preview</span>
-
-                    {Object.entries(pdfViewModes).map(([key, mode]) => (
+                    {viewerCandidates.map((candidate, index) => (
                       <button
-                        key={key}
+                        key={candidate.label}
                         type="button"
                         onClick={() => {
-                          setPdfError("");
+                          setActiveViewerIndex(index);
                           setIframeLoaded(false);
-
-                          if (key === "outline") {
-                            setOutlineOpen((current) => !current);
-                            setPdfViewMode("outline");
-                            return;
-                          }
-
-                          setOutlineOpen(false);
-                          setPdfViewMode(key);
+                          setPdfError("");
                         }}
                         className={`rounded-full px-3 py-2 text-sm ${
-                          (key === "outline" ? outlineOpen : pdfViewMode === key) ? "bg-slate-950 text-white" : "bg-brand-elevated text-brand-slate"
+                          activeViewerIndex === index ? "bg-brand-violet text-white" : "bg-brand-elevated text-brand-slate"
                         }`}
                       >
-                        {key === "outline" ? (
-                          <span className="inline-flex items-center">
-                            <ListTree size={14} className="mr-2" />
-                            {mode.label}
-                          </span>
-                        ) : (
-                          mode.label
-                        )}
+                        {candidate.label}
                       </button>
                     ))}
+
+                    {isPdfViewer
+                      ? Object.entries(pdfViewModes).map(([key, mode]) => (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => {
+                              setPdfError("");
+                              setIframeLoaded(false);
+
+                              if (key === "outline") {
+                                setOutlineOpen((current) => !current);
+                                setPdfViewMode("outline");
+                                return;
+                              }
+
+                              setOutlineOpen(false);
+                              setPdfViewMode(key);
+                            }}
+                            className={`rounded-full px-3 py-2 text-sm ${
+                              (key === "outline" ? outlineOpen : pdfViewMode === key) ? "bg-slate-950 text-white" : "bg-brand-elevated text-brand-slate"
+                            }`}
+                          >
+                            {key === "outline" ? (
+                              <span className="inline-flex items-center">
+                                <ListTree size={14} className="mr-2" />
+                                {mode.label}
+                              </span>
+                            ) : (
+                              mode.label
+                            )}
+                          </button>
+                        ))
+                      : null}
                   </div>
 
                   <div className="flex flex-wrap gap-3">
-                    <div className="inline-flex items-center rounded-full border border-brand-border bg-brand-elevated px-3 py-2 text-sm text-brand-ink">
-                      <button type="button" className="rounded-full p-1 hover:bg-white" onClick={goToPreviousPage} disabled={pdfPageNumber <= 1}>
-                        <ChevronLeft size={16} />
-                      </button>
-                      <span className="mx-2 min-w-20 text-center">{pageLabel}</span>
-                      <button type="button" className="rounded-full p-1 hover:bg-white" onClick={goToNextPage}>
-                        <ChevronRight size={16} />
-                      </button>
-                    </div>
-                    <button type="button" className="button-secondary px-4 py-2" onClick={togglePresentationMode}>
-                      <MonitorPlay size={16} className="mr-2" />
-                      Presentation View
-                    </button>
+                    {isPdfViewer ? (
+                      <>
+                        <div className="inline-flex items-center rounded-full border border-brand-border bg-brand-elevated px-3 py-2 text-sm text-brand-ink">
+                          <button type="button" className="rounded-full p-1 hover:bg-white" onClick={goToPreviousPage} disabled={pdfPageNumber <= 1}>
+                            <ChevronLeft size={16} />
+                          </button>
+                          <span className="mx-2 min-w-20 text-center">{pageLabel}</span>
+                          <button type="button" className="rounded-full p-1 hover:bg-white" onClick={goToNextPage}>
+                            <ChevronRight size={16} />
+                          </button>
+                        </div>
+                        <button type="button" className="button-secondary px-4 py-2" onClick={togglePresentationMode}>
+                          <MonitorPlay size={16} className="mr-2" />
+                          Presentation View
+                        </button>
+                      </>
+                    ) : null}
                     <button type="button" className="button-secondary px-4 py-2" onClick={toggleFullscreen}>
                       {isFullscreen ? <Minimize2 size={16} className="mr-2" /> : <Maximize2 size={16} className="mr-2" />}
                       {isFullscreen ? "Exit Full Screen" : "Full Screen"}
                     </button>
-                    <a href={inlinePreviewPdfUrl || previewPdfUrl} target="_blank" rel="noreferrer" className="button-soft px-4 py-2">
-                      <ExternalLink size={16} className="mr-2" />
-                      Open Preview PDF
-                    </a>
+                    {previewPdfUrl ? (
+                      <a href={inlinePreviewPdfUrl || previewPdfUrl} target="_blank" rel="noreferrer" className="button-soft px-4 py-2">
+                        <ExternalLink size={16} className="mr-2" />
+                        Open Preview PDF
+                      </a>
+                    ) : null}
                     {activePpt?.downloadUrl ? (
                       <a href={activePpt.downloadUrl} target="_blank" rel="noreferrer" download className="button-primary px-4 py-2">
                         <Download size={16} className="mr-2" />
@@ -388,9 +428,9 @@ export default function PptPreviewModal({ ppt, onClose }) {
 
                 <div className={`h-full overflow-hidden border border-white/10 bg-white ${presentationMode ? "rounded-none border-0" : "rounded-[1.5rem]"}`}>
                   <iframe
-                    key={pdfViewerUrl}
-                    title={`${activePpt?.title || ppt.title} PDF preview`}
-                    src={pdfViewerUrl}
+                    key={isPdfViewer ? pdfViewerUrl : activeViewer.url}
+                    title={`${activePpt?.title || ppt.title} preview`}
+                    src={isPdfViewer ? pdfViewerUrl : activeViewer.url}
                     className="h-full w-full bg-white"
                     loading="eager"
                     referrerPolicy="no-referrer"
@@ -398,7 +438,8 @@ export default function PptPreviewModal({ ppt, onClose }) {
                     onLoad={() => {
                       console.info("[ppt-preview] iframe-loaded", {
                         id: activePpt?.id || null,
-                        previewPdfUrl: inlinePreviewPdfUrl || previewPdfUrl
+                        previewUrl: isPdfViewer ? inlinePreviewPdfUrl || previewPdfUrl : activeViewer.url,
+                        viewerType: isPdfViewer ? "pdf" : activeViewer.type
                       });
                       setIframeLoaded(true);
                       setPdfError("");
@@ -406,13 +447,14 @@ export default function PptPreviewModal({ ppt, onClose }) {
                     onError={() => {
                       console.error("[ppt-preview] iframe-error", {
                         id: activePpt?.id || null,
-                        previewPdfUrl: inlinePreviewPdfUrl || previewPdfUrl
+                        previewUrl: isPdfViewer ? inlinePreviewPdfUrl || previewPdfUrl : activeViewer.url,
+                        viewerType: isPdfViewer ? "pdf" : activeViewer.type
                       });
                     }}
                   />
                 </div>
 
-                {presentationMode ? (
+                {presentationMode && isPdfViewer ? (
                   <>
                     <button
                       type="button"

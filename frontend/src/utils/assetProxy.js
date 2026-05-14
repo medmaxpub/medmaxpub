@@ -1,17 +1,17 @@
 import api from "../api/client";
-import { buildAssetProxyUrl } from "./assetProxy";
 
-export function buildPdfProxyUrl(fileUrl, options = {}) {
+export function buildAssetProxyUrl(fileUrl, options = {}) {
   if (!fileUrl) {
     return null;
   }
+
   const baseUrl = String(api.defaults.baseURL || "").replace(/\/+$/, "");
 
   if (!baseUrl) {
-    return buildAssetProxyUrl(fileUrl, options);
+    return fileUrl;
   }
 
-  const proxyUrl = new URL(`${baseUrl}/assets/pdf-proxy`);
+  const proxyUrl = new URL(`${baseUrl}/assets/file-proxy`);
   proxyUrl.searchParams.set("url", fileUrl);
 
   if (options.download) {

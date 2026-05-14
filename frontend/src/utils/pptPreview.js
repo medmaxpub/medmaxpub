@@ -1,4 +1,5 @@
 import { getJournalRouteSlug } from "./journalLinks";
+import { buildAssetProxyUrl } from "./assetProxy";
 
 function isLocalHostname(hostname) {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0";
@@ -179,14 +180,17 @@ export function normalizePptItem(item = {}) {
   const pptAsset = item.file || item.pptFile || null;
   const previewAsset = item.previewFile || item.pdfPreviewFile || null;
   const pptUrl = normalizeAssetUrl(item.pptUrl || item.fileUrl || pptAsset?.secure_url, pptAsset);
+  const proxiedPptUrl = buildAssetProxyUrl(pptUrl);
   const previewPdfUrl = normalizeAssetUrl(
     item.previewPdfUrl || item.previewUrl || previewAsset?.secure_url,
     previewAsset
   );
   const pdfViewerUrl = buildPdfViewerUrl(previewPdfUrl);
-  const modalPreviewUrl = pdfViewerUrl;
-  const previewIssue = !previewPdfUrl
-    ? "Preview PDF is not ready yet for this presentation."
+  const googleViewerUrl = !pdfViewerUrl ? buildGoogleViewerUrl(proxiedPptUrl || pptUrl) : null;
+  const officeViewerUrl = !pdfViewerUrl ? buildOfficeViewerUrl(proxiedPptUrl || pptUrl) : null;
+  const modalPreviewUrl = pdfViewerUrl || officeViewerUrl || googleViewerUrl;
+  const previewIssue = !previewPdfUrl && !officeViewerUrl && !googleViewerUrl
+    ? "Preview PDF is not ready yet for this presentation, and fallback viewers are unavailable."
     : !pptUrl
       ? "The PPT file URL is missing or invalid."
       : null;
@@ -202,13 +206,13 @@ export function normalizePptItem(item = {}) {
     previewPdfUrl,
     previewPublicId: item.previewPublicId || previewAsset?.public_id || null,
     pdfViewerUrl,
-    googleViewerUrl: null,
-    officeViewerUrl: null,
+    googleViewerUrl,
+    officeViewerUrl,
     modalPreviewUrl,
     previewIssue,
-    downloadUrl: pptUrl,
+    downloadUrl: proxiedPptUrl || pptUrl,
     fileUrl: pptUrl,
-    previewUrl: previewPdfUrl,
+    previewUrl: previewPdfUrl || officeViewerUrl || googleViewerUrl,
     journalTitle: item.journalTitle || item.journal?.managingJournalName || "",
     journalUrl: item.journalUrl || item.journal?.journalUrl || "",
     publicJournalUrl:
