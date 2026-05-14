@@ -38,7 +38,19 @@ app.use(
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use("/uploads", express.static(uploadsRoot));
+app.use(
+  "/uploads",
+  express.static(uploadsRoot, {
+    setHeaders(res, filePath) {
+      const normalizedPath = String(filePath || "").toLowerCase();
+
+      if (normalizedPath.endsWith(".pdf")) {
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", "inline");
+      }
+    }
+  })
+);
 
 app.use("/api", routes);
 app.use(notFound);

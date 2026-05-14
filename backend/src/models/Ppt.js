@@ -30,6 +30,14 @@ const pptSchema = new mongoose.Schema(
     pptPublicId: String,
     previewPdfUrl: String,
     previewPublicId: String,
+    previewStatus: {
+      type: String,
+      enum: ["pending", "ready", "missing", "failed"],
+      default: "pending"
+    },
+    previewError: String,
+    previewRequestedAt: Date,
+    previewReadyAt: Date,
     // Legacy Spring Boot fields kept for production compatibility with older records.
     pptFile: assetSchema,
     pdfPreviewFile: assetSchema,

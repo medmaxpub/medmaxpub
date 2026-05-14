@@ -76,6 +76,18 @@ export function resolvePptPreviewAsset(ppt) {
   return ppt?.previewFile || ppt?.pdfPreviewFile || ppt?._doc?.previewFile || ppt?._doc?.pdfPreviewFile || null;
 }
 
+function determinePreviewStatus(ppt, previewAsset) {
+  if (previewAsset || ppt?.previewPdfUrl) {
+    return "ready";
+  }
+
+  return ppt?.previewStatus || "missing";
+}
+
+function logPptPreview(event, payload) {
+  console.info(`[ppt-preview] ${event}`, payload);
+}
+
 export async function createPptRecord({ journalId, title, description, pptUpload, previewUpload, req }) {
   if (!pptUpload) {
     throw new AppError("PPT or PPTX file is required", 400);
@@ -87,6 +99,29 @@ export async function createPptRecord({ journalId, title, description, pptUpload
     (await generatePreviewAssetFromUpload(pptUpload, req)) ||
     (await generatePreviewAssetFromStoredFile(pptAsset, req));
 
+  if (!previewAsset) {
+    logPptPreview("create-missing-preview", {
+      journalId,
+      title,
+      pptUrl: normalizeStoredAssetUrl(pptAsset?.secure_url, pptAsset),
+      storage: pptAsset?.storage || null,
+      hasManualPreviewUpload: Boolean(previewUpload)
+    });
+
+    throw new AppError(
+      "PPT preview PDF could not be prepared. Upload the PPT Preview PDF so the viewer works the same in production and localhost.",
+      400
+    );
+  }
+
+  logPptPreview("create-ready", {
+    journalId,
+    title,
+    pptUrl: normalizeStoredAssetUrl(pptAsset?.secure_url, pptAsset),
+    previewPdfUrl: normalizeStoredAssetUrl(previewAsset?.secure_url, previewAsset),
+    storage: previewAsset?.storage || null
+  });
+
   return Ppt.create({
     journal: journalId,
     title,
@@ -96,7 +131,10 @@ export async function createPptRecord({ journalId, title, description, pptUpload
     pptUrl: normalizeStoredAssetUrl(pptAsset?.secure_url, pptAsset),
     pptPublicId: pptAsset?.public_id || null,
     previewPdfUrl: normalizeStoredAssetUrl(previewAsset?.secure_url, previewAsset),
-    previewPublicId: previewAsset?.public_id || null
+    previewPublicId: previewAsset?.public_id || null,
+    previewStatus: "ready",
+    previewReadyAt: new Date(),
+    previewError: ""
   });
 }
 
@@ -105,19 +143,45 @@ export async function ensurePptPreviewAsset(ppt, req) {
   const previewAsset = resolvePptPreviewAsset(ppt);
 
   if (previewAsset || !pptAsset) {
+    if (previewAsset) {
+      ppt.previewStatus = "ready";
+      ppt.previewError = "";
+    }
+
     return ppt;
   }
+
+  ppt.previewRequestedAt = new Date();
+  ppt.previewStatus = "pending";
 
   const generatedPreview = await generatePreviewAssetFromStoredFile(pptAsset, req);
 
   if (!generatedPreview) {
+    ppt.previewStatus = "missing";
+    ppt.previewError = "Preview PDF is unavailable for this PPT.";
+    await ppt.save();
+    logPptPreview("ensure-missing-preview", {
+      pptId: String(ppt._id || ppt.id || ""),
+      title: ppt.title,
+      pptUrl: normalizeStoredAssetUrl(pptAsset?.secure_url, pptAsset),
+      storage: pptAsset?.storage || null
+    });
     return ppt;
   }
 
   ppt.previewFile = generatedPreview;
   ppt.previewPdfUrl = normalizeStoredAssetUrl(generatedPreview.secure_url, generatedPreview);
   ppt.previewPublicId = generatedPreview.public_id || null;
+  ppt.previewStatus = "ready";
+  ppt.previewReadyAt = new Date();
+  ppt.previewError = "";
   await ppt.save();
+  logPptPreview("ensure-ready", {
+    pptId: String(ppt._id || ppt.id || ""),
+    title: ppt.title,
+    previewPdfUrl: ppt.previewPdfUrl,
+    storage: generatedPreview?.storage || null
+  });
   return ppt;
 }
 
@@ -139,6 +203,8 @@ export function serializePpt(ppt) {
     pptPublicId: ppt?.pptPublicId || pptAsset?.public_id || null,
     previewPdfUrl,
     previewPublicId: ppt?.previewPublicId || previewAsset?.public_id || null,
+    previewStatus: determinePreviewStatus(ppt, previewAsset),
+    previewError: ppt?.previewError || "",
     file: pptAsset,
     previewFile: previewAsset,
     fileUrl: pptUrl,

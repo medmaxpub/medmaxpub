@@ -49,6 +49,16 @@ export default function PptPreviewModal({ ppt, onClose }) {
   const isPdfViewer = Boolean(previewPdfUrl);
 
   useEffect(() => {
+    if (ppt) {
+      console.info("[ppt-preview] open", {
+        id: ppt.id || ppt._id || null,
+        title: ppt.title || "",
+        previewPdfUrl: ppt.previewPdfUrl || null,
+        downloadUrl: ppt.downloadUrl || ppt.pptUrl || null,
+        previewStatus: ppt.previewStatus || "unknown"
+      });
+    }
+
     setResolvedPpt(ppt ? normalizePptItem(ppt) : null);
     setIframeLoaded(false);
     setPdfViewMode("width");
@@ -60,7 +70,7 @@ export default function PptPreviewModal({ ppt, onClose }) {
   }, [ppt]);
 
   useEffect(() => {
-    if (!activePpt?.id || activePpt.previewPdfUrl) {
+    if (!activePpt?.id || activePpt.previewPdfUrl || activePpt.previewStatus === "missing" || activePpt.previewStatus === "failed") {
       setWaitingForPreview(false);
       return undefined;
     }
@@ -81,10 +91,22 @@ export default function PptPreviewModal({ ppt, onClose }) {
             return;
           }
 
+          console.info("[ppt-preview] poll-result", {
+            id: nextPpt.id,
+            previewPdfUrl: nextPpt.previewPdfUrl || null,
+            previewStatus: nextPpt.previewStatus || "unknown"
+          });
+
           if (nextPpt.previewPdfUrl) {
             setResolvedPpt(nextPpt);
             setWaitingForPreview(false);
             setPdfError("");
+            return;
+          }
+
+          if (nextPpt.previewStatus === "missing" || nextPpt.previewStatus === "failed") {
+            setResolvedPpt(nextPpt);
+            setWaitingForPreview(false);
             return;
           }
         } catch {
@@ -95,6 +117,10 @@ export default function PptPreviewModal({ ppt, onClose }) {
       }
 
       if (!cancelled) {
+        console.warn("[ppt-preview] preview-timeout", {
+          id: activePpt.id,
+          previewStatus: activePpt.previewStatus || "unknown"
+        });
         setWaitingForPreview(false);
       }
     };
@@ -368,8 +394,18 @@ export default function PptPreviewModal({ ppt, onClose }) {
                     referrerPolicy="no-referrer"
                     allowFullScreen
                     onLoad={() => {
+                      console.info("[ppt-preview] iframe-loaded", {
+                        id: activePpt?.id || null,
+                        previewPdfUrl
+                      });
                       setIframeLoaded(true);
                       setPdfError("");
+                    }}
+                    onError={() => {
+                      console.error("[ppt-preview] iframe-error", {
+                        id: activePpt?.id || null,
+                        previewPdfUrl
+                      });
                     }}
                   />
                 </div>

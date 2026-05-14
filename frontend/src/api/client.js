@@ -34,7 +34,7 @@ function isLocalApiUrl(url) {
 }
 
 function buildApiBaseUrl() {
-  const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+  const configuredBaseUrl = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "").trim();
   const localRuntime = isLocalRuntime();
 
   if (!configuredBaseUrl) {
@@ -57,6 +57,13 @@ function buildApiBaseUrl() {
 const api = axios.create({
   baseURL: buildApiBaseUrl()
 });
+
+if (typeof window !== "undefined") {
+  console.info("[api-client] base-url", {
+    runtime: isLocalRuntime() ? "local" : "production",
+    baseURL: api.defaults.baseURL
+  });
+}
 
 function clearAuthState() {
   localStorage.removeItem("medmax-impersonation-original-token");

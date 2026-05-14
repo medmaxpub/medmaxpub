@@ -413,6 +413,7 @@ export const getJournalByUrl = asyncHandler(async (req, res) => {
     throw new AppError("Journal not found", 404);
   }
 
+  res.set("Cache-Control", "no-store");
   res.json(await buildJournalDetails(journal, req));
 });
 

@@ -25,6 +25,7 @@ export const uploadPpt = asyncHandler(async (req, res) => {
   });
 
   const populatedPpt = await Ppt.findById(ppt._id).populate("journal", "managingJournalName journalUrl journalDomainName").lean();
+  res.set("Cache-Control", "no-store");
   res.status(201).json(serializePpt(populatedPpt));
 });
 
@@ -35,6 +36,7 @@ export const getPpts = asyncHandler(async (req, res) => {
     await ensurePptPreviewAsset(ppt, req);
   }
 
+  res.set("Cache-Control", "no-store");
   res.json(ppts.map((ppt) => serializePpt(ppt.toObject())));
 });
 
@@ -47,6 +49,7 @@ export const getAdminPpts = asyncHandler(async (req, res) => {
     await ensurePptPreviewAsset(ppt, req);
   }
 
+  res.set("Cache-Control", "no-store");
   res.json(ppts.map((ppt) => serializePpt(ppt.toObject())));
 });
 
@@ -58,5 +61,6 @@ export const getPptById = asyncHandler(async (req, res) => {
   }
 
   await ensurePptPreviewAsset(ppt, req);
+  res.set("Cache-Control", "no-store");
   res.json(serializePpt(ppt.toObject()));
 });
