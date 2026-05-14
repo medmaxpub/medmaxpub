@@ -3,13 +3,13 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
-import PdfPreviewModal from "../../components/common/PdfPreviewModal";
 import PptPreviewModal from "../../components/common/PptPreviewModal";
 import JournalMenu from "../../components/journal/JournalMenu";
 import IssueAccordion from "../../components/journal/IssueAccordion";
 import { mockJournals } from "../../data/mockData";
 import useAutoRefresh from "../../hooks/useAutoRefresh";
 import { normalizePptItem, warmPreviewUrl } from "../../utils/pptPreview";
+import { buildPdfProxyUrl } from "../../utils/pdfProxy";
 import { normalizeVideoItem } from "../../utils/videoPlayer";
 import { buildJournalSectionPath, getJournalRouteSlug } from "../../utils/journalLinks";
 
@@ -48,7 +48,6 @@ export default function JournalShell() {
   const { journalUrl, section = "home" } = useParams();
   const [journal, setJournal] = useState(null);
   const [activePreview, setActivePreview] = useState(null);
-  const [activePdfPreview, setActivePdfPreview] = useState(null);
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
   const loadJournal = useCallback(() => {
@@ -114,18 +113,23 @@ export default function JournalShell() {
       <p className="mt-2 text-sm text-brand-slate">{(article.authors || []).join(", ") || "Author details unavailable"}</p>
       {article.abstractText ? <p className="mt-4 leading-7 text-brand-slate">{article.abstractText}</p> : null}
       {article.doiNumber ? <p className="mt-3 text-sm text-brand-slate">DOI: {article.doiNumber}</p> : null}
-      {article.pdfUrl ? (
+      {article.pdfUrl ? (() => {
+        const viewPdfUrl = buildPdfProxyUrl(article.pdfUrl);
+        const downloadPdfUrl = buildPdfProxyUrl(article.pdfUrl, { download: true });
+
+        return (
         <div className="mt-4 flex flex-wrap gap-3">
-          <a href={article.pdfUrl} className="button-soft px-4 py-2" target="_blank" rel="noreferrer">
+          <a href={viewPdfUrl || article.pdfUrl} className="button-soft px-4 py-2" target="_blank" rel="noreferrer">
             <ExternalLink size={16} className="mr-2" />
             View PDF
           </a>
-          <a href={article.pdfUrl} className="button-primary px-4 py-2" target="_blank" rel="noreferrer">
+          <a href={downloadPdfUrl || article.pdfUrl} className="button-primary px-4 py-2" target="_blank" rel="noreferrer">
             <Download size={16} className="mr-2" />
             Download PDF
           </a>
         </div>
-      ) : null}
+        );
+      })() : null}
     </article>
   );
 
@@ -163,10 +167,16 @@ export default function JournalShell() {
             <h3 className="mt-3 text-xl font-semibold text-brand-ink">{journal.pdfFiles?.length || 0} files</h3>
             <div className="mt-4 flex flex-wrap gap-3">
               {(journal.pdfFiles || []).slice(0, 2).map((pdf) => (
-                <button key={pdf.id} type="button" className="button-soft px-4 py-2" onClick={() => setActivePdfPreview(pdf)}>
+                <a
+                  key={pdf.id}
+                  href={buildPdfProxyUrl(pdf.fileUrl) || pdf.fileUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="button-soft px-4 py-2"
+                >
                   <FileText size={16} className="mr-2" />
                   {pdf.title}
-                </button>
+                </a>
               ))}
             </div>
           </div>
@@ -236,11 +246,11 @@ export default function JournalShell() {
               <h4 className="text-xl font-semibold text-brand-ink">{article.title}</h4>
               <p className="mt-2 text-sm text-brand-slate">{article.authors.join(", ")}</p>
               <div className="mt-4 flex gap-3">
-                <a href={article.pdfUrl} className="button-soft px-4 py-2" target="_blank" rel="noreferrer">
+                <a href={buildPdfProxyUrl(article.pdfUrl) || article.pdfUrl} className="button-soft px-4 py-2" target="_blank" rel="noreferrer">
                   <ExternalLink size={16} className="mr-2" />
                   View PDF
                 </a>
-                <a href={article.pdfUrl} className="button-primary px-4 py-2" target="_blank" rel="noreferrer">
+                <a href={buildPdfProxyUrl(article.pdfUrl, { download: true }) || article.pdfUrl} className="button-primary px-4 py-2" target="_blank" rel="noreferrer">
                   <Download size={16} className="mr-2" />
                   Download PDF
                 </a>
@@ -388,16 +398,22 @@ export default function JournalShell() {
               {journal.pdfFiles?.length ? (
                 <div className="mt-5 flex flex-wrap gap-3">
                   {journal.pdfFiles.map((item) => (
-                    <a key={item.id} href={item.fileUrl} target="_blank" rel="noreferrer" className="button-secondary inline-flex px-4 py-2">
+                    <a
+                      key={item.id}
+                      href={buildPdfProxyUrl(item.fileUrl) || item.fileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="button-secondary inline-flex px-4 py-2"
+                    >
                       <FileText size={16} className="mr-2" />
-                      {item.title}
+                      View PDF
                     </a>
                   ))}
                 </div>
               ) : journal.pdfFileUrl ? (
-                <a href={journal.pdfFileUrl} target="_blank" rel="noreferrer" className="button-secondary mt-5 inline-flex px-4 py-2">
+                <a href={buildPdfProxyUrl(journal.pdfFileUrl) || journal.pdfFileUrl} target="_blank" rel="noreferrer" className="button-secondary mt-5 inline-flex px-4 py-2">
                   <FileText size={16} className="mr-2" />
-                  Open Journal PDF
+                  View PDF
                 </a>
               ) : null}
             </div>
@@ -411,7 +427,6 @@ export default function JournalShell() {
         </div>
       </div>
       <PptPreviewModal ppt={activePreview} onClose={() => setActivePreview(null)} />
-      <PdfPreviewModal pdf={activePdfPreview} onClose={() => setActivePdfPreview(null)} />
     </div>
   );
 }

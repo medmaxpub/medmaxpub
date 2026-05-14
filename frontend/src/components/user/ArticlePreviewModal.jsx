@@ -1,10 +1,14 @@
-import { ExternalLink, X } from "lucide-react";
+import { Download, ExternalLink, X } from "lucide-react";
+import { buildPdfProxyUrl } from "../../utils/pdfProxy";
 import { indexingLinkFields, stripHtml } from "./userPortalShared";
 
 export default function ArticlePreviewModal({ article, onClose }) {
   if (!article) {
     return null;
   }
+
+  const viewPdfUrl = article.pdfFileUrl ? buildPdfProxyUrl(article.pdfFileUrl) || article.pdfFileUrl : "";
+  const downloadPdfUrl = article.pdfFileUrl ? buildPdfProxyUrl(article.pdfFileUrl, { download: true }) || article.pdfFileUrl : "";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-navy/80 p-4" onClick={onClose}>
@@ -64,10 +68,16 @@ export default function ArticlePreviewModal({ article, onClose }) {
               <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Files & Links</p>
               <div className="mt-4 flex flex-wrap gap-3">
                 {article.pdfFileUrl ? (
-                  <a href={article.pdfFileUrl} target="_blank" rel="noreferrer" className="button-primary px-4 py-2">
-                    <ExternalLink size={16} className="mr-2" />
-                    View PDF
-                  </a>
+                  <>
+                    <a href={viewPdfUrl} target="_blank" rel="noreferrer" className="button-primary px-4 py-2">
+                      <ExternalLink size={16} className="mr-2" />
+                      View PDF
+                    </a>
+                    <a href={downloadPdfUrl} target="_blank" rel="noreferrer" className="button-secondary px-4 py-2">
+                      <Download size={16} className="mr-2" />
+                      Download PDF
+                    </a>
+                  </>
                 ) : null}
                 {article.supplementaryFiles?.map((file) => (
                   <a key={file.id} href={file.url} target="_blank" rel="noreferrer" className="button-secondary px-4 py-2">
