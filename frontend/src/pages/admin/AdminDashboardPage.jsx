@@ -19,6 +19,7 @@ const initialJournalForm = {
   aboutJournal: "",
   journalInstructions: "",
   pptFile: null,
+  pptPreviewFile: null,
   pdfFile: null,
   videoFile: null
 };
@@ -56,6 +57,7 @@ function mapJournalToForm(journal) {
     aboutJournal: journal?.aboutJournal || "",
     journalInstructions: journal?.journalInstructions || "",
     pptFile: null,
+    pptPreviewFile: null,
     pdfFile: null,
     videoFile: null
   };
@@ -199,6 +201,10 @@ export default function AdminDashboardPage({ mode = "admin" }) {
       pptData.append("title", `${managingJournalName} PPT`);
       pptData.append("description", aboutJournal);
       pptData.append("pptFile", form.pptFile);
+
+      if (form.pptPreviewFile) {
+        pptData.append("previewFile", form.pptPreviewFile);
+      }
 
       await api.post(`/journals/${journalId}/ppts`, pptData, {
         headers: { "Content-Type": "multipart/form-data" }
@@ -551,6 +557,15 @@ export default function AdminDashboardPage({ mode = "admin" }) {
                       accept=".ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"
                       onChange={(event) => setJournalForm({ ...journalForm, pptFile: event.target.files?.[0] || null })}
                     />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-brand-slate">PPT Preview PDF</label>
+                    <input
+                      type="file"
+                      accept=".pdf,application/pdf"
+                      onChange={(event) => setJournalForm({ ...journalForm, pptPreviewFile: event.target.files?.[0] || null })}
+                    />
+                    <p className="mt-2 text-xs text-brand-slate">Recommended for production so PPT preview and presentation mode stay smooth.</p>
                   </div>
                   <div>
                     <label className="mb-2 block text-sm font-medium text-brand-slate">PDF</label>

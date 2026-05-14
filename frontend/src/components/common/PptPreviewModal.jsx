@@ -1,5 +1,4 @@
 import {
-  AlertCircle,
   ChevronLeft,
   ChevronRight,
   Download,
@@ -10,7 +9,7 @@ import {
   MonitorPlay,
   X
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { buildPdfViewerUrl, warmPreviewUrl } from "../../utils/pptPreview";
 
 const pdfViewModes = {
@@ -33,8 +32,6 @@ const pdfViewModes = {
 };
 
 export default function PptPreviewModal({ ppt, onClose }) {
-  const [activeViewerIndex, setActiveViewerIndex] = useState(0);
-  const [toastMessage, setToastMessage] = useState("");
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [pdfViewMode, setPdfViewMode] = useState("width");
   const [presentationMode, setPresentationMode] = useState(false);
@@ -43,70 +40,35 @@ export default function PptPreviewModal({ ppt, onClose }) {
   const [pdfError, setPdfError] = useState("");
   const [outlineOpen, setOutlineOpen] = useState(false);
   const viewerShellRef = useRef(null);
-  const activePpt = ppt || {};
-
-  const viewerCandidates = useMemo(
-    () =>
-      [
-        activePpt.previewPdfUrl ? { label: "PDF Preview", type: "pdf", url: activePpt.previewPdfUrl } : null,
-        activePpt.googleViewerUrl ? { label: "Google Viewer", type: "external", url: activePpt.googleViewerUrl } : null,
-        activePpt.officeViewerUrl ? { label: "Alternate Viewer", type: "external", url: activePpt.officeViewerUrl } : null
-      ].filter(Boolean),
-    [activePpt.googleViewerUrl, activePpt.officeViewerUrl, activePpt.previewPdfUrl]
-  );
-
-  const activeViewer = viewerCandidates[activeViewerIndex] || null;
-  const isPdfViewer = activeViewer?.type === "pdf" && Boolean(activeViewer?.url);
+  const previewPdfUrl = ppt?.previewPdfUrl || null;
+  const isPdfViewer = Boolean(previewPdfUrl);
 
   useEffect(() => {
-    setActiveViewerIndex(0);
-    setToastMessage(activePpt.previewIssue || "");
     setIframeLoaded(false);
     setPdfViewMode("width");
     setPresentationMode(false);
     setPdfPageNumber(1);
     setPdfError("");
     setOutlineOpen(false);
-  }, [activePpt]);
+  }, [previewPdfUrl, ppt?.id]);
 
   useEffect(() => {
-    if (!toastMessage) {
+    if (!previewPdfUrl) {
       return undefined;
     }
 
-    const timeoutId = window.setTimeout(() => setToastMessage(""), 4000);
-    return () => window.clearTimeout(timeoutId);
-  }, [toastMessage]);
-
-  useEffect(() => {
-    if (!activeViewer?.url) {
-      return undefined;
-    }
-
-    warmPreviewUrl(activeViewer.url);
+    warmPreviewUrl(previewPdfUrl);
     setIframeLoaded(false);
     setPdfError("");
+
     const timeoutId = window.setTimeout(() => {
-      if (iframeLoaded) {
-        return;
+      if (!iframeLoaded) {
+        setPdfError("");
       }
-
-      if (!isPdfViewer && activeViewerIndex < viewerCandidates.length - 1) {
-        setActiveViewerIndex((current) => current + 1);
-        setToastMessage(`${activeViewer.label} is unavailable. Trying another preview option.`);
-        return;
-      }
-
-      if (isPdfViewer) {
-        setToastMessage("Preview is taking longer than expected. You can still use Open Preview PDF or Download PPT.");
-        return;
-      }
-
-      setPdfError("Preview could not be embedded. Use Open Preview PDF or Download PPT.");
-    }, isPdfViewer ? 8000 : 4500);
+    }, 10000);
 
     return () => window.clearTimeout(timeoutId);
-  }, [activeViewer, activeViewerIndex, iframeLoaded, isPdfViewer, viewerCandidates.length]);
+  }, [iframeLoaded, previewPdfUrl]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -179,7 +141,7 @@ export default function PptPreviewModal({ ppt, onClose }) {
 
   const pageLabel = isPdfViewer ? `Page ${pdfPageNumber}` : "";
   const pdfViewerUrl = isPdfViewer
-    ? buildPdfViewerUrl(activeViewer.url, {
+    ? buildPdfViewerUrl(previewPdfUrl, {
         ...(pdfViewModes[pdfViewMode]?.options || pdfViewModes.width.options),
         navpanes: outlineOpen && !presentationMode ? 1 : 0,
         toolbar: presentationMode ? 0 : 1,
@@ -200,15 +162,6 @@ export default function PptPreviewModal({ ppt, onClose }) {
         }`}
         onClick={(event) => event.stopPropagation()}
       >
-        {toastMessage ? (
-          <div className="absolute right-6 top-6 z-10 max-w-md rounded-2xl bg-brand-navy px-4 py-3 text-sm text-white shadow-xl">
-            <div className="flex items-start gap-3">
-              <AlertCircle size={18} className="mt-0.5 shrink-0" />
-              <p>{toastMessage}</p>
-            </div>
-          </div>
-        ) : null}
-
         {!presentationMode ? (
           <div className="flex items-start justify-between gap-4 border-b border-brand-border px-6 py-5">
             <div>
@@ -228,96 +181,68 @@ export default function PptPreviewModal({ ppt, onClose }) {
         ) : null}
 
         <div ref={viewerShellRef} className="flex-1 bg-slate-950">
-          {activeViewer?.url ? (
+          {isPdfViewer && pdfViewerUrl ? (
             <div className={`flex h-full flex-col ${presentationMode ? "group/presentation" : ""}`}>
               {!presentationMode ? (
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-white px-6 py-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    {viewerCandidates.map((candidate, index) => (
+                    <span className="rounded-full bg-brand-violet px-3 py-2 text-sm text-white">PDF Preview</span>
+
+                    {Object.entries(pdfViewModes).map(([key, mode]) => (
                       <button
-                        key={candidate.label}
+                        key={key}
                         type="button"
                         onClick={() => {
-                          setActiveViewerIndex(index);
-                          setToastMessage("");
-                          setIframeLoaded(false);
                           setPdfError("");
-                          setPdfPageNumber(1);
+                          setIframeLoaded(false);
+
+                          if (key === "outline") {
+                            setOutlineOpen((current) => !current);
+                            setPdfViewMode("outline");
+                            return;
+                          }
+
+                          setOutlineOpen(false);
+                          setPdfViewMode(key);
                         }}
                         className={`rounded-full px-3 py-2 text-sm ${
-                          activeViewerIndex === index ? "bg-brand-navy text-white" : "bg-brand-elevated text-brand-slate"
+                          (key === "outline" ? outlineOpen : pdfViewMode === key) ? "bg-slate-950 text-white" : "bg-brand-elevated text-brand-slate"
                         }`}
                       >
-                        {candidate.label}
+                        {key === "outline" ? (
+                          <span className="inline-flex items-center">
+                            <ListTree size={14} className="mr-2" />
+                            {mode.label}
+                          </span>
+                        ) : (
+                          mode.label
+                        )}
                       </button>
                     ))}
-
-                    {isPdfViewer
-                      ? Object.entries(pdfViewModes).map(([key, mode]) => (
-                          <button
-                            key={key}
-                            type="button"
-                            onClick={() => {
-                              setPdfError("");
-                              setIframeLoaded(false);
-
-                              if (key === "outline") {
-                                setOutlineOpen((current) => !current);
-                                setPdfViewMode("outline");
-                                return;
-                              }
-
-                              setOutlineOpen(false);
-                              setPdfViewMode(key);
-                            }}
-                            className={`rounded-full px-3 py-2 text-sm ${
-                              (key === "outline" ? outlineOpen : pdfViewMode === key) ? "bg-slate-950 text-white" : "bg-brand-elevated text-brand-slate"
-                            }`}
-                          >
-                            {key === "outline" ? (
-                              <span className="inline-flex items-center">
-                                <ListTree size={14} className="mr-2" />
-                                {mode.label}
-                              </span>
-                            ) : (
-                              mode.label
-                            )}
-                          </button>
-                        ))
-                      : null}
                   </div>
 
                   <div className="flex flex-wrap gap-3">
-                    {isPdfViewer ? (
-                      <>
-                        <div className="inline-flex items-center rounded-full border border-brand-border bg-brand-elevated px-3 py-2 text-sm text-brand-ink">
-                          <button type="button" className="rounded-full p-1 hover:bg-white" onClick={goToPreviousPage} disabled={pdfPageNumber <= 1}>
-                            <ChevronLeft size={16} />
-                          </button>
-                          <span className="mx-2 min-w-20 text-center">{pageLabel}</span>
-                          <button type="button" className="rounded-full p-1 hover:bg-white" onClick={goToNextPage}>
-                            <ChevronRight size={16} />
-                          </button>
-                        </div>
-                        <button type="button" className="button-secondary px-4 py-2" onClick={togglePresentationMode}>
-                          <MonitorPlay size={16} className="mr-2" />
-                          Presentation View
-                        </button>
-                      </>
-                    ) : null}
-
+                    <div className="inline-flex items-center rounded-full border border-brand-border bg-brand-elevated px-3 py-2 text-sm text-brand-ink">
+                      <button type="button" className="rounded-full p-1 hover:bg-white" onClick={goToPreviousPage} disabled={pdfPageNumber <= 1}>
+                        <ChevronLeft size={16} />
+                      </button>
+                      <span className="mx-2 min-w-20 text-center">{pageLabel}</span>
+                      <button type="button" className="rounded-full p-1 hover:bg-white" onClick={goToNextPage}>
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                    <button type="button" className="button-secondary px-4 py-2" onClick={togglePresentationMode}>
+                      <MonitorPlay size={16} className="mr-2" />
+                      Presentation View
+                    </button>
                     <button type="button" className="button-secondary px-4 py-2" onClick={toggleFullscreen}>
                       {isFullscreen ? <Minimize2 size={16} className="mr-2" /> : <Maximize2 size={16} className="mr-2" />}
                       {isFullscreen ? "Exit Full Screen" : "Full Screen"}
                     </button>
-
-                    {ppt.previewPdfUrl ? (
-                      <a href={ppt.previewPdfUrl} target="_blank" rel="noreferrer" className="button-soft px-4 py-2">
-                        <ExternalLink size={16} className="mr-2" />
-                        Open Preview PDF
-                      </a>
-                    ) : null}
-
+                    <a href={previewPdfUrl} target="_blank" rel="noreferrer" className="button-soft px-4 py-2">
+                      <ExternalLink size={16} className="mr-2" />
+                      Open Preview PDF
+                    </a>
                     {ppt.downloadUrl ? (
                       <a href={ppt.downloadUrl} target="_blank" rel="noreferrer" download className="button-primary px-4 py-2">
                         <Download size={16} className="mr-2" />
@@ -379,41 +304,23 @@ export default function PptPreviewModal({ ppt, onClose }) {
                   </div>
                 ) : null}
 
-                {isPdfViewer && pdfViewerUrl ? (
-                  <div className={`h-full overflow-hidden border border-white/10 bg-white ${presentationMode ? "rounded-none border-0" : "rounded-[1.5rem]"}`}>
-                    <iframe
-                      key={pdfViewerUrl}
-                      title={`${ppt.title} PDF preview`}
-                      src={pdfViewerUrl}
-                      className="h-full w-full bg-white"
-                      loading="eager"
-                      referrerPolicy="no-referrer"
-                      allowFullScreen
-                      onLoad={() => {
-                        setIframeLoaded(true);
-                        setPdfError("");
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className={`h-full overflow-hidden border border-white/10 bg-white ${presentationMode ? "rounded-none border-0" : "rounded-[1.5rem]"}`}>
-                    <iframe
-                      key={activeViewer.url}
-                      title={`${ppt.title} preview`}
-                      src={activeViewer.url}
-                      className="h-full w-full bg-white"
-                      loading="eager"
-                      referrerPolicy="no-referrer"
-                      allowFullScreen
-                      onLoad={() => {
-                        setIframeLoaded(true);
-                        setPdfError("");
-                      }}
-                    />
-                  </div>
-                )}
+                <div className={`h-full overflow-hidden border border-white/10 bg-white ${presentationMode ? "rounded-none border-0" : "rounded-[1.5rem]"}`}>
+                  <iframe
+                    key={pdfViewerUrl}
+                    title={`${ppt.title} PDF preview`}
+                    src={pdfViewerUrl}
+                    className="h-full w-full bg-white"
+                    loading="eager"
+                    referrerPolicy="no-referrer"
+                    allowFullScreen
+                    onLoad={() => {
+                      setIframeLoaded(true);
+                      setPdfError("");
+                    }}
+                  />
+                </div>
 
-                {presentationMode && isPdfViewer ? (
+                {presentationMode ? (
                   <>
                     <button
                       type="button"
@@ -439,8 +346,8 @@ export default function PptPreviewModal({ ppt, onClose }) {
               <div className="max-w-xl text-center">
                 <h3 className="font-display text-2xl font-semibold text-white">Preview unavailable</h3>
                 <p className="mt-4 leading-7 text-slate-300">
-                  This PPT does not have a valid embeddable preview right now. Upload a preview PDF or verify that the PPT file URL is
-                  public and reachable from the browser.
+                  This PPT does not have a PDF preview yet. Upload a preview PDF for this presentation so production and localhost use the
+                  same clean viewer and presentation mode.
                 </p>
                 <div className="mt-6 flex flex-wrap justify-center gap-3">
                   {ppt.downloadUrl ? (

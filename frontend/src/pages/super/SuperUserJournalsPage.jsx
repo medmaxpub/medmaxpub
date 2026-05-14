@@ -58,6 +58,11 @@ export default function SuperUserJournalsPage() {
       pptData.append("title", `${journalForm.managingJournalName} PPT`);
       pptData.append("description", journalForm.aboutJournal);
       pptData.append("pptFile", journalForm.pptFile);
+
+      if (journalForm.pptPreviewFile) {
+        pptData.append("previewFile", journalForm.pptPreviewFile);
+      }
+
       await api.post(`/journals/${journalId}/ppts`, pptData, {
         headers: { "Content-Type": "multipart/form-data" }
       });

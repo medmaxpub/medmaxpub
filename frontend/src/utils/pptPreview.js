@@ -184,10 +184,12 @@ export function normalizePptItem(item = {}) {
     previewAsset
   );
   const pdfViewerUrl = buildPdfViewerUrl(previewPdfUrl);
-  const googleViewerUrl = !pdfViewerUrl ? buildGoogleViewerUrl(pptUrl) : null;
-  const officeViewerUrl = !pdfViewerUrl ? buildOfficeViewerUrl(pptUrl) : null;
-  const modalPreviewUrl = pdfViewerUrl || googleViewerUrl || officeViewerUrl;
-  const previewIssue = !pptUrl ? "The PPT file URL is missing or invalid." : null;
+  const modalPreviewUrl = pdfViewerUrl;
+  const previewIssue = !previewPdfUrl
+    ? "Preview PDF is not ready yet for this presentation."
+    : !pptUrl
+      ? "The PPT file URL is missing or invalid."
+      : null;
 
   return {
     ...item,
@@ -200,13 +202,13 @@ export function normalizePptItem(item = {}) {
     previewPdfUrl,
     previewPublicId: item.previewPublicId || previewAsset?.public_id || null,
     pdfViewerUrl,
-    googleViewerUrl,
-    officeViewerUrl,
+    googleViewerUrl: null,
+    officeViewerUrl: null,
     modalPreviewUrl,
     previewIssue,
     downloadUrl: pptUrl,
     fileUrl: pptUrl,
-    previewUrl: previewPdfUrl || googleViewerUrl || officeViewerUrl,
+    previewUrl: previewPdfUrl,
     journalTitle: item.journalTitle || item.journal?.managingJournalName || "",
     journalUrl: item.journalUrl || item.journal?.journalUrl || "",
     publicJournalUrl:

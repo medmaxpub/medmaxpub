@@ -141,6 +141,15 @@ export default function JournalEditorModal({
                 />
               </div>
               <div>
+                <label className="mb-2 block text-sm font-medium text-brand-slate">PPT Preview PDF</label>
+                <input
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={(event) => setForm((current) => ({ ...current, pptPreviewFile: event.target.files?.[0] || null }))}
+                />
+                <p className="mt-2 text-xs text-brand-slate">Recommended for production so PPT preview and presentation mode stay smooth.</p>
+              </div>
+              <div>
                 <label className="mb-2 block text-sm font-medium text-brand-slate">PDF</label>
                 <input
                   type="file"

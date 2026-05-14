@@ -19,6 +19,7 @@ export const initialJournalForm = {
   coverImage: "",
   coverImageFile: null,
   pptFile: null,
+  pptPreviewFile: null,
   pdfFile: null,
   videoFile: null
 };
@@ -71,6 +72,7 @@ export function mapJournalToForm(journal) {
     username: journal?.username || journal?.ownerUsername || "",
     password: "",
     pptFile: null,
+    pptPreviewFile: null,
     pdfFile: null,
     videoFile: null
   };
