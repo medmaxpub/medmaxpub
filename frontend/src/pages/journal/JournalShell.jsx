@@ -182,11 +182,11 @@ export default function JournalShell() {
                   className="button-soft px-4 py-2"
                   onMouseEnter={() => {
                     const normalized = normalizePptItem(ppt);
-                    warmPreviewUrl(normalized.previewPdfUrl);
+                    warmPreviewUrl(normalized.previewUrl);
                   }}
                   onFocus={() => {
                     const normalized = normalizePptItem(ppt);
-                    warmPreviewUrl(normalized.previewPdfUrl);
+                    warmPreviewUrl(normalized.previewUrl);
                   }}
                   onClick={() => setActivePreview(normalizePptItem(ppt))}
                 >

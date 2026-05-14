@@ -1,5 +1,6 @@
 import { getJournalRouteSlug } from "./journalLinks";
 import { buildAssetProxyUrl } from "./assetProxy";
+import { buildPdfProxyUrl } from "./pdfProxy";
 
 function isLocalHostname(hostname) {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0";
@@ -180,17 +181,16 @@ export function normalizePptItem(item = {}) {
   const pptAsset = item.file || item.pptFile || null;
   const previewAsset = item.previewFile || item.pdfPreviewFile || null;
   const pptUrl = normalizeAssetUrl(item.pptUrl || item.fileUrl || pptAsset?.secure_url, pptAsset);
-  const proxiedPptUrl = buildAssetProxyUrl(pptUrl);
+  const proxiedPptUrl = buildAssetProxyUrl(pptUrl, { download: true });
   const previewPdfUrl = normalizeAssetUrl(
     item.previewPdfUrl || item.previewUrl || previewAsset?.secure_url,
     previewAsset
   );
-  const pdfViewerUrl = buildPdfViewerUrl(previewPdfUrl);
-  const googleViewerUrl = !pdfViewerUrl ? buildGoogleViewerUrl(proxiedPptUrl || pptUrl) : null;
-  const officeViewerUrl = !pdfViewerUrl ? buildOfficeViewerUrl(proxiedPptUrl || pptUrl) : null;
-  const modalPreviewUrl = pdfViewerUrl || officeViewerUrl || googleViewerUrl;
-  const previewIssue = !previewPdfUrl && !officeViewerUrl && !googleViewerUrl
-    ? "Preview PDF is not ready yet for this presentation, and fallback viewers are unavailable."
+  const proxiedPreviewPdfUrl = buildPdfProxyUrl(previewPdfUrl);
+  const pdfViewerUrl = buildPdfViewerUrl(proxiedPreviewPdfUrl);
+  const modalPreviewUrl = pdfViewerUrl;
+  const previewIssue = !previewPdfUrl
+    ? item.previewError || "Preview PDF is not ready yet for this presentation."
     : !pptUrl
       ? "The PPT file URL is missing or invalid."
       : null;
@@ -202,17 +202,20 @@ export function normalizePptItem(item = {}) {
     file: pptAsset,
     previewFile: previewAsset,
     pptUrl,
+    pptFileUrl: pptUrl,
+    originalPptUrl: pptUrl,
+    pptFileName: item.pptFileName || pptAsset?.original_filename || "",
     pptPublicId: item.pptPublicId || pptAsset?.public_id || null,
     previewPdfUrl,
     previewPublicId: item.previewPublicId || previewAsset?.public_id || null,
     pdfViewerUrl,
-    googleViewerUrl,
-    officeViewerUrl,
+    googleViewerUrl: null,
+    officeViewerUrl: null,
     modalPreviewUrl,
     previewIssue,
     downloadUrl: proxiedPptUrl || pptUrl,
     fileUrl: pptUrl,
-    previewUrl: previewPdfUrl || officeViewerUrl || googleViewerUrl,
+    previewUrl: proxiedPreviewPdfUrl || previewPdfUrl,
     journalTitle: item.journalTitle || item.journal?.managingJournalName || "",
     journalUrl: item.journalUrl || item.journal?.journalUrl || "",
     publicJournalUrl:

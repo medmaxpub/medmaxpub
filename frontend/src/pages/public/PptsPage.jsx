@@ -159,8 +159,8 @@ export default function PptsPage() {
                           <button
                             type="button"
                             className="button-soft px-4 py-2"
-                            onMouseEnter={() => warmPreviewUrl(ppt.previewPdfUrl)}
-                            onFocus={() => warmPreviewUrl(ppt.previewPdfUrl)}
+                            onMouseEnter={() => warmPreviewUrl(ppt.previewUrl)}
+                            onFocus={() => warmPreviewUrl(ppt.previewUrl)}
                             onClick={() => setActivePreview(ppt)}
                           >
                             <Eye size={16} className="mr-2" />

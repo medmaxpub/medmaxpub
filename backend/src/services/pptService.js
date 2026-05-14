@@ -98,51 +98,54 @@ export async function createPptRecord({ journalId, title, description, pptUpload
     (await uploadAsset(previewUpload, "medmaxpub/ppts-previews", "image", req)) ||
     (await generatePreviewAssetFromUpload(pptUpload, req)) ||
     (await generatePreviewAssetFromStoredFile(pptAsset, req));
+  const previewStatus = previewAsset ? "ready" : "failed";
+  const previewError = previewAsset ? "" : "Preview PDF generation failed";
+  const pptRecord = await Ppt.create({
+    journal: journalId,
+    title,
+    description,
+    file: pptAsset,
+    previewFile: previewAsset,
+    pptFileName: pptUpload.originalname || "",
+    pptUrl: normalizeStoredAssetUrl(pptAsset?.secure_url, pptAsset),
+    pptPublicId: pptAsset?.public_id || null,
+    previewPdfUrl: normalizeStoredAssetUrl(previewAsset?.secure_url, previewAsset),
+    previewPublicId: previewAsset?.public_id || null,
+    previewStatus,
+    previewRequestedAt: new Date(),
+    previewReadyAt: previewAsset ? new Date() : null,
+    previewError
+  });
 
   if (!previewAsset) {
     logPptPreview("create-missing-preview", {
+      pptId: String(pptRecord._id),
       journalId,
       title,
       pptUrl: normalizeStoredAssetUrl(pptAsset?.secure_url, pptAsset),
       storage: pptAsset?.storage || null,
       hasManualPreviewUpload: Boolean(previewUpload)
     });
-
-    throw new AppError(
-      "PPT preview PDF could not be prepared. Upload the PPT Preview PDF so the viewer works the same in production and localhost.",
-      400
-    );
+  } else {
+    logPptPreview("create-ready", {
+      pptId: String(pptRecord._id),
+      journalId,
+      title,
+      pptUrl: normalizeStoredAssetUrl(pptAsset?.secure_url, pptAsset),
+      previewPdfUrl: normalizeStoredAssetUrl(previewAsset?.secure_url, previewAsset),
+      storage: previewAsset?.storage || null
+    });
   }
 
-  logPptPreview("create-ready", {
-    journalId,
-    title,
-    pptUrl: normalizeStoredAssetUrl(pptAsset?.secure_url, pptAsset),
-    previewPdfUrl: normalizeStoredAssetUrl(previewAsset?.secure_url, previewAsset),
-    storage: previewAsset?.storage || null
-  });
-
-  return Ppt.create({
-    journal: journalId,
-    title,
-    description,
-    file: pptAsset,
-    previewFile: previewAsset,
-    pptUrl: normalizeStoredAssetUrl(pptAsset?.secure_url, pptAsset),
-    pptPublicId: pptAsset?.public_id || null,
-    previewPdfUrl: normalizeStoredAssetUrl(previewAsset?.secure_url, previewAsset),
-    previewPublicId: previewAsset?.public_id || null,
-    previewStatus: "ready",
-    previewReadyAt: new Date(),
-    previewError: ""
-  });
+  return pptRecord;
 }
 
-export async function ensurePptPreviewAsset(ppt, req) {
+export async function ensurePptPreviewAsset(ppt, req, options = {}) {
+  const { force = false } = options;
   const pptAsset = resolvePptFileAsset(ppt);
   const previewAsset = resolvePptPreviewAsset(ppt);
 
-  if (previewAsset || !pptAsset) {
+  if ((previewAsset && !force) || !pptAsset) {
     if (previewAsset) {
       ppt.previewStatus = "ready";
       ppt.previewError = "";
@@ -157,8 +160,8 @@ export async function ensurePptPreviewAsset(ppt, req) {
   const generatedPreview = await generatePreviewAssetFromStoredFile(pptAsset, req);
 
   if (!generatedPreview) {
-    ppt.previewStatus = "missing";
-    ppt.previewError = "Preview PDF is unavailable for this PPT.";
+    ppt.previewStatus = "failed";
+    ppt.previewError = "Preview PDF generation failed";
     await ppt.save();
     logPptPreview("ensure-missing-preview", {
       pptId: String(ppt._id || ppt.id || ""),
@@ -199,6 +202,9 @@ export function serializePpt(ppt) {
     createdAt: ppt.createdAt || null,
     updatedAt: ppt.updatedAt || null,
     journal: ppt.journal || null,
+    pptFileUrl: pptUrl,
+    originalPptUrl: pptUrl,
+    pptFileName: ppt?.pptFileName || pptAsset?.original_filename || "",
     pptUrl,
     pptPublicId: ppt?.pptPublicId || pptAsset?.public_id || null,
     previewPdfUrl,
