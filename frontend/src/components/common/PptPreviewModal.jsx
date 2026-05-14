@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import api from "../../api/client";
+import { buildPdfProxyUrl } from "../../utils/pdfProxy";
 import { buildPdfViewerUrl, normalizePptItem, warmPreviewUrl } from "../../utils/pptPreview";
 
 const pdfViewModes = {
@@ -46,6 +47,7 @@ export default function PptPreviewModal({ ppt, onClose }) {
   const viewerShellRef = useRef(null);
   const activePpt = resolvedPpt || (ppt ? normalizePptItem(ppt) : null);
   const previewPdfUrl = activePpt?.previewPdfUrl || null;
+  const inlinePreviewPdfUrl = buildPdfProxyUrl(previewPdfUrl);
   const isPdfViewer = Boolean(previewPdfUrl);
 
   useEffect(() => {
@@ -133,11 +135,11 @@ export default function PptPreviewModal({ ppt, onClose }) {
   }, [activePpt?.id, activePpt?.previewPdfUrl]);
 
   useEffect(() => {
-    if (!previewPdfUrl) {
+    if (!inlinePreviewPdfUrl) {
       return undefined;
     }
 
-    warmPreviewUrl(previewPdfUrl);
+    warmPreviewUrl(inlinePreviewPdfUrl);
     setIframeLoaded(false);
     setPdfError("");
 
@@ -148,7 +150,7 @@ export default function PptPreviewModal({ ppt, onClose }) {
     }, 10000);
 
     return () => window.clearTimeout(timeoutId);
-  }, [iframeLoaded, previewPdfUrl]);
+  }, [iframeLoaded, inlinePreviewPdfUrl]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -221,7 +223,7 @@ export default function PptPreviewModal({ ppt, onClose }) {
 
   const pageLabel = isPdfViewer ? `Page ${pdfPageNumber}` : "";
   const pdfViewerUrl = isPdfViewer
-    ? buildPdfViewerUrl(previewPdfUrl, {
+    ? buildPdfViewerUrl(inlinePreviewPdfUrl, {
         ...(pdfViewModes[pdfViewMode]?.options || pdfViewModes.width.options),
         navpanes: outlineOpen && !presentationMode ? 1 : 0,
         toolbar: presentationMode ? 0 : 1,
@@ -319,7 +321,7 @@ export default function PptPreviewModal({ ppt, onClose }) {
                       {isFullscreen ? <Minimize2 size={16} className="mr-2" /> : <Maximize2 size={16} className="mr-2" />}
                       {isFullscreen ? "Exit Full Screen" : "Full Screen"}
                     </button>
-                    <a href={previewPdfUrl} target="_blank" rel="noreferrer" className="button-soft px-4 py-2">
+                    <a href={inlinePreviewPdfUrl || previewPdfUrl} target="_blank" rel="noreferrer" className="button-soft px-4 py-2">
                       <ExternalLink size={16} className="mr-2" />
                       Open Preview PDF
                     </a>
@@ -396,7 +398,7 @@ export default function PptPreviewModal({ ppt, onClose }) {
                     onLoad={() => {
                       console.info("[ppt-preview] iframe-loaded", {
                         id: activePpt?.id || null,
-                        previewPdfUrl
+                        previewPdfUrl: inlinePreviewPdfUrl || previewPdfUrl
                       });
                       setIframeLoaded(true);
                       setPdfError("");
@@ -404,7 +406,7 @@ export default function PptPreviewModal({ ppt, onClose }) {
                     onError={() => {
                       console.error("[ppt-preview] iframe-error", {
                         id: activePpt?.id || null,
-                        previewPdfUrl
+                        previewPdfUrl: inlinePreviewPdfUrl || previewPdfUrl
                       });
                     }}
                   />
@@ -449,7 +451,7 @@ export default function PptPreviewModal({ ppt, onClose }) {
                     </a>
                   ) : null}
                   {previewPdfUrl ? (
-                    <a href={previewPdfUrl} target="_blank" rel="noreferrer" className="button-soft px-4 py-2">
+                    <a href={inlinePreviewPdfUrl || previewPdfUrl} target="_blank" rel="noreferrer" className="button-soft px-4 py-2">
                       <ExternalLink size={16} className="mr-2" />
                       Open Preview PDF
                     </a>

@@ -1,4 +1,5 @@
 import express from "express";
+import { proxyPdfAsset } from "../controllers/assetController.js";
 import { impersonateUser, login, signupAdmin } from "../controllers/authController.js";
 import {
   createArticle,
@@ -40,6 +41,7 @@ router.post("/auth/login", login);
 router.post("/auth/signup-admin", protect, signupAdmin);
 router.post("/auth/impersonate/:id", protect, impersonateUser);
 router.post("/contact", ...postContactMessage);
+router.get("/assets/pdf-proxy", proxyPdfAsset);
 
 router.get("/admin/journals", protect, getAdminJournals);
 router.get("/admin/ppts", protect, getAdminPpts);

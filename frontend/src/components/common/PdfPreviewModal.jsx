@@ -1,6 +1,7 @@
 import { Download, ExternalLink, FileText, Maximize2, Minimize2, PanelLeftClose, PanelLeftOpen, Printer, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { buildPdfViewerUrl } from "../../utils/pptPreview";
+import { buildPdfProxyUrl } from "../../utils/pdfProxy";
 
 const pdfViewModes = {
   width: {
@@ -29,8 +30,10 @@ export default function PdfPreviewModal({ pdf, onClose }) {
   const [viewMode, setViewMode] = useState("width");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const viewerShellRef = useRef(null);
+  const inlinePdfUrl = useMemo(() => buildPdfProxyUrl(pdf?.fileUrl), [pdf?.fileUrl]);
+  const downloadPdfUrl = useMemo(() => buildPdfProxyUrl(pdf?.fileUrl, { download: true }), [pdf?.fileUrl]);
 
-  const iframeUrl = useMemo(() => buildPdfViewerUrl(pdf?.fileUrl, pdfViewModes[viewMode].options), [pdf?.fileUrl, viewMode]);
+  const iframeUrl = useMemo(() => buildPdfViewerUrl(inlinePdfUrl, pdfViewModes[viewMode].options), [inlinePdfUrl, viewMode]);
 
   useEffect(() => {
     setViewMode("width");
@@ -109,15 +112,15 @@ export default function PdfPreviewModal({ pdf, onClose }) {
               {isFullscreen ? <Minimize2 size={16} className="mr-2" /> : <Maximize2 size={16} className="mr-2" />}
               {isFullscreen ? "Exit Full Screen" : "Full Screen"}
             </button>
-            <a href={pdf.fileUrl} target="_blank" rel="noreferrer" className="button-soft px-4 py-2">
+            <a href={inlinePdfUrl || pdf.fileUrl} target="_blank" rel="noreferrer" className="button-soft px-4 py-2">
               <Printer size={16} className="mr-2" />
               Print-Friendly Tab
             </a>
-            <a href={pdf.fileUrl} target="_blank" rel="noreferrer" className="button-secondary px-4 py-2">
+            <a href={inlinePdfUrl || pdf.fileUrl} target="_blank" rel="noreferrer" className="button-secondary px-4 py-2">
               <ExternalLink size={16} className="mr-2" />
               Open in New Tab
             </a>
-            <a href={pdf.fileUrl} target="_blank" rel="noreferrer" className="button-primary px-4 py-2">
+            <a href={downloadPdfUrl || pdf.fileUrl} target="_blank" rel="noreferrer" className="button-primary px-4 py-2">
               <Download size={16} className="mr-2" />
               Download PDF
             </a>
@@ -131,7 +134,7 @@ export default function PdfPreviewModal({ pdf, onClose }) {
 
         <div className="flex-1 bg-slate-950 p-4 sm:p-5">
           <div className="h-full overflow-hidden rounded-[1.5rem] border border-white/10 bg-white">
-            <iframe title={pdf.title} src={iframeUrl || pdf.fileUrl} className="h-full w-full bg-white" loading="lazy" allowFullScreen />
+            <iframe title={pdf.title} src={iframeUrl || inlinePdfUrl || pdf.fileUrl} className="h-full w-full bg-white" loading="lazy" allowFullScreen />
           </div>
         </div>
       </div>
