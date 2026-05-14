@@ -4,13 +4,15 @@ import {
   Download,
   ExternalLink,
   ListTree,
+  LoaderCircle,
   Maximize2,
   Minimize2,
   MonitorPlay,
   X
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { buildPdfViewerUrl, warmPreviewUrl } from "../../utils/pptPreview";
+import api from "../../api/client";
+import { buildPdfViewerUrl, normalizePptItem, warmPreviewUrl } from "../../utils/pptPreview";
 
 const pdfViewModes = {
   width: {
@@ -32,6 +34,7 @@ const pdfViewModes = {
 };
 
 export default function PptPreviewModal({ ppt, onClose }) {
+  const [resolvedPpt, setResolvedPpt] = useState(ppt ? normalizePptItem(ppt) : null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [pdfViewMode, setPdfViewMode] = useState("width");
   const [presentationMode, setPresentationMode] = useState(false);
@@ -39,18 +42,69 @@ export default function PptPreviewModal({ ppt, onClose }) {
   const [pdfPageNumber, setPdfPageNumber] = useState(1);
   const [pdfError, setPdfError] = useState("");
   const [outlineOpen, setOutlineOpen] = useState(false);
+  const [waitingForPreview, setWaitingForPreview] = useState(false);
   const viewerShellRef = useRef(null);
-  const previewPdfUrl = ppt?.previewPdfUrl || null;
+  const activePpt = resolvedPpt || (ppt ? normalizePptItem(ppt) : null);
+  const previewPdfUrl = activePpt?.previewPdfUrl || null;
   const isPdfViewer = Boolean(previewPdfUrl);
 
   useEffect(() => {
+    setResolvedPpt(ppt ? normalizePptItem(ppt) : null);
     setIframeLoaded(false);
     setPdfViewMode("width");
     setPresentationMode(false);
     setPdfPageNumber(1);
     setPdfError("");
     setOutlineOpen(false);
-  }, [previewPdfUrl, ppt?.id]);
+    setWaitingForPreview(false);
+  }, [ppt]);
+
+  useEffect(() => {
+    if (!activePpt?.id || activePpt.previewPdfUrl) {
+      setWaitingForPreview(false);
+      return undefined;
+    }
+
+    let cancelled = false;
+    let attempts = 0;
+    setWaitingForPreview(true);
+
+    const loadPreview = async () => {
+      while (!cancelled && attempts < 8) {
+        attempts += 1;
+
+        try {
+          const response = await api.get(`/ppts/${activePpt.id}`);
+          const nextPpt = normalizePptItem(response.data);
+
+          if (cancelled) {
+            return;
+          }
+
+          if (nextPpt.previewPdfUrl) {
+            setResolvedPpt(nextPpt);
+            setWaitingForPreview(false);
+            setPdfError("");
+            return;
+          }
+        } catch {
+          // Keep polling briefly so production preview generation has time to finish.
+        }
+
+        await new Promise((resolve) => window.setTimeout(resolve, 2000));
+      }
+
+      if (!cancelled) {
+        setWaitingForPreview(false);
+      }
+    };
+
+    loadPreview();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activePpt?.id, activePpt?.previewPdfUrl]);
 
   useEffect(() => {
     if (!previewPdfUrl) {
@@ -166,8 +220,8 @@ export default function PptPreviewModal({ ppt, onClose }) {
           <div className="flex items-start justify-between gap-4 border-b border-brand-border px-6 py-5">
             <div>
               <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">PPT Preview</p>
-              <h2 className="mt-2 font-display text-3xl font-semibold text-brand-ink">{ppt.title}</h2>
-              {ppt.journalTitle ? <p className="mt-2 text-sm text-brand-slate">{ppt.journalTitle}</p> : null}
+              <h2 className="mt-2 font-display text-3xl font-semibold text-brand-ink">{activePpt?.title || ppt.title}</h2>
+              {activePpt?.journalTitle ? <p className="mt-2 text-sm text-brand-slate">{activePpt.journalTitle}</p> : null}
             </div>
             <button
               type="button"
@@ -243,8 +297,8 @@ export default function PptPreviewModal({ ppt, onClose }) {
                       <ExternalLink size={16} className="mr-2" />
                       Open Preview PDF
                     </a>
-                    {ppt.downloadUrl ? (
-                      <a href={ppt.downloadUrl} target="_blank" rel="noreferrer" download className="button-primary px-4 py-2">
+                    {activePpt?.downloadUrl ? (
+                      <a href={activePpt.downloadUrl} target="_blank" rel="noreferrer" download className="button-primary px-4 py-2">
                         <Download size={16} className="mr-2" />
                         Download PPT
                       </a>
@@ -307,7 +361,7 @@ export default function PptPreviewModal({ ppt, onClose }) {
                 <div className={`h-full overflow-hidden border border-white/10 bg-white ${presentationMode ? "rounded-none border-0" : "rounded-[1.5rem]"}`}>
                   <iframe
                     key={pdfViewerUrl}
-                    title={`${ppt.title} PDF preview`}
+                    title={`${activePpt?.title || ppt.title} PDF preview`}
                     src={pdfViewerUrl}
                     className="h-full w-full bg-white"
                     loading="eager"
@@ -344,16 +398,24 @@ export default function PptPreviewModal({ ppt, onClose }) {
           ) : (
             <div className="flex h-full items-center justify-center p-8">
               <div className="max-w-xl text-center">
-                <h3 className="font-display text-2xl font-semibold text-white">Preview unavailable</h3>
+                <h3 className="font-display text-2xl font-semibold text-white">{waitingForPreview ? "Preparing preview" : "Preview unavailable"}</h3>
                 <p className="mt-4 leading-7 text-slate-300">
-                  This PPT does not have a PDF preview yet. Upload a preview PDF for this presentation so production and localhost use the
-                  same clean viewer and presentation mode.
+                  {waitingForPreview
+                    ? "The production preview is being prepared. This usually takes a few seconds, and the viewer will open automatically once the PDF preview is ready."
+                    : "This PPT does not have a PDF preview yet. Upload a preview PDF for this presentation so production and localhost use the same clean viewer and presentation mode."}
                 </p>
+                {waitingForPreview ? <LoaderCircle size={28} className="mx-auto mt-6 animate-spin text-white" /> : null}
                 <div className="mt-6 flex flex-wrap justify-center gap-3">
-                  {ppt.downloadUrl ? (
-                    <a href={ppt.downloadUrl} target="_blank" rel="noreferrer" download className="button-primary px-4 py-2">
+                  {activePpt?.downloadUrl ? (
+                    <a href={activePpt.downloadUrl} target="_blank" rel="noreferrer" download className="button-primary px-4 py-2">
                       <Download size={16} className="mr-2" />
                       Download PPT
+                    </a>
+                  ) : null}
+                  {previewPdfUrl ? (
+                    <a href={previewPdfUrl} target="_blank" rel="noreferrer" className="button-soft px-4 py-2">
+                      <ExternalLink size={16} className="mr-2" />
+                      Open Preview PDF
                     </a>
                   ) : null}
                 </div>

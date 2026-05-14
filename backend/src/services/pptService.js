@@ -83,8 +83,9 @@ export async function createPptRecord({ journalId, title, description, pptUpload
 
   const pptAsset = await uploadAsset(pptUpload, "medmaxpub/ppts", "raw", req);
   const previewAsset =
-    (await uploadAsset(previewUpload, "medmaxpub/ppts-previews", "raw", req)) ||
-    (await generatePreviewAssetFromUpload(pptUpload, req));
+    (await uploadAsset(previewUpload, "medmaxpub/ppts-previews", "image", req)) ||
+    (await generatePreviewAssetFromUpload(pptUpload, req)) ||
+    (await generatePreviewAssetFromStoredFile(pptAsset, req));
 
   return Ppt.create({
     journal: journalId,

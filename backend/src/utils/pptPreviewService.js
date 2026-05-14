@@ -4,6 +4,8 @@ import path from "path";
 import { promisify } from "util";
 import { execFile } from "child_process";
 import { resolveStoredAssetPath, uploadAsset } from "./assetStorage.js";
+import cloudinary from "../config/cloudinary.js";
+import { hasCloudinaryConfig } from "./cloudinaryService.js";
 
 const execFileAsync = promisify(execFile);
 const LIBREOFFICE_COMMANDS = ["libreoffice", "soffice"];
@@ -15,6 +17,8 @@ const PPT_MIME_TYPES = new Set([
 ]);
 
 const PPT_EXTENSIONS = new Set([".ppt", ".pptx", ".odp"]);
+const CLOUNDINARY_PREVIEW_WAIT_ATTEMPTS = 6;
+const CLOUNDINARY_PREVIEW_WAIT_MS = 1500;
 
 function hasConvertiblePptExtension(filename = "") {
   return PPT_EXTENSIONS.has(path.extname(filename).toLowerCase());
@@ -63,9 +67,19 @@ async function buildPdfAssetFromPath(pdfPath, baseName, req) {
       size: pdfBuffer.length
     },
     "medmaxpub/ppts-previews",
-    "raw",
+    "image",
     req
   );
+}
+
+function isCloudinaryAsset(asset) {
+  return asset?.storage === "cloudinary" || asset?.secure_url?.includes("res.cloudinary.com");
+}
+
+function delay(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 export async function generatePreviewAssetFromUpload(file, req) {
@@ -137,11 +151,102 @@ async function downloadRemoteAsset(asset, targetPath) {
   return true;
 }
 
+function buildCloudinaryPreviewUrl(asset) {
+  if (!asset?.secure_url || !isCloudinaryAsset(asset)) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(asset.secure_url);
+    parsed.pathname = parsed.pathname.replace("/raw/upload/", "/image/upload/");
+
+    if (!parsed.pathname.toLowerCase().endsWith(".pdf")) {
+      parsed.pathname = `${parsed.pathname}.pdf`;
+    }
+
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
+function buildCloudinaryPreviewAsset(asset, previewUrl, sourceFilename) {
+  if (!previewUrl) {
+    return null;
+  }
+
+  return {
+    storage: "cloudinary",
+    public_id: asset.public_id,
+    secure_url: previewUrl,
+    resource_type: "image",
+    format: "pdf",
+    file_type: "application/pdf",
+    original_filename: `${sourceFilename}.pdf`,
+    size: null,
+    uploaded_at: new Date().toISOString()
+  };
+}
+
+async function requestCloudinaryAsposeConversion(asset) {
+  if (!hasCloudinaryConfig() || !asset?.public_id) {
+    return false;
+  }
+
+  try {
+    await cloudinary.api.update(asset.public_id, undefined, {
+      resource_type: "raw",
+      type: "upload",
+      raw_convert: "aspose"
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function waitForCloudinaryPreview(asset, sourceFilename) {
+  const previewUrl = buildCloudinaryPreviewUrl(asset);
+
+  if (!previewUrl) {
+    return null;
+  }
+
+  for (let attempt = 0; attempt < CLOUNDINARY_PREVIEW_WAIT_ATTEMPTS; attempt += 1) {
+    try {
+      const response = await fetch(previewUrl, {
+        method: "HEAD",
+        redirect: "follow"
+      });
+
+      if (response.ok) {
+        return buildCloudinaryPreviewAsset(asset, previewUrl, sourceFilename);
+      }
+    } catch {
+      // Keep polling briefly while Aspose finishes the conversion.
+    }
+
+    await delay(CLOUNDINARY_PREVIEW_WAIT_MS);
+  }
+
+  return null;
+}
+
 export async function generatePreviewAssetFromStoredFile(asset, req) {
   const sourceFilename = resolveAssetFilename(asset);
 
   if (!asset?.public_id || !sourceFilename) {
     return null;
+  }
+
+  if (isCloudinaryAsset(asset)) {
+    const conversionRequested = await requestCloudinaryAsposeConversion(asset);
+
+    if (!conversionRequested) {
+      return null;
+    }
+
+    return waitForCloudinaryPreview(asset, sourceFilename);
   }
 
   const tempDirectory = await fs.mkdtemp(path.join(os.tmpdir(), "medmaxpub-ppt-preview-backfill-"));
