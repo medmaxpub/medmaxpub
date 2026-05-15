@@ -1,0 +1,263 @@
+import { ExternalLink, FileVideo, Presentation } from "lucide-react";
+import { useMemo, useState } from "react";
+import SectionHeader from "../common/SectionHeader";
+import api from "../../api/client";
+
+const initialPptForm = {
+  journalId: "",
+  title: "",
+  authorName: "",
+  doiNumber: "",
+  pptFile: null
+};
+
+const initialVideoForm = {
+  journalId: "",
+  title: "",
+  authorName: "",
+  doiNumber: "",
+  videoFile: null
+};
+
+function normalizeJournalOption(journal) {
+  return {
+    id: journal.id || journal._id || "",
+    title: journal.managingJournalName || journal.journalTitle || "Untitled journal"
+  };
+}
+
+export default function DashboardMediaUploads({
+  journals = [],
+  onUploaded = null,
+  showSubmission = true,
+  showPpt = true,
+  showVideo = true,
+  headingLabel = "Media Uploads",
+  headingTitle = "Online submission, PPT, and video options",
+  headingDescription = "Use the online submission shortcut or upload journal-linked PPT and video records with journal title, author name, DOI, and attached files."
+}) {
+  const [pptForm, setPptForm] = useState(initialPptForm);
+  const [videoForm, setVideoForm] = useState(initialVideoForm);
+  const [pptStatus, setPptStatus] = useState("");
+  const [videoStatus, setVideoStatus] = useState("");
+  const [isSavingPpt, setIsSavingPpt] = useState(false);
+  const [isSavingVideo, setIsSavingVideo] = useState(false);
+
+  const journalOptions = useMemo(
+    () =>
+      journals
+        .map(normalizeJournalOption)
+        .filter((journal) => journal.id)
+        .sort((left, right) => left.title.localeCompare(right.title)),
+    [journals]
+  );
+  const visibleSectionsCount = [showSubmission, showPpt, showVideo].filter(Boolean).length;
+  const gridClassName =
+    visibleSectionsCount === 1 ? "xl:grid-cols-1" : visibleSectionsCount === 2 ? "xl:grid-cols-2" : "xl:grid-cols-3";
+
+  const submitPpt = async (event) => {
+    event.preventDefault();
+    setPptStatus("");
+    setIsSavingPpt(true);
+
+    try {
+      const payload = new FormData();
+      payload.append("title", pptForm.title);
+      payload.append("description", `${pptForm.authorName} | ${pptForm.doiNumber}`);
+      payload.append("authorName", pptForm.authorName);
+      payload.append("doiNumber", pptForm.doiNumber);
+      payload.append("pptFile", pptForm.pptFile);
+
+      await api.post(`/journals/${pptForm.journalId}/ppts`, payload, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
+      setPptStatus("PPT uploaded successfully.");
+      setPptForm(initialPptForm);
+      await onUploaded?.();
+    } catch (error) {
+      setPptStatus(error.response?.data?.message || "PPT upload failed.");
+    } finally {
+      setIsSavingPpt(false);
+    }
+  };
+
+  const submitVideo = async (event) => {
+    event.preventDefault();
+    setVideoStatus("");
+    setIsSavingVideo(true);
+
+    try {
+      const payload = new FormData();
+      payload.append("title", videoForm.title);
+      payload.append("description", `${videoForm.authorName} | ${videoForm.doiNumber}`);
+      payload.append("authorName", videoForm.authorName);
+      payload.append("doiNumber", videoForm.doiNumber);
+      payload.append("videoFile", videoForm.videoFile);
+
+      await api.post(`/journals/${videoForm.journalId}/videos`, payload, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
+      setVideoStatus("Video uploaded successfully.");
+      setVideoForm(initialVideoForm);
+      await onUploaded?.();
+    } catch (error) {
+      setVideoStatus(error.response?.data?.message || "Video upload failed.");
+    } finally {
+      setIsSavingVideo(false);
+    }
+  };
+
+  return (
+    <section className="card-panel p-6 sm:p-8">
+      <SectionHeader
+        label={headingLabel}
+        title={headingTitle}
+        description={headingDescription}
+      />
+
+      <div className={`mt-8 grid gap-8 ${gridClassName}`}>
+        {showSubmission ? (
+        <div className="rounded-3xl border border-brand-border bg-brand-elevated p-6">
+          <p className="text-xs uppercase tracking-[0.18em] text-brand-gold">Online Submission</p>
+          <h3 className="mt-3 text-2xl font-semibold text-brand-ink">Open manuscript form</h3>
+          <p className="mt-3 text-sm leading-7 text-brand-slate">
+            Launch the public online submission page in a new tab whenever you need to review or share the submission workflow.
+          </p>
+          <a href="/submit-manuscript" target="_blank" rel="noreferrer" className="button-primary mt-6 px-4 py-2">
+            <ExternalLink size={16} className="mr-2" />
+            Open Submission
+          </a>
+        </div>
+        ) : null}
+
+        {showPpt ? (
+        <div className="rounded-3xl border border-brand-border bg-brand-elevated p-6">
+          <div className="flex items-center gap-3">
+            <Presentation size={18} className="text-brand-crimson" />
+            <h3 className="text-2xl font-semibold text-brand-ink">PPT Upload</h3>
+          </div>
+
+          <form onSubmit={submitPpt} className="mt-6 grid gap-4">
+            <div>
+              <label className="form-label" data-required="true">Journal Title</label>
+              <select value={pptForm.journalId} onChange={(event) => setPptForm((current) => ({ ...current, journalId: event.target.value }))} required>
+                <option value="">Select journal</option>
+                {journalOptions.map((journal) => (
+                  <option key={journal.id} value={journal.id}>
+                    {journal.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="form-label" data-required="true">PPT Title</label>
+              <input
+                value={pptForm.title}
+                onChange={(event) => setPptForm((current) => ({ ...current, title: event.target.value }))}
+                placeholder="Enter PPT title"
+                required
+              />
+            </div>
+            <div>
+              <label className="form-label" data-required="true">Author Name</label>
+              <input
+                value={pptForm.authorName}
+                onChange={(event) => setPptForm((current) => ({ ...current, authorName: event.target.value }))}
+                placeholder="Enter author name"
+                required
+              />
+            </div>
+            <div>
+              <label className="form-label" data-required="true">DOI</label>
+              <input
+                value={pptForm.doiNumber}
+                onChange={(event) => setPptForm((current) => ({ ...current, doiNumber: event.target.value }))}
+                placeholder="Enter DOI"
+                required
+              />
+            </div>
+            <div>
+              <label className="form-label" data-required="true">PPT Attached File</label>
+              <input
+                type="file"
+                accept=".ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                onChange={(event) => setPptForm((current) => ({ ...current, pptFile: event.target.files?.[0] || null }))}
+                required
+              />
+            </div>
+            <button type="submit" className="button-primary" disabled={isSavingPpt || !journalOptions.length}>
+              {isSavingPpt ? "Uploading..." : "Upload PPT"}
+            </button>
+            {pptStatus ? <p className="text-sm text-brand-slate">{pptStatus}</p> : null}
+          </form>
+        </div>
+        ) : null}
+
+        {showVideo ? (
+        <div className="rounded-3xl border border-brand-border bg-brand-elevated p-6">
+          <div className="flex items-center gap-3">
+            <FileVideo size={18} className="text-brand-crimson" />
+            <h3 className="text-2xl font-semibold text-brand-ink">Video Upload</h3>
+          </div>
+
+          <form onSubmit={submitVideo} className="mt-6 grid gap-4">
+            <div>
+              <label className="form-label" data-required="true">Journal Title</label>
+              <select value={videoForm.journalId} onChange={(event) => setVideoForm((current) => ({ ...current, journalId: event.target.value }))} required>
+                <option value="">Select journal</option>
+                {journalOptions.map((journal) => (
+                  <option key={journal.id} value={journal.id}>
+                    {journal.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="form-label" data-required="true">Video Title</label>
+              <input
+                value={videoForm.title}
+                onChange={(event) => setVideoForm((current) => ({ ...current, title: event.target.value }))}
+                placeholder="Enter video title"
+                required
+              />
+            </div>
+            <div>
+              <label className="form-label" data-required="true">Author Name</label>
+              <input
+                value={videoForm.authorName}
+                onChange={(event) => setVideoForm((current) => ({ ...current, authorName: event.target.value }))}
+                placeholder="Enter author name"
+                required
+              />
+            </div>
+            <div>
+              <label className="form-label" data-required="true">DOI</label>
+              <input
+                value={videoForm.doiNumber}
+                onChange={(event) => setVideoForm((current) => ({ ...current, doiNumber: event.target.value }))}
+                placeholder="Enter DOI"
+                required
+              />
+            </div>
+            <div>
+              <label className="form-label" data-required="true">Video Attached File</label>
+              <input
+                type="file"
+                accept="video/*"
+                onChange={(event) => setVideoForm((current) => ({ ...current, videoFile: event.target.files?.[0] || null }))}
+                required
+              />
+            </div>
+            <button type="submit" className="button-primary" disabled={isSavingVideo || !journalOptions.length}>
+              {isSavingVideo ? "Uploading..." : "Upload Video"}
+            </button>
+            {videoStatus ? <p className="text-sm text-brand-slate">{videoStatus}</p> : null}
+          </form>
+        </div>
+        ) : null}
+      </div>
+    </section>
+  );
+}

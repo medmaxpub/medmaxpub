@@ -16,6 +16,7 @@ import PolicyPage from "./pages/public/PolicyPage";
 import PptsPage from "./pages/public/PptsPage";
 import SuperUserDashboardPage from "./pages/super/SuperUserDashboardPage";
 import SuperUserJournalsPage from "./pages/super/SuperUserJournalsPage";
+import SuperUserMediaPage from "./pages/super/SuperUserMediaPage";
 import SuperUserTestimonialsPage from "./pages/super/SuperUserTestimonialsPage";
 import SuperUserUsersPage from "./pages/super/SuperUserUsersPage";
 import UserArchivePagesPage from "./pages/user/UserArchivePagesPage";
@@ -82,15 +83,21 @@ export default function App() {
         </Route>
       </Route>
 
-      <Route element={<ProtectedRoute allowedRoles={["super_user"]} redirectTo="/login" />}>
+      <Route element={<ProtectedRoute allowedRoles={["super_user", "admin"]} redirectTo="/login" />}>
         <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
         <Route path="/admin/dashboard" element={<Navigate to="/superuser/dashboard" replace />} />
+        <Route path="/admin/online-submission" element={<Navigate to="/superuser/online-submission" replace />} />
+        <Route path="/admin/ppt-upload" element={<Navigate to="/superuser/ppt-upload" replace />} />
+        <Route path="/admin/video-upload" element={<Navigate to="/superuser/video-upload" replace />} />
         <Route path="/super" element={<Navigate to="/superuser/dashboard" replace />} />
         <Route path="/superuser" element={<SuperUserLayout />}>
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<SuperUserDashboardPage />} />
           <Route path="users" element={<SuperUserUsersPage />} />
           <Route path="journals" element={<SuperUserJournalsPage />} />
+          <Route path="online-submission" element={<SuperUserMediaPage variant="submission" />} />
+          <Route path="ppt-upload" element={<SuperUserMediaPage variant="ppt" />} />
+          <Route path="video-upload" element={<SuperUserMediaPage variant="video" />} />
           <Route path="testimonials" element={<SuperUserTestimonialsPage />} />
         </Route>
       </Route>

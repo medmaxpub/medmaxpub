@@ -31,6 +31,8 @@ export const createVideo = asyncHandler(async (req, res) => {
     journal: journal._id,
     title: req.body.title,
     description: req.body.description,
+    authorName: req.body.authorName || "",
+    doiNumber: req.body.doiNumber || "",
     youtubeUrl: req.body.youtubeUrl,
     thumbnail,
     videoFile

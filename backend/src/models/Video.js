@@ -24,6 +24,8 @@ const videoSchema = new mongoose.Schema(
     },
     title: { type: String, required: true },
     description: { type: String, default: "" },
+    authorName: { type: String, default: "" },
+    doiNumber: { type: String, default: "" },
     youtubeUrl: String,
     thumbnail: assetSchema,
     videoFile: assetSchema

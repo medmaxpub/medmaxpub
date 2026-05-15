@@ -1,4 +1,4 @@
-import { BookOpenText, LayoutGrid, LogOut, MessageSquareQuote, Users } from "lucide-react";
+import { BookOpenText, FileVideo, LayoutGrid, LogOut, MessageSquareQuote, Presentation, Send, Users } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 import { medmaxTransparentLogo } from "../../assets/branding";
 import { useAuth } from "../../context/AuthContext";
@@ -7,11 +7,17 @@ const navItems = [
   { label: "Welcome", to: "/superuser/dashboard", icon: LayoutGrid },
   { label: "Users", to: "/superuser/users", icon: Users },
   { label: "Journals", to: "/superuser/journals", icon: BookOpenText },
+  { label: "Online Submission", to: "/superuser/online-submission", icon: Send },
+  { label: "PPT Upload", to: "/superuser/ppt-upload", icon: Presentation },
+  { label: "Video Upload", to: "/superuser/video-upload", icon: FileVideo },
   { label: "Testimonials", to: "/superuser/testimonials", icon: MessageSquareQuote }
 ];
 
 export default function SuperUserLayout() {
   const { logout, user } = useAuth();
+  const isAdmin = user?.role === "admin";
+  const portalLabel = isAdmin ? "Admin Portal" : "Super User Portal";
+  const dashboardTitle = isAdmin ? "Admin Dashboard" : "Super User Dashboard";
 
   return (
     <div className="min-h-screen bg-white">
@@ -20,7 +26,7 @@ export default function SuperUserLayout() {
           <div className="inline-flex rounded-[1.15rem] border border-brand-border bg-brand-elevated px-4 py-3 shadow-panel">
             <img src={medmaxTransparentLogo} alt="Medmax Publishers" className="h-12 w-auto" />
           </div>
-          <p className="mt-3 text-xs font-semibold uppercase tracking-[0.26em] text-brand-navy">Super User Portal</p>
+          <p className="mt-3 text-xs font-semibold uppercase tracking-[0.26em] text-brand-navy">{portalLabel}</p>
 
           <div className="mt-8 rounded-[1.15rem] border border-brand-border bg-brand-elevated p-4 shadow-panel">
             <p className="text-sm text-brand-slate">Signed in as</p>
@@ -58,7 +64,7 @@ export default function SuperUserLayout() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-brand-navy">Control Center</p>
-                <h1 className="mt-2 font-display text-3xl font-semibold text-brand-ink sm:text-4xl">Super User Dashboard</h1>
+                <h1 className="mt-2 font-display text-3xl font-semibold text-brand-ink sm:text-4xl">{dashboardTitle}</h1>
               </div>
             </div>
           </header>

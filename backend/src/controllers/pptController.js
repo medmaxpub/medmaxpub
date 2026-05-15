@@ -19,6 +19,8 @@ export const uploadPpt = asyncHandler(async (req, res) => {
     journalId: journal._id,
     title: req.body.title,
     description: req.body.description,
+    authorName: req.body.authorName,
+    doiNumber: req.body.doiNumber,
     pptUpload: req.files?.pptFile?.[0],
     previewUpload: req.files?.previewFile?.[0],
     req

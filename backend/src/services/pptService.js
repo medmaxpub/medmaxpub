@@ -88,7 +88,7 @@ function logPptPreview(event, payload) {
   console.info(`[ppt-preview] ${event}`, payload);
 }
 
-export async function createPptRecord({ journalId, title, description, pptUpload, previewUpload, req }) {
+export async function createPptRecord({ journalId, title, description, authorName, doiNumber, pptUpload, previewUpload, req }) {
   if (!pptUpload) {
     throw new AppError("PPT or PPTX file is required", 400);
   }
@@ -104,6 +104,8 @@ export async function createPptRecord({ journalId, title, description, pptUpload
     journal: journalId,
     title,
     description,
+    authorName,
+    doiNumber,
     file: pptAsset,
     previewFile: previewAsset,
     pptFileName: pptUpload.originalname || "",
@@ -198,6 +200,8 @@ export function serializePpt(ppt) {
     id: ppt.id || ppt._id,
     title: ppt.title,
     description: ppt.description,
+    authorName: ppt.authorName || "",
+    doiNumber: ppt.doiNumber || "",
     uploadedDate: ppt.uploadedDate || ppt.createdAt,
     createdAt: ppt.createdAt || null,
     updatedAt: ppt.updatedAt || null,
