@@ -147,7 +147,7 @@ export async function ensurePptPreviewAsset(ppt, req, options = {}) {
   const pptAsset = resolvePptFileAsset(ppt);
   const previewAsset = resolvePptPreviewAsset(ppt);
 
-  if ((previewAsset && !force) || !pptAsset) {
+  if ((previewAsset && !force) || (!force && ppt?.previewStatus === "failed") || !pptAsset) {
     if (previewAsset) {
       ppt.previewStatus = "ready";
       ppt.previewError = "";

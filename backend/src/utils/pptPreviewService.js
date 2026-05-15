@@ -190,7 +190,7 @@ function buildCloudinaryPreviewAsset(asset, previewUrl, sourceFilename) {
 
 async function requestCloudinaryAsposeConversion(asset) {
   if (!hasCloudinaryConfig() || !asset?.public_id) {
-    return false;
+    return { ok: false, reason: "Cloudinary is not configured for PPT preview conversion." };
   }
 
   try {
@@ -199,9 +199,12 @@ async function requestCloudinaryAsposeConversion(asset) {
       type: "upload",
       raw_convert: "aspose"
     });
-    return true;
-  } catch {
-    return false;
+    return { ok: true, reason: "" };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: error?.message || "Cloudinary PPT preview conversion is unavailable."
+    };
   }
 }
 
@@ -240,9 +243,9 @@ export async function generatePreviewAssetFromStoredFile(asset, req) {
   }
 
   if (isCloudinaryAsset(asset)) {
-    const conversionRequested = await requestCloudinaryAsposeConversion(asset);
+    const conversionRequest = await requestCloudinaryAsposeConversion(asset);
 
-    if (!conversionRequested) {
+    if (!conversionRequest.ok) {
       return null;
     }
 
