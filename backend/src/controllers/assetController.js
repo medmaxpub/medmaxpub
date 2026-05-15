@@ -1,4 +1,5 @@
 import path from "path";
+import cloudinary from "../config/cloudinary.js";
 import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -85,6 +86,91 @@ function resolveContentType(targetUrl, upstreamContentType = "") {
   return "application/octet-stream";
 }
 
+function parseCloudinaryAsset(targetUrl) {
+  try {
+    const parsed = new URL(targetUrl);
+
+    if (parsed.hostname !== "res.cloudinary.com") {
+      return null;
+    }
+
+    const segments = parsed.pathname.split("/").filter(Boolean);
+
+    if (segments.length < 5) {
+      return null;
+    }
+
+    const resourceType = segments[1];
+    const deliveryType = segments[2];
+    const versionIndex = segments.findIndex((segment, index) => index >= 3 && /^v\d+$/.test(segment));
+
+    if (versionIndex === -1 || versionIndex === segments.length - 1) {
+      return null;
+    }
+
+    const publicPath = segments.slice(versionIndex + 1).join("/");
+    const extension = path.extname(publicPath).replace(".", "").toLowerCase();
+    const publicId = extension ? publicPath.slice(0, -1 * (`.${extension}`).length) : publicPath;
+
+    if (!publicId) {
+      return null;
+    }
+
+    return {
+      publicId,
+      format: extension || undefined,
+      resourceType,
+      type: deliveryType
+    };
+  } catch {
+    return null;
+  }
+}
+
+function buildSignedCloudinaryDownloadUrl(targetUrl) {
+  const parsedAsset = parseCloudinaryAsset(targetUrl);
+
+  if (!parsedAsset?.publicId || !parsedAsset?.format) {
+    return null;
+  }
+
+  try {
+    return cloudinary.utils.private_download_url(parsedAsset.publicId, parsedAsset.format, {
+      resource_type: parsedAsset.resourceType,
+      type: parsedAsset.type,
+      expires_at: Math.floor(Date.now() / 1000) + 60 * 10
+    });
+  } catch {
+    return null;
+  }
+}
+
+async function fetchAssetWithCloudinaryFallback(targetUrl) {
+  let response = await fetch(targetUrl, {
+    redirect: "follow"
+  });
+
+  if (response.ok) {
+    return response;
+  }
+
+  if (response.status !== 401) {
+    return response;
+  }
+
+  const signedUrl = buildSignedCloudinaryDownloadUrl(targetUrl);
+
+  if (!signedUrl) {
+    return response;
+  }
+
+  response = await fetch(signedUrl, {
+    redirect: "follow"
+  });
+
+  return response;
+}
+
 export const proxyPdfAsset = asyncHandler(async (req, res) => {
   const targetUrl = String(req.query.url || "").trim();
   const shouldDownload = String(req.query.download || "").trim() === "1";
@@ -97,9 +183,7 @@ export const proxyPdfAsset = asyncHandler(async (req, res) => {
     throw new AppError("PDF URL is not allowed", 400);
   }
 
-  const response = await fetch(targetUrl, {
-    redirect: "follow"
-  });
+  const response = await fetchAssetWithCloudinaryFallback(targetUrl);
 
   if (!response.ok) {
     throw new AppError(`Failed to load PDF asset (${response.status})`, 502);
@@ -133,9 +217,7 @@ export const proxyFileAsset = asyncHandler(async (req, res) => {
     throw new AppError("File URL is not allowed", 400);
   }
 
-  const response = await fetch(targetUrl, {
-    redirect: "follow"
-  });
+  const response = await fetchAssetWithCloudinaryFallback(targetUrl);
 
   if (!response.ok) {
     throw new AppError(`Failed to load file asset (${response.status})`, 502);

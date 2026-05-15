@@ -7,7 +7,7 @@ export default function ArticlePreviewModal({ article, onClose }) {
     return null;
   }
 
-  const viewPdfUrl = article.pdfFileUrl || (article.pdfFileUrl ? buildPdfProxyUrl(article.pdfFileUrl) : "");
+  const viewPdfUrl = article.pdfFileUrl ? buildPdfProxyUrl(article.pdfFileUrl) || article.pdfFileUrl : "";
   const downloadPdfUrl = article.pdfFileUrl ? buildPdfProxyUrl(article.pdfFileUrl, { download: true }) || article.pdfFileUrl : "";
 
   return (

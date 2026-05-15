@@ -66,7 +66,7 @@ export default function PptPreviewModal({ ppt, onClose }) {
     return null;
   }
 
-  const inlinePreviewUrl = resolvedPpt.previewPdfUrl || buildPdfProxyUrl(resolvedPpt.previewPdfUrl);
+  const inlinePreviewUrl = buildPdfProxyUrl(resolvedPpt.previewPdfUrl) || resolvedPpt.previewPdfUrl;
   const originalPptDownloadUrl = buildAssetProxyUrl(resolvedPpt.originalPptUrl || resolvedPpt.pptFileUrl || resolvedPpt.pptUrl, {
     download: true
   });
