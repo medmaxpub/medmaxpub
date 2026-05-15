@@ -6,7 +6,6 @@ import dnaImage from "../../assets/DNA.png";
 import AboutMedmaxSection from "../../components/common/AboutMedmaxSection";
 import JournalCard from "../../components/common/JournalCard";
 import SectionHeader from "../../components/common/SectionHeader";
-import useAutoRefresh from "../../hooks/useAutoRefresh";
 import {
   heroShowcaseImages,
   indexingPartners,
@@ -17,11 +16,18 @@ import {
 } from "../../data/mockData";
 
 export default function HomePage() {
-  const featuredJournals = mockJournals.slice(0, 4);
+  const [featuredJournals, setFeaturedJournals] = useState(() => (shouldUseDevelopmentFallback() ? mockJournals.slice(0, 4) : []));
   const [testimonials, setTestimonials] = useState(mockTestimonials);
+  const [stats, setStats] = useState(websiteStats);
   const [activeHeroIndex, setActiveHeroIndex] = useState(0);
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
   const statIcons = [BookOpen, FileText, CalendarDays, Database];
+
+  const loadFeaturedJournals = useCallback(() => {
+    return withFallback(() => api.get("/journals"), useDevelopmentFallback ? mockJournals : []).then((data) => {
+      setFeaturedJournals((Array.isArray(data) ? data : []).slice(0, 4));
+    });
+  }, [useDevelopmentFallback]);
 
   const loadTestimonials = useCallback(() => {
     return withFallback(() => api.get("/testimonials"), useDevelopmentFallback ? mockTestimonials : []).then((data) =>
@@ -29,11 +35,23 @@ export default function HomePage() {
     );
   }, [useDevelopmentFallback]);
 
+  const loadSiteStats = useCallback(() => {
+    return withFallback(() => api.get("/site-stats"), useDevelopmentFallback ? { stats: websiteStats } : { stats: websiteStats }).then((data) =>
+      setStats(Array.isArray(data?.stats) && data.stats.length ? data.stats : websiteStats)
+    );
+  }, [useDevelopmentFallback]);
+
+  useEffect(() => {
+    loadFeaturedJournals();
+  }, [loadFeaturedJournals]);
+
   useEffect(() => {
     loadTestimonials();
   }, [loadTestimonials]);
 
-  useAutoRefresh(loadTestimonials, { intervalMs: 20000 });
+  useEffect(() => {
+    loadSiteStats();
+  }, [loadSiteStats]);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -123,11 +141,17 @@ export default function HomePage() {
             title="Open access journal profiles with direct public URLs"
             description="Each featured journal now highlights only the core Medmax profile fields used in the admin portal."
           />
-          <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {featuredJournals.map((journal) => (
-              <JournalCard key={journal.id} journal={journal} />
-            ))}
-          </div>
+          {featuredJournals.length ? (
+            <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+              {featuredJournals.map((journal) => (
+                <JournalCard key={journal.id} journal={journal} />
+              ))}
+            </div>
+          ) : (
+            <div className="mt-10 card-panel p-6 text-brand-slate">
+              No live journals have been published yet.
+            </div>
+          )}
         </div>
       </section>
 
@@ -139,15 +163,17 @@ export default function HomePage() {
             description="Indexing logos are displayed in a clean strip similar to publisher and conference trust sections."
             align="center"
           />
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-            {indexingPartners.map((partner) => (
-              <div
-                key={partner}
-                className="card-panel flex min-h-28 items-center justify-center px-6 py-5 text-center text-sm font-semibold uppercase tracking-[0.18em] text-brand-ink"
-              >
-                {partner}
-              </div>
-            ))}
+          <div className="partner-marquee mt-10">
+            <div className="partner-marquee-track">
+              {[...indexingPartners, ...indexingPartners].map((partner, index) => (
+                <div
+                  key={`${partner}-${index}`}
+                  className="partner-marquee-item card-panel flex min-h-28 items-center justify-center px-6 py-5 text-center text-sm font-semibold uppercase tracking-[0.18em] text-brand-ink"
+                >
+                  {partner}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -199,7 +225,7 @@ export default function HomePage() {
 
                 <div className="mt-9 overflow-hidden rounded-[1.6rem] border border-brand-border bg-white shadow-panel">
                   <div className="grid sm:grid-cols-2">
-                    {websiteStats.map((item, index) => {
+                    {stats.map((item, index) => {
                       const Icon = statIcons[index] || Database;
                       const borderClass =
                         index === 0
@@ -240,8 +266,8 @@ export default function HomePage() {
         <div className="container-shell">
           <SectionHeader
             label="Testimonials"
-            title="What speakers, editors, and delegates say"
-            description="A testimonial carousel can be powered from admin-managed entries, with text or video-based social proof."
+            title="Trusted voices from the global research community"
+            description="See how authors, editors, reviewers, and academic leaders describe their publishing experience with Medmax Publishers."
             align="center"
           />
           <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">

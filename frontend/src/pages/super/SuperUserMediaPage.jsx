@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import DashboardMediaUploads from "../../components/admin/DashboardMediaUploads";
+import SubmissionInbox from "../../components/admin/SubmissionInbox";
 import { getSuperUserJournalsFallback } from "./superUserFallbacks";
 
 export default function SuperUserMediaPage({ variant = "submission" }) {
   const [journals, setJournals] = useState([]);
+  const [submissions, setSubmissions] = useState([]);
+  const [isLoadingSubmissions, setIsLoadingSubmissions] = useState(false);
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
   const loadJournals = useCallback(async () => {
@@ -16,14 +19,29 @@ export default function SuperUserMediaPage({ variant = "submission" }) {
     loadJournals();
   }, [loadJournals]);
 
+  const loadSubmissions = useCallback(async () => {
+    if (variant !== "submission") {
+      return;
+    }
+
+    setIsLoadingSubmissions(true);
+    const data = await withFallback(() => api.get("/admin/submissions"), []);
+    setSubmissions(Array.isArray(data) ? data : []);
+    setIsLoadingSubmissions(false);
+  }, [variant]);
+
+  useEffect(() => {
+    loadSubmissions();
+  }, [loadSubmissions]);
+
   const configByVariant = {
     submission: {
       showSubmission: true,
       showPpt: false,
       showVideo: false,
       headingLabel: "Online Submission",
-      headingTitle: "Submission access",
-      headingDescription: "Open the manuscript submission form from a dedicated admin-side page."
+      headingTitle: "Submission inbox",
+      headingDescription: "Review manuscript submissions received from the public online submission form."
     },
     ppt: {
       showSubmission: false,
@@ -44,6 +62,14 @@ export default function SuperUserMediaPage({ variant = "submission" }) {
   };
 
   const config = configByVariant[variant] || configByVariant.submission;
+
+  if (variant === "submission") {
+    return (
+      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+        <SubmissionInbox submissions={submissions} isLoading={isLoadingSubmissions} />
+      </div>
+    );
+  }
 
   return <DashboardMediaUploads journals={journals} onUploaded={loadJournals} {...config} />;
 }

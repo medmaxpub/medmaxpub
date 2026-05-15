@@ -5,7 +5,6 @@ import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/clien
 import EmptyState from "../../components/common/EmptyState";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockJournals, mockPpts } from "../../data/mockData";
-import useAutoRefresh from "../../hooks/useAutoRefresh";
 import { buildJournalArchiveInfo, getAssetJournalUrl } from "../../utils/journalArchive";
 import { buildJournalSectionPath } from "../../utils/journalLinks";
 import { normalizePptItem, warmPreviewUrl } from "../../utils/pptPreview";
@@ -18,42 +17,53 @@ export default function PptsPage() {
 
   const loadItems = useCallback(async () => {
     setIsLoading(true);
-    const data = await withFallback(() => api.get("/ppts"), useDevelopmentFallback ? mockPpts : []);
-    const normalized = data.map(normalizePptItem);
-    const journalLookup = {};
-
     if (useDevelopmentFallback) {
+      const journalLookup = {};
+
       mockJournals.forEach((journal) => {
         journalLookup[journal.journalUrl] = buildJournalArchiveInfo(journal);
       });
-    } else {
-      const journalUrls = [...new Set(normalized.map(getAssetJournalUrl).filter(Boolean))];
-      const journalResults = await Promise.all(
-        journalUrls.map(async (url) => {
-          const journal = await withFallback(() => api.get(`/journals/${url}`), null);
-          return journal ? [url, buildJournalArchiveInfo(journal)] : null;
-        })
-      );
 
-      journalResults.filter(Boolean).forEach(([url, journal]) => {
-        journalLookup[url] = journal;
-      });
+      setItems(
+        mockPpts.map(normalizePptItem).map((item) => ({
+          ...item,
+          journalInfo: journalLookup[getAssetJournalUrl(item)] || null
+        }))
+      );
+      setIsLoading(false);
+      return;
     }
 
-    setItems(
-      normalized.map((item) => ({
-        ...item,
-        journalInfo: journalLookup[getAssetJournalUrl(item)] || null
-      }))
+    const journalSummaries = await withFallback(() => api.get("/journals"), []);
+    const journalDetails = await Promise.all(
+      (Array.isArray(journalSummaries) ? journalSummaries : []).map((journal) =>
+        withFallback(() => api.get(`/journals/${journal.publicJournalUrl || journal.journalUrl}`), null)
+      )
     );
+
+    const liveItems = journalDetails
+      .filter(Boolean)
+      .flatMap((journal) => {
+        const journalInfo = buildJournalArchiveInfo(journal);
+
+        return (journal.ppts || []).map((ppt) => ({
+          ...normalizePptItem({
+            ...ppt,
+            journalTitle: journal.managingJournalName,
+            journalUrl: journal.journalUrl,
+            publicJournalUrl: journal.publicJournalUrl
+          }),
+          journalInfo
+        }));
+      });
+
+    setItems(liveItems);
     setIsLoading(false);
   }, [useDevelopmentFallback]);
 
   useEffect(() => {
     loadItems();
   }, [loadItems]);
-
-  useAutoRefresh(loadItems, { intervalMs: 15000 });
 
   const filteredItems = items.filter((ppt) => {
     const normalizedQuery = query.trim().toLowerCase();

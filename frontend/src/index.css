@@ -131,6 +131,22 @@ button {
   flex: 0 0 100%;
 }
 
+.partner-marquee {
+  overflow: hidden;
+}
+
+.partner-marquee-track {
+  display: flex;
+  width: max-content;
+  gap: 1rem;
+  animation: hero-marquee-scroll 26s linear infinite;
+  will-change: transform;
+}
+
+.partner-marquee-item {
+  flex: 0 0 15rem;
+}
+
 .journal-card-link {
   @apply block h-full rounded-3xl transition duration-300 hover:-translate-y-1 hover:border-brand-teal hover:shadow-[0_24px_54px_rgba(15,23,42,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal focus-visible:ring-offset-4 focus-visible:ring-offset-white;
 }
@@ -159,6 +175,10 @@ button {
 
 @media (hover: hover) {
   .hero-marquee:hover .hero-marquee-track {
+    animation-play-state: paused;
+  }
+
+  .partner-marquee:hover .partner-marquee-track {
     animation-play-state: paused;
   }
 }

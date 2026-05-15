@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockJournals } from "../../data/mockData";
 
@@ -20,7 +21,7 @@ const initialForm = {
   email: "",
   postalAddress: "",
   country: "",
-  journal: "",
+  journalId: "",
   articleType: "",
   manuscriptTitle: "",
   abstract: "",
@@ -30,15 +31,59 @@ const initialForm = {
 export default function SubmitManuscriptPage() {
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState("");
+  const [journals, setJournals] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const useDevelopmentFallback = shouldUseDevelopmentFallback();
+
+  const loadJournals = useCallback(() => {
+    return withFallback(() => api.get("/journals"), useDevelopmentFallback ? mockJournals : []).then((data) => {
+      setJournals(Array.isArray(data) ? data : []);
+    });
+  }, [useDevelopmentFallback]);
+
+  useEffect(() => {
+    loadJournals();
+  }, [loadJournals]);
+
   const journalOptions = useMemo(
-    () => mockJournals.map((journal) => ({ value: journal.journalUrl, label: journal.managingJournalName })),
-    []
+    () =>
+      journals.map((journal) => ({
+        value: journal.id || journal._id || "",
+        label: journal.managingJournalName || "Untitled journal"
+      })),
+    [journals]
   );
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    setStatus("Submission form captured successfully. The editorial team can now connect this form to a live backend workflow.");
-    setForm(initialForm);
+    setStatus("");
+    setIsSaving(true);
+
+    try {
+      const payload = new FormData();
+      payload.append("name", form.name);
+      payload.append("email", form.email);
+      payload.append("postalAddress", form.postalAddress);
+      payload.append("country", form.country);
+      payload.append("journalId", form.journalId);
+      payload.append("articleType", form.articleType);
+      payload.append("manuscriptTitle", form.manuscriptTitle);
+      payload.append("abstract", form.abstract);
+      form.files.forEach((file) => {
+        payload.append("files", file);
+      });
+
+      const response = await api.post("/submissions", payload, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
+      setStatus(response.data?.message || "Manuscript submitted successfully.");
+      setForm(initialForm);
+    } catch (error) {
+      setStatus(error.response?.data?.message || "Manuscript submission failed.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -100,7 +145,7 @@ export default function SubmitManuscriptPage() {
 
                 <div>
                   <label className="form-label" data-required="true">Journal</label>
-                  <select value={form.journal} onChange={(event) => setForm({ ...form, journal: event.target.value })} required>
+                  <select value={form.journalId} onChange={(event) => setForm({ ...form, journalId: event.target.value })} required>
                     <option value="">Select Journal</option>
                     {journalOptions.map((journal) => (
                       <option key={journal.value} value={journal.value}>
@@ -156,8 +201,8 @@ export default function SubmitManuscriptPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  <button type="submit" className="button-primary px-5 py-3">
-                    Submit
+                  <button type="submit" className="button-primary px-5 py-3" disabled={isSaving || !journalOptions.length}>
+                    {isSaving ? "Submitting..." : "Submit"}
                   </button>
                 </div>
 

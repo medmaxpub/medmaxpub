@@ -17,7 +17,7 @@ function isLocalRuntime() {
 }
 
 export function shouldUseDevelopmentFallback() {
-  return isLocalRuntime();
+  return isLocalRuntime() && String(import.meta.env.VITE_ENABLE_MOCK_FALLBACKS || "").trim().toLowerCase() === "true";
 }
 
 function normalizeApiBaseUrl(url) {

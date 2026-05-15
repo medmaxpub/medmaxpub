@@ -5,17 +5,21 @@ import { companyInfo } from "../../data/mockData";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-brand-navy/60 bg-[#1d3f74] text-white">
-      <div className="container-shell grid gap-8 py-10 sm:py-12 md:grid-cols-2 xl:grid-cols-3">
-        <div>
+    <footer className="border-t border-brand-border bg-white text-brand-ink">
+      <div className="container-shell grid gap-8 py-10 sm:py-12 md:grid-cols-2 xl:grid-cols-[1.15fr_0.8fr_1fr] xl:gap-12">
+        <div className="xl:pr-6">
           <Link to="/" className="inline-flex transition hover:opacity-90">
-            <img src={medmaxTransparentLogo} alt="Medmax Publishers" className="h-20 w-auto sm:h-24" />
+            <img src={medmaxTransparentLogo} alt="Medmax Publishers" className="h-24 w-auto sm:h-28" />
           </Link>
+          <p className="mt-4 max-w-md text-sm leading-7 text-brand-slate">
+            Medmax Publishers is a peer-reviewed, open access publisher covering a comprehensive range of topics in
+            Clinical, Medicine, Life Sciences, Pharma, and Engineering & Technology.
+          </p>
         </div>
 
-        <div className="min-w-0">
-          <h3 className="text-lg font-semibold text-white">Quick Links</h3>
-          <div className="mt-4 flex flex-col gap-3 text-sm text-white/85">
+        <div className="min-w-0 xl:justify-self-center">
+          <h3 className="text-lg font-semibold text-brand-ink">Quick Links</h3>
+          <div className="mt-4 flex flex-col gap-2 text-sm text-brand-slate">
             <Link to="/" className="transition hover:text-brand-gold">Home</Link>
             <Link to="/about" className="transition hover:text-brand-gold">About</Link>
             <Link to="/journals" className="transition hover:text-brand-gold">Journals</Link>
@@ -27,9 +31,9 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="min-w-0">
-          <h3 className="text-lg font-semibold text-white">Contact Info</h3>
-          <div className="mt-4 space-y-3 text-sm text-white/85">
+        <div className="min-w-0 xl:pl-4">
+          <h3 className="text-lg font-semibold text-brand-ink">Contact Info</h3>
+          <div className="mt-4 space-y-3 text-sm text-brand-slate">
             <div className="flex items-start gap-3">
               <MapPin size={18} className="mt-0.5 shrink-0 text-brand-gold" />
               <div>{companyInfo.addressLines.map((line) => <div key={line}>{line}</div>)}</div>
@@ -49,7 +53,7 @@ export default function Footer() {
               {[Facebook, Twitter, Linkedin].map((Icon, index) => (
                 <span
                   key={index}
-                  className="rounded-full border border-white/20 bg-white/5 p-2 text-white transition hover:border-brand-gold hover:bg-white/10 hover:text-brand-gold"
+                  className="rounded-full border border-brand-border bg-brand-surface p-2 text-brand-ink transition hover:border-brand-gold hover:bg-brand-sky hover:text-brand-gold"
                 >
                   <Icon size={16} />
                 </span>
@@ -59,16 +63,16 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-white/10 bg-[#16315a]">
-        <div className="container-shell flex flex-col items-center gap-3 py-4 text-center text-sm text-white">
+      <div className="border-t border-brand-border bg-white">
+        <div className="container-shell flex flex-col items-center gap-3 py-4 text-center text-sm text-brand-ink">
           <div className="flex items-center justify-center gap-5 whitespace-nowrap font-medium">
-            <Link to="/terms-and-conditions" className="transition hover:text-white/75">
+            <Link to="/terms-and-conditions" className="transition hover:text-brand-slate">
               Terms and Conditions
             </Link>
-            <Link to="/withdraw-policy" className="transition hover:text-white/75">
+            <Link to="/withdraw-policy" className="transition hover:text-brand-slate">
               Withdraw Policy
             </Link>
-            <Link to="/privacy-policy" className="transition hover:text-white/75">
+            <Link to="/privacy-policy" className="transition hover:text-brand-slate">
               Privacy Policy
             </Link>
           </div>

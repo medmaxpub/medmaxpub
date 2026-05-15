@@ -6,7 +6,6 @@ import EmptyState from "../../components/common/EmptyState";
 import JournalMenu from "../../components/journal/JournalMenu";
 import IssueAccordion from "../../components/journal/IssueAccordion";
 import { mockJournals } from "../../data/mockData";
-import useAutoRefresh from "../../hooks/useAutoRefresh";
 import { normalizePptItem, warmPreviewUrl } from "../../utils/pptPreview";
 import { buildPdfProxyUrl } from "../../utils/pdfProxy";
 import { normalizeVideoItem } from "../../utils/videoPlayer";
@@ -86,8 +85,6 @@ export default function JournalShell() {
   useEffect(() => {
     loadJournal();
   }, [loadJournal]);
-
-  useAutoRefresh(loadJournal, { intervalMs: 15000 });
 
   if (!journal) {
     return (

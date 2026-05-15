@@ -12,6 +12,7 @@ import { ensureJournalAccess, ensureSuperAdmin, hasElevatedAccess } from "../uti
 import { deleteAsset, uploadAsset } from "../utils/assetStorage.js";
 import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { filterSampleJournals, isSampleJournalRecord } from "../utils/sampleContent.js";
 
 function normalizeText(value) {
   return String(value || "").trim();
@@ -375,13 +376,13 @@ async function upsertLinkedOwner(req, payload, existingJournal = null) {
 
 export const getJournals = asyncHandler(async (req, res) => {
   const journals = await Journal.find().populate("owner", "firstName lastName userName").sort({ createdAt: -1 }).lean();
-  res.json(journals.map(serializeJournalSummary));
+  res.json(filterSampleJournals(journals).map(serializeJournalSummary));
 });
 
 export const getAdminJournals = asyncHandler(async (req, res) => {
   const filter = hasElevatedAccess(req.user) ? {} : { owner: req.user._id };
   const journals = await Journal.find(filter).populate("owner", "firstName lastName userName").sort({ createdAt: -1 }).lean();
-  res.json(journals.map(serializeJournalSummary));
+  res.json(filterSampleJournals(journals).map(serializeJournalSummary));
 });
 
 export const getJournalByUrl = asyncHandler(async (req, res) => {
@@ -410,6 +411,10 @@ export const getJournalByUrl = asyncHandler(async (req, res) => {
   }
 
   if (!journal) {
+    throw new AppError("Journal not found", 404);
+  }
+
+  if (isSampleJournalRecord(journal)) {
     throw new AppError("Journal not found", 404);
   }
 

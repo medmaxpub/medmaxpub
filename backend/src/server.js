@@ -13,7 +13,10 @@ async function startServer() {
   await ensureUploadsDirectory();
   await connectDatabase();
   await bootstrapAdmin();
-  await seedSampleContent();
+
+  if (process.env.ENABLE_SAMPLE_CONTENT === "true") {
+    await seedSampleContent();
+  }
 
   app.listen(port, host, () => {
     console.log(`medmaxpub API running on ${host}:${port}`);

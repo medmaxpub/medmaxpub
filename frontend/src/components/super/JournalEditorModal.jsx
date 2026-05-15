@@ -153,6 +153,7 @@ export default function JournalEditorModal({
                   accept="image/*"
                   onChange={(event) => setForm((current) => ({ ...current, coverImageFile: event.target.files?.[0] || null }))}
                 />
+                <p className="mt-2 text-sm text-brand-slate">Recommended size: 800 x 1000 px (4:5 ratio) for the best journal card fit.</p>
                 {form.coverImage ? (
                   <div className="mt-3 flex items-center gap-3 rounded-2xl border border-brand-border bg-white p-3">
                     <img src={form.coverImage} alt="Current journal cover" className="h-20 w-16 rounded-xl object-cover" />

@@ -5,7 +5,6 @@ import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/clien
 import EmptyState from "../../components/common/EmptyState";
 import JournalMenu from "../../components/journal/JournalMenu";
 import { mockJournals } from "../../data/mockData";
-import useAutoRefresh from "../../hooks/useAutoRefresh";
 import { buildPdfProxyUrl } from "../../utils/pdfProxy";
 import { buildJournalSectionPath, getJournalRouteSlug } from "../../utils/journalLinks";
 
@@ -85,8 +84,6 @@ export default function JournalArticleAbstractPage() {
   useEffect(() => {
     loadJournal();
   }, [loadJournal]);
-
-  useAutoRefresh(loadJournal, { intervalMs: 15000 });
 
   const article = useMemo(() => {
     if (location.state?.article && String(location.state.article.id) === String(articleId)) {

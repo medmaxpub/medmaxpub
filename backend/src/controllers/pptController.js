@@ -4,6 +4,7 @@ import { createPptRecord, ensurePptPreviewAsset, serializePpt } from "../service
 import { buildAccessibleJournalFilter, ensureJournalAccess } from "../utils/accessControl.js";
 import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { filterSampleMediaItems, isSampleJournalRecord } from "../utils/sampleContent.js";
 
 export const uploadPpt = asyncHandler(async (req, res) => {
   const requestedJournalId = req.params.journalId || req.body.journalId;
@@ -42,7 +43,7 @@ export const getPpts = asyncHandler(async (req, res) => {
   }
 
   res.set("Cache-Control", "no-store");
-  res.json(ppts.map((ppt) => serializePpt(ppt.toObject())));
+  res.json(filterSampleMediaItems(ppts.map((ppt) => ppt.toObject())).map((ppt) => serializePpt(ppt)));
 });
 
 export const getAdminPpts = asyncHandler(async (req, res) => {
@@ -55,13 +56,17 @@ export const getAdminPpts = asyncHandler(async (req, res) => {
   }
 
   res.set("Cache-Control", "no-store");
-  res.json(ppts.map((ppt) => serializePpt(ppt.toObject())));
+  res.json(filterSampleMediaItems(ppts.map((ppt) => ppt.toObject())).map((ppt) => serializePpt(ppt)));
 });
 
 export const getPptById = asyncHandler(async (req, res) => {
   const ppt = await Ppt.findById(req.params.id).populate("journal", "managingJournalName journalUrl journalDomainName");
 
   if (!ppt) {
+    throw new AppError("PPT not found", 404);
+  }
+
+  if (isSampleJournalRecord(ppt.journal)) {
     throw new AppError("PPT not found", 404);
   }
 

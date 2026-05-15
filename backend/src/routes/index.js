@@ -11,6 +11,7 @@ import {
   updateArticleStatus
 } from "../controllers/articleController.js";
 import { postContactMessage } from "../controllers/contactController.js";
+import { createManuscriptSubmission, getAdminManuscriptSubmissions } from "../controllers/manuscriptSubmissionController.js";
 import {
   createEditorialBoardMember,
   deleteEditorialBoardMember,
@@ -28,6 +29,7 @@ import {
   updateJournal
 } from "../controllers/journalController.js";
 import { createIssue } from "../controllers/issueController.js";
+import { getAdminSiteStats, getSiteStats, updateAdminSiteStats } from "../controllers/siteStatsController.js";
 import { getAdminPpts, getPptById, getPpts, regeneratePptPreview, uploadPpt } from "../controllers/pptController.js";
 import { createVideo, getAdminVideos, getVideos } from "../controllers/videoController.js";
 import { createTestimonial, deleteTestimonial, getTestimonials, updateTestimonial } from "../controllers/testimonialController.js";
@@ -41,10 +43,14 @@ router.post("/auth/login", login);
 router.post("/auth/signup-admin", protect, signupAdmin);
 router.post("/auth/impersonate/:id", protect, impersonateUser);
 router.post("/contact", ...postContactMessage);
+router.post("/submissions", upload.array("files", 10), createManuscriptSubmission);
 router.get("/assets/pdf-proxy", proxyPdfAsset);
 router.get("/assets/file-proxy", proxyFileAsset);
 
 router.get("/admin/journals", protect, getAdminJournals);
+router.get("/admin/site-stats", protect, getAdminSiteStats);
+router.put("/admin/site-stats", protect, updateAdminSiteStats);
+router.get("/admin/submissions", protect, getAdminManuscriptSubmissions);
 router.get("/admin/ppts", protect, getAdminPpts);
 router.get("/admin/videos", protect, getAdminVideos);
 router.get("/admin/users", protect, getUsers);
@@ -62,6 +68,8 @@ router
   .route("/journals")
   .get(getJournals)
   .post(protect, upload.single("coverImage"), createJournal);
+
+router.get("/site-stats", getSiteStats);
 
 router
   .route("/journals/:id")

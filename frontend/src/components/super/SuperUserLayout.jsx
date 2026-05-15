@@ -1,4 +1,4 @@
-import { BookOpenText, FileVideo, LayoutGrid, LogOut, MessageSquareQuote, Presentation, Send, Users } from "lucide-react";
+import { BarChart3, BookOpenText, FileVideo, LayoutGrid, LogOut, MessageSquareQuote, Presentation, Send, Users } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 import { medmaxTransparentLogo } from "../../assets/branding";
 import { useAuth } from "../../context/AuthContext";
@@ -10,6 +10,7 @@ const navItems = [
   { label: "Online Submission", to: "/superuser/online-submission", icon: Send },
   { label: "PPT Upload", to: "/superuser/ppt-upload", icon: Presentation },
   { label: "Video Upload", to: "/superuser/video-upload", icon: FileVideo },
+  { label: "Homepage Stats", to: "/superuser/site-stats", icon: BarChart3 },
   { label: "Testimonials", to: "/superuser/testimonials", icon: MessageSquareQuote }
 ];
 

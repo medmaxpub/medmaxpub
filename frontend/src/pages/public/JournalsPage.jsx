@@ -6,7 +6,6 @@ import EmptyState from "../../components/common/EmptyState";
 import JournalCard from "../../components/common/JournalCard";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockJournals } from "../../data/mockData";
-import useAutoRefresh from "../../hooks/useAutoRefresh";
 
 export default function JournalsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -21,8 +20,6 @@ export default function JournalsPage() {
   useEffect(() => {
     loadJournals();
   }, [loadJournals]);
-
-  useAutoRefresh(loadJournals, { intervalMs: 15000 });
 
   const filtered = journals.filter((journal) => {
     const normalizedQuery = query.toLowerCase();
@@ -61,7 +58,7 @@ export default function JournalsPage() {
         </div>
 
         {filtered.length ? (
-          <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {filtered.map((journal) => (
               <JournalCard key={journal.id} journal={journal} />
             ))}

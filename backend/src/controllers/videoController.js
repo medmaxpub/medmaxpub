@@ -4,6 +4,7 @@ import { buildAccessibleJournalFilter, ensureJournalAccess } from "../utils/acce
 import { uploadAsset } from "../utils/assetStorage.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { AppError } from "../utils/appError.js";
+import { filterSampleMediaItems } from "../utils/sampleContent.js";
 
 export const createVideo = asyncHandler(async (req, res) => {
   const requestedJournalId = req.params.journalId || req.body.journalId;
@@ -44,7 +45,7 @@ export const createVideo = asyncHandler(async (req, res) => {
 
 export const getVideos = asyncHandler(async (req, res) => {
   const videos = await Video.find().populate("journal", "managingJournalName journalUrl journalDomainName").sort({ createdAt: -1 }).lean();
-  res.json(videos);
+  res.json(filterSampleMediaItems(videos));
 });
 
 export const getAdminVideos = asyncHandler(async (req, res) => {
@@ -53,5 +54,5 @@ export const getAdminVideos = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .lean();
 
-  res.json(videos);
+  res.json(filterSampleMediaItems(videos));
 });
