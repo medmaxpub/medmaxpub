@@ -22,6 +22,8 @@ const configuredOrigins = [
   .filter(Boolean);
 const allowedOrigins = [...new Set([...defaultOrigins, ...configuredOrigins])];
 const allowedOriginHostnames = ["medmaxpub.pages.dev"];
+const defaultAllowedHeaders = ["Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"];
+const allowedMethods = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"];
 
 function matchesAllowedOrigin(origin) {
   if (!origin) {
@@ -55,11 +57,37 @@ const corsOptions = {
     callback(new Error(`CORS blocked for origin: ${origin}`));
   },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"],
+  methods: allowedMethods,
+  allowedHeaders: defaultAllowedHeaders,
   exposedHeaders: ["Content-Disposition", "Content-Type"],
   optionsSuccessStatus: 204
 };
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  if (matchesAllowedOrigin(origin)) {
+    if (origin) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+      res.setHeader("Vary", "Origin");
+    }
+
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Allow-Methods", allowedMethods.join(", "));
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      req.headers["access-control-request-headers"] || defaultAllowedHeaders.join(", ")
+    );
+    res.setHeader("Access-Control-Expose-Headers", "Content-Disposition, Content-Type");
+  }
+
+  if (req.method === "OPTIONS") {
+    res.status(204).end();
+    return;
+  }
+
+  next();
+});
 
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
