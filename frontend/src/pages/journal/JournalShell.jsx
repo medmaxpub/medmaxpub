@@ -123,27 +123,11 @@ export default function JournalShell() {
   const renderArticleCard = (article, keyPrefix = "article") => (
     <article key={`${keyPrefix}-${article.id}`} className="overflow-hidden rounded-3xl border border-cyan-500/60 bg-white shadow-sm">
       <div className="flex items-center justify-between gap-4 bg-[linear-gradient(135deg,#0ea5b7_0%,#0891b2_100%)] px-5 py-3 text-white">
+        <p className="text-sm font-semibold md:text-base">DOI: {article.doiNumber || "NA"}</p>
         <p className="text-lg font-semibold italic">{article.articleType || "Article"}</p>
-        {article.country ? <p className="text-lg font-semibold">{article.country}</p> : null}
       </div>
 
       <div className="space-y-5 p-5">
-        <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Take this journal reference</p>
-          <p className="mt-2 text-sm font-medium text-brand-slate">Publication article Should follow</p>
-        </div>
-
-        <div className="grid gap-4 text-sm text-brand-slate md:grid-cols-2">
-          <div>
-            <span className="font-semibold text-brand-ink">DOI:</span>{" "}
-            <span>{article.doiNumber || "NA"}</span>
-          </div>
-          <div>
-            <span className="font-semibold text-brand-ink">Article type:</span>{" "}
-            <span>{article.articleType || "Article"}</span>
-          </div>
-        </div>
-
         <div className="text-sm text-brand-slate">
           <span className="font-semibold text-brand-ink">Title:</span>{" "}
           <span className="text-base font-medium text-brand-ink">{article.title || "Untitled article"}</span>
@@ -461,7 +445,9 @@ export default function JournalShell() {
 
         <div className="mt-8 card-panel p-5 sm:p-8">
           <span className="eyebrow">{sectionTitles[section] || "Journal"}</span>
-          <h2 className="font-display text-2xl font-semibold text-brand-ink sm:text-3xl">{sectionTitles[section] || "Journal Section"}</h2>
+          {section !== "article-in-press" ? (
+            <h2 className="font-display text-2xl font-semibold text-brand-ink sm:text-3xl">{sectionTitles[section] || "Journal Section"}</h2>
+          ) : null}
           <div className="mt-6">{renderSection()}</div>
         </div>
       </div>
