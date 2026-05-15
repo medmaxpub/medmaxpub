@@ -7,7 +7,7 @@ export default function PdfPreviewModal({ pdf, onClose }) {
     return null;
   }
 
-  const inlinePdfUrl = buildPdfProxyUrl(pdf.fileUrl);
+  const inlinePdfUrl = pdf.fileUrl || buildPdfProxyUrl(pdf.fileUrl);
   const downloadPdfUrl = buildPdfProxyUrl(pdf.fileUrl, { download: true });
 
   return (
