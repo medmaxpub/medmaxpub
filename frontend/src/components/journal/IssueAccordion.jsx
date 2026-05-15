@@ -33,7 +33,7 @@ export default function IssueAccordion({ archive }) {
                           <p className="font-medium text-brand-ink">Issue {issue.issue}</p>
                           <div className="mt-3 space-y-3">
                             {issue.articles.map((article) => {
-                              const viewPdfUrl = buildPdfProxyUrl(article.pdfUrl);
+                              const viewPdfUrl = article.pdfUrl || buildPdfProxyUrl(article.pdfUrl);
                               const downloadPdfUrl = buildPdfProxyUrl(article.pdfUrl, { download: true });
 
                               return (

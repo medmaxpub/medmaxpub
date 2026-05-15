@@ -264,8 +264,8 @@ async function replaceArticleAssets(article, files, req) {
   const nextSupplementaryUploads = files?.supplementaryFiles || [];
 
   if (nextPdfUpload) {
-    await deleteAsset(article.pdfFile, "raw");
-    article.pdfFile = await uploadAsset(nextPdfUpload, "medmaxpub/articles", "raw", req);
+    await deleteAsset(article.pdfFile, "image");
+    article.pdfFile = await uploadAsset(nextPdfUpload, "medmaxpub/articles", "image", req);
   }
 
   if (nextSupplementaryUploads.length) {
@@ -293,7 +293,7 @@ export const createArticle = asyncHandler(async (req, res) => {
   await ensureJournalAccess(req.user, journalId);
 
   const issue = await resolveIssueForArticle(journalId, payload);
-  const pdfFile = await uploadAsset(req.files?.pdfFile?.[0], "medmaxpub/articles", "raw", req);
+  const pdfFile = await uploadAsset(req.files?.pdfFile?.[0], "medmaxpub/articles", "image", req);
   const supplementaryFiles = await uploadSupplementaryAssets(req.files?.supplementaryFiles, req);
 
   const article = await Article.create({

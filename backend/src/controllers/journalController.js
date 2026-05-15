@@ -543,7 +543,7 @@ export const uploadJournalPdf = asyncHandler(async (req, res) => {
   const createdItems = [];
 
   for (const file of uploadedFiles) {
-    const asset = await uploadAsset(file, "medmaxpub/journal-pdfs", "raw", req);
+    const asset = await uploadAsset(file, "medmaxpub/journal-pdfs", "image", req);
     const title = normalizeText(req.body.title) || file.originalname?.replace(/\.[^.]+$/, "") || "Journal PDF";
 
     const createdItem = await JournalPdf.create({

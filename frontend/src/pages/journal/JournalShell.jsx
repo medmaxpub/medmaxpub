@@ -142,7 +142,7 @@ export default function JournalShell() {
           </Link>
           {article.pdfUrl ? (
             <a
-              href={buildPdfProxyUrl(article.pdfUrl) || article.pdfUrl}
+              href={article.pdfUrl || buildPdfProxyUrl(article.pdfUrl)}
               className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-brand-border bg-brand-elevated text-brand-ink transition hover:border-brand-teal hover:bg-brand-sky"
               target="_blank"
               rel="noreferrer"
@@ -193,7 +193,7 @@ export default function JournalShell() {
               {(journal.pdfFiles || []).slice(0, 2).map((pdf) => (
                 <a
                   key={pdf.id}
-                  href={buildPdfProxyUrl(pdf.fileUrl) || pdf.fileUrl}
+                  href={pdf.fileUrl || buildPdfProxyUrl(pdf.fileUrl)}
                   target="_blank"
                   rel="noreferrer"
                   className="button-soft px-4 py-2"
@@ -269,7 +269,7 @@ export default function JournalShell() {
               <h4 className="text-xl font-semibold text-brand-ink">{article.title}</h4>
               <p className="mt-2 text-sm text-brand-slate">{article.authors.join(", ")}</p>
               <div className="mt-4 flex gap-3">
-                <a href={buildPdfProxyUrl(article.pdfUrl) || article.pdfUrl} className="button-soft px-4 py-2" target="_blank" rel="noreferrer">
+                <a href={article.pdfUrl || buildPdfProxyUrl(article.pdfUrl)} className="button-soft px-4 py-2" target="_blank" rel="noreferrer">
                   <ExternalLink size={16} className="mr-2" />
                   View PDF
                 </a>
@@ -409,7 +409,7 @@ export default function JournalShell() {
                   {journal.pdfFiles.map((item) => (
                     <a
                       key={item.id}
-                      href={buildPdfProxyUrl(item.fileUrl) || item.fileUrl}
+                      href={item.fileUrl || buildPdfProxyUrl(item.fileUrl)}
                       target="_blank"
                       rel="noreferrer"
                       className="button-secondary inline-flex px-4 py-2"
@@ -420,7 +420,7 @@ export default function JournalShell() {
                   ))}
                 </div>
               ) : journal.pdfFileUrl ? (
-                <a href={buildPdfProxyUrl(journal.pdfFileUrl) || journal.pdfFileUrl} target="_blank" rel="noreferrer" className="button-secondary mt-5 inline-flex px-4 py-2">
+                <a href={journal.pdfFileUrl || buildPdfProxyUrl(journal.pdfFileUrl)} target="_blank" rel="noreferrer" className="button-secondary mt-5 inline-flex px-4 py-2">
                   <FileText size={16} className="mr-2" />
                   View PDF
                 </a>

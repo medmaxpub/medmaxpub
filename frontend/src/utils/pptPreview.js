@@ -187,7 +187,7 @@ export function normalizePptItem(item = {}) {
     previewAsset
   );
   const proxiedPreviewPdfUrl = buildPdfProxyUrl(previewPdfUrl);
-  const pdfViewerUrl = buildPdfViewerUrl(proxiedPreviewPdfUrl, {
+  const pdfViewerUrl = buildPdfViewerUrl(previewPdfUrl || proxiedPreviewPdfUrl, {
     toolbar: 1,
     navpanes: 0,
     scrollbar: 1,
@@ -195,6 +195,8 @@ export function normalizePptItem(item = {}) {
     zoom: "page-width",
     view: "FitH"
   });
+  const officeViewerUrl = buildOfficeViewerUrl(pptUrl);
+  const googleViewerUrl = buildGoogleViewerUrl(pptUrl);
   const modalPreviewUrl = pdfViewerUrl;
   const previewIssue = !previewPdfUrl
     ? item.previewError || "Preview PDF is not ready yet for this presentation."
@@ -216,9 +218,9 @@ export function normalizePptItem(item = {}) {
     previewPdfUrl,
     previewPublicId: item.previewPublicId || previewAsset?.public_id || null,
     pdfViewerUrl,
-    browserPreviewUrl: pdfViewerUrl || proxiedPreviewPdfUrl || previewPdfUrl,
-    googleViewerUrl: null,
-    officeViewerUrl: null,
+    browserPreviewUrl: pdfViewerUrl || officeViewerUrl || googleViewerUrl || pptUrl,
+    googleViewerUrl,
+    officeViewerUrl,
     modalPreviewUrl,
     previewIssue,
     downloadUrl: proxiedPptUrl || pptUrl,

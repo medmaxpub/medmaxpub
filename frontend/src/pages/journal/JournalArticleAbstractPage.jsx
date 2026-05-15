@@ -116,7 +116,7 @@ export default function JournalArticleAbstractPage() {
     );
   }
 
-  const pdfUrl = article.pdfUrl ? buildPdfProxyUrl(article.pdfUrl) || article.pdfUrl : "";
+  const pdfUrl = article.pdfUrl || (article.pdfUrl ? buildPdfProxyUrl(article.pdfUrl) : "");
 
   return (
     <div className="section-shell">
