@@ -45,14 +45,20 @@ export default function AdminLoginPage() {
         <p className="mt-4 text-brand-slate">Use the same login for admin and journal user accounts. Access is routed automatically after sign in.</p>
 
         <div className="mt-8 space-y-4">
-          <input value={identifier} onChange={(event) => setIdentifier(event.target.value)} placeholder="User Name or Email" required />
-          <input
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Password"
-            type="password"
-            required
-          />
+          <div>
+            <label className="form-label" data-required="true">User Name or Email</label>
+            <input value={identifier} onChange={(event) => setIdentifier(event.target.value)} placeholder="User Name or Email" required />
+          </div>
+          <div>
+            <label className="form-label" data-required="true">Password</label>
+            <input
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Password"
+              type="password"
+              required
+            />
+          </div>
         </div>
 
         {error ? <p className="mt-4 text-sm text-rose-500">{error}</p> : null}

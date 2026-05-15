@@ -109,7 +109,7 @@ export default function ContactPage() {
           <form onSubmit={handleSubmit} className="mt-8 rounded-3xl border border-brand-border bg-brand-surface p-6 sm:p-8">
             <div className="grid gap-5 md:grid-cols-2">
               <div className="md:col-span-1">
-                <label className="mb-2 block text-sm font-medium text-brand-slate">Full Name</label>
+                <label className="form-label" data-required="true">Full Name</label>
                 <input
                   value={form.fullName}
                   onChange={(event) => setForm((current) => ({ ...current, fullName: event.target.value }))}
@@ -119,7 +119,7 @@ export default function ContactPage() {
               </div>
 
               <div className="md:col-span-1">
-                <label className="mb-2 block text-sm font-medium text-brand-slate">Email</label>
+                <label className="form-label" data-required="true">Email</label>
                 <input
                   type="email"
                   value={form.email}
@@ -130,7 +130,7 @@ export default function ContactPage() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium text-brand-slate">Subject</label>
+                <label className="form-label" data-required="true">Subject</label>
                 <input
                   value={form.subject}
                   onChange={(event) => setForm((current) => ({ ...current, subject: event.target.value }))}
@@ -140,7 +140,7 @@ export default function ContactPage() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium text-brand-slate">Message</label>
+                <label className="form-label" data-required="true">Message</label>
                 <textarea
                   rows="6"
                   value={form.message}

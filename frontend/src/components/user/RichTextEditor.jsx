@@ -40,10 +40,11 @@ export default function RichTextEditor({ label, value, onChange, required = fals
 
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium text-brand-slate">
-        {label}
-        {required ? " *" : ""}
-      </label>
+      {label ? (
+        <label className="form-label" data-required={required ? "true" : undefined}>
+          {label}
+        </label>
+      ) : null}
       <div className="rich-editor-shell">
         <div className="rich-editor-toolbar">
           {toolbarActions.map((action) => (

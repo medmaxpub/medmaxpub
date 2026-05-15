@@ -16,6 +16,7 @@ export default function SuperUserJournalsPage() {
   const [journalForm, setJournalForm] = useState(initialJournalForm);
   const [journalEditorOpen, setJournalEditorOpen] = useState(false);
   const [journalStatus, setJournalStatus] = useState("");
+  const [isSavingJournal, setIsSavingJournal] = useState(false);
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
   const loadJournals = useCallback(async () => {
@@ -95,6 +96,7 @@ export default function SuperUserJournalsPage() {
   const submitJournal = async (event) => {
     event.preventDefault();
     setJournalStatus("");
+    setIsSavingJournal(true);
 
     try {
       const payload = new FormData();
@@ -127,6 +129,8 @@ export default function SuperUserJournalsPage() {
       await loadJournals();
     } catch (error) {
       setJournalStatus(error.response?.data?.message || "Journal save failed.");
+    } finally {
+      setIsSavingJournal(false);
     }
   };
 
@@ -237,6 +241,7 @@ export default function SuperUserJournalsPage() {
         form={journalForm}
         setForm={setJournalForm}
         status={journalStatus}
+        isSubmitting={isSavingJournal}
         onSubmit={submitJournal}
         onClose={() => {
           setJournalEditorOpen(false);

@@ -114,7 +114,7 @@ export default function UserEditorialBoardFormPage() {
 
           <form onSubmit={submitMember} className="space-y-6">
             <div className="grid gap-5 lg:grid-cols-[220px_1fr] lg:items-start">
-              <label className="pt-3 text-sm font-semibold text-brand-ink">Editor Type:</label>
+              <label className="form-side-label" data-required="true">Editor Type</label>
               <input
                 value={form.editorType}
                 onChange={(event) => setForm((current) => ({ ...current, editorType: event.target.value }))}
@@ -124,7 +124,7 @@ export default function UserEditorialBoardFormPage() {
             </div>
 
             <div className="grid gap-5 lg:grid-cols-[220px_1fr] lg:items-start">
-              <label className="pt-3 text-sm font-semibold text-brand-ink">Editor Name:</label>
+              <label className="form-side-label" data-required="true">Editor Name</label>
               <input
                 value={form.name}
                 onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
@@ -135,7 +135,7 @@ export default function UserEditorialBoardFormPage() {
 
             <div className="grid gap-5 lg:grid-cols-[220px_1fr] lg:items-start">
               <div className="pt-3">
-                <label className="text-sm font-semibold text-brand-ink">Editor Photo:</label>
+                <label className="text-sm font-semibold text-brand-ink">Editor Photo</label>
               </div>
               <div>
                 <input
@@ -148,7 +148,7 @@ export default function UserEditorialBoardFormPage() {
             </div>
 
             <div className="grid gap-5 lg:grid-cols-[220px_1fr] lg:items-start">
-              <div className="pt-3 text-sm font-semibold text-brand-ink">Editor Description *</div>
+              <div className="form-side-label" data-required="true">Editor Description</div>
               <RichTextEditor
                 label=""
                 value={form.editorDescription}
@@ -159,7 +159,7 @@ export default function UserEditorialBoardFormPage() {
             </div>
 
             <div className="grid gap-5 lg:grid-cols-[220px_1fr] lg:items-start">
-              <div className="pt-3 text-sm font-semibold text-brand-ink">Editor Biography *</div>
+              <div className="form-side-label" data-required="true">Editor Biography</div>
               <RichTextEditor
                 label=""
                 value={form.editorBiography}
@@ -170,7 +170,7 @@ export default function UserEditorialBoardFormPage() {
             </div>
 
             <div className="grid gap-5 lg:grid-cols-[220px_1fr] lg:items-start">
-              <label className="pt-3 text-sm font-semibold text-brand-ink">EB Profile URL</label>
+              <label className="form-side-label">EB Profile URL</label>
               <input
                 type="url"
                 value={form.profileUrl}

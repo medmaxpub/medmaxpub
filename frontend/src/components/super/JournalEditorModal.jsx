@@ -7,6 +7,7 @@ export default function JournalEditorModal({
   form,
   setForm,
   status,
+  isSubmitting = false,
   onSubmit,
   onClose,
   isCreateForExistingUser = false,
@@ -46,31 +47,43 @@ export default function JournalEditorModal({
 
         {!isCreateForExistingUser && !ownerNotice ? (
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <input
-              value={form.firstName}
-              onChange={(event) => setForm((current) => ({ ...current, firstName: event.target.value }))}
-              placeholder="First Name"
-              required
-            />
-            <input
-              value={form.lastName}
-              onChange={(event) => setForm((current) => ({ ...current, lastName: event.target.value }))}
-              placeholder="Last Name"
-              required
-            />
-            <input
-              value={form.username}
-              onChange={(event) => setForm((current) => ({ ...current, username: event.target.value }))}
-              placeholder="User Name"
-              required
-            />
-            <input
-              value={form.password}
-              onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
-              placeholder="Password"
-              type="password"
-              required
-            />
+            <div>
+              <label className="form-label" data-required="true">First Name</label>
+              <input
+                value={form.firstName}
+                onChange={(event) => setForm((current) => ({ ...current, firstName: event.target.value }))}
+                placeholder="First Name"
+                required
+              />
+            </div>
+            <div>
+              <label className="form-label" data-required="true">Last Name</label>
+              <input
+                value={form.lastName}
+                onChange={(event) => setForm((current) => ({ ...current, lastName: event.target.value }))}
+                placeholder="Last Name"
+                required
+              />
+            </div>
+            <div>
+              <label className="form-label" data-required="true">User Name</label>
+              <input
+                value={form.username}
+                onChange={(event) => setForm((current) => ({ ...current, username: event.target.value }))}
+                placeholder="User Name"
+                required
+              />
+            </div>
+            <div>
+              <label className="form-label" data-required="true">Password</label>
+              <input
+                value={form.password}
+                onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
+                placeholder="Password"
+                type="password"
+                required
+              />
+            </div>
           </div>
         ) : (
           <div className="mt-6 rounded-3xl border border-brand-border bg-brand-elevated p-4 text-sm text-brand-slate">
@@ -83,43 +96,58 @@ export default function JournalEditorModal({
         )}
 
         <div className="mt-6 grid gap-4">
-          <input
-            value={form.managingJournalName}
-            onChange={(event) => setForm((current) => ({ ...current, managingJournalName: event.target.value }))}
-            placeholder="Managing Journal Name"
-            required
-          />
-          <input
-            value={form.journalDomainName}
-            onChange={(event) => setForm((current) => ({ ...current, journalDomainName: event.target.value }))}
-            placeholder="Journal Domain Name"
-            required
-          />
-          <input
-            value={form.journalUrl}
-            onChange={(event) => setForm((current) => ({ ...current, journalUrl: event.target.value }))}
-            placeholder="Journal URL"
-            required
-          />
-          <textarea
-            value={form.aboutJournal}
-            onChange={(event) => setForm((current) => ({ ...current, aboutJournal: event.target.value }))}
-            placeholder="About Journal"
-            rows="4"
-            required
-          />
-          <textarea
-            value={form.journalInstructions}
-            onChange={(event) => setForm((current) => ({ ...current, journalInstructions: event.target.value }))}
-            placeholder="Journal Instructions"
-            rows="4"
-            required
-          />
+          <div>
+            <label className="form-label" data-required="true">Managing Journal Name</label>
+            <input
+              value={form.managingJournalName}
+              onChange={(event) => setForm((current) => ({ ...current, managingJournalName: event.target.value }))}
+              placeholder="Managing Journal Name"
+              required
+            />
+          </div>
+          <div>
+            <label className="form-label" data-required="true">Journal Domain Name</label>
+            <input
+              value={form.journalDomainName}
+              onChange={(event) => setForm((current) => ({ ...current, journalDomainName: event.target.value }))}
+              placeholder="Journal Domain Name"
+              required
+            />
+          </div>
+          <div>
+            <label className="form-label" data-required="true">Journal URL</label>
+            <input
+              value={form.journalUrl}
+              onChange={(event) => setForm((current) => ({ ...current, journalUrl: event.target.value }))}
+              placeholder="Journal URL"
+              required
+            />
+          </div>
+          <div>
+            <label className="form-label" data-required="true">About Journal</label>
+            <textarea
+              value={form.aboutJournal}
+              onChange={(event) => setForm((current) => ({ ...current, aboutJournal: event.target.value }))}
+              placeholder="About Journal"
+              rows="4"
+              required
+            />
+          </div>
+          <div>
+            <label className="form-label" data-required="true">Journal Instructions</label>
+            <textarea
+              value={form.journalInstructions}
+              onChange={(event) => setForm((current) => ({ ...current, journalInstructions: event.target.value }))}
+              placeholder="Journal Instructions"
+              rows="4"
+              required
+            />
+          </div>
           <div className="rounded-3xl border border-brand-border bg-brand-surface p-5">
             <p className="text-sm font-semibold text-brand-ink">Optional Uploads</p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-medium text-brand-slate">Journal Cover Image</label>
+                <label className="form-label">Journal Cover Image</label>
                 <input
                   type="file"
                   accept="image/*"
@@ -132,37 +160,12 @@ export default function JournalEditorModal({
                   </div>
                 ) : null}
               </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-brand-slate">PPT</label>
-                <input
-                  type="file"
-                  accept=".ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"
-                  onChange={(event) => setForm((current) => ({ ...current, pptFile: event.target.files?.[0] || null }))}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-brand-slate">PPT Preview PDF</label>
-                <input
-                  type="file"
-                  accept=".pdf,application/pdf"
-                  onChange={(event) => setForm((current) => ({ ...current, pptPreviewFile: event.target.files?.[0] || null }))}
-                />
-                <p className="mt-2 text-xs text-brand-slate">Recommended for production so PPT preview and presentation mode stay smooth.</p>
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-brand-slate">PDF</label>
+              <div className="sm:col-span-2">
+                <label className="form-label">PDF</label>
                 <input
                   type="file"
                   accept=".pdf,application/pdf"
                   onChange={(event) => setForm((current) => ({ ...current, pdfFile: event.target.files?.[0] || null }))}
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-medium text-brand-slate">Video</label>
-                <input
-                  type="file"
-                  accept="video/*"
-                  onChange={(event) => setForm((current) => ({ ...current, videoFile: event.target.files?.[0] || null }))}
                 />
               </div>
             </div>
@@ -172,10 +175,10 @@ export default function JournalEditorModal({
         {status ? <p className="mt-4 text-sm text-brand-slate">{status}</p> : null}
 
         <div className="mt-6 flex flex-wrap gap-3">
-          <button type="submit" className="button-primary">
-            Save Journal
+          <button type="submit" className="button-primary" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Save Journal"}
           </button>
-          <button type="button" className="button-secondary" onClick={onClose}>
+          <button type="button" className="button-secondary" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </button>
         </div>

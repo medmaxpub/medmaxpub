@@ -2,17 +2,6 @@ import { useMemo, useState } from "react";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockJournals } from "../../data/mockData";
 
-const articleTypes = [
-  "Original Research",
-  "Review Article",
-  "Case Report",
-  "Short Communication",
-  "Mini Review",
-  "Editorial",
-  "Commentary",
-  "Letter to the Editor"
-];
-
 const countries = [
   "United States",
   "India",
@@ -66,7 +55,7 @@ export default function SubmitManuscriptPage() {
             <form onSubmit={handleSubmit} className="rounded-3xl border border-brand-border bg-brand-surface p-6 sm:p-8">
               <div className="grid gap-5">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-brand-slate">Name</label>
+                  <label className="form-label" data-required="true">Name</label>
                   <input
                     value={form.name}
                     onChange={(event) => setForm({ ...form, name: event.target.value })}
@@ -76,7 +65,7 @@ export default function SubmitManuscriptPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-brand-slate">Email address</label>
+                  <label className="form-label" data-required="true">Email address</label>
                   <input
                     type="email"
                     value={form.email}
@@ -87,7 +76,7 @@ export default function SubmitManuscriptPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-brand-slate">Postal Address</label>
+                  <label className="form-label" data-required="true">Postal Address</label>
                   <textarea
                     rows="4"
                     value={form.postalAddress}
@@ -98,7 +87,7 @@ export default function SubmitManuscriptPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-brand-slate">Country</label>
+                  <label className="form-label" data-required="true">Country</label>
                   <select value={form.country} onChange={(event) => setForm({ ...form, country: event.target.value })} required>
                     <option value="">Select Your Country</option>
                     {countries.map((country) => (
@@ -110,7 +99,7 @@ export default function SubmitManuscriptPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-brand-slate">Journal</label>
+                  <label className="form-label" data-required="true">Journal</label>
                   <select value={form.journal} onChange={(event) => setForm({ ...form, journal: event.target.value })} required>
                     <option value="">Select Journal</option>
                     {journalOptions.map((journal) => (
@@ -122,23 +111,17 @@ export default function SubmitManuscriptPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-brand-slate">Article Type</label>
-                  <select
+                  <label className="form-label" data-required="true">Article Type</label>
+                  <input
                     value={form.articleType}
                     onChange={(event) => setForm({ ...form, articleType: event.target.value })}
+                    placeholder="Enter your article type"
                     required
-                  >
-                    <option value="">Select Your Article Type</option>
-                    {articleTypes.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-brand-slate">Manuscript Title</label>
+                  <label className="form-label" data-required="true">Manuscript Title</label>
                   <textarea
                     rows="3"
                     value={form.manuscriptTitle}
@@ -149,7 +132,7 @@ export default function SubmitManuscriptPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-brand-slate">Abstract</label>
+                  <label className="form-label" data-required="true">Abstract</label>
                   <textarea
                     rows="5"
                     value={form.abstract}
@@ -160,7 +143,7 @@ export default function SubmitManuscriptPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-brand-slate">Attach your file</label>
+                  <label className="form-label" data-required="true">Attach your file</label>
                   <input
                     type="file"
                     multiple

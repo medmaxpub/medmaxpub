@@ -38,3 +38,8 @@ export function buildJournalSectionPath(journalUrl, section = "home") {
   const slug = getJournalRouteSlug(journalUrl);
   return slug ? `/journals/${slug}/${section}` : "/journals";
 }
+
+export function buildJournalArticleAbstractPath(journalUrl, articleId) {
+  const slug = getJournalRouteSlug(journalUrl);
+  return slug && articleId ? `/journals/${slug}/article-in-press/${articleId}/abstract` : "/journals";
+}

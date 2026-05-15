@@ -6,7 +6,6 @@ import RichTextEditor from "../../components/user/RichTextEditor";
 import {
   accessTypeOptions,
   ARTICLE_STATUSES,
-  articleTypeOptions,
   buildArticleFormData,
   indexingLinkFields,
   initialArticleForm,
@@ -16,10 +15,10 @@ import {
 } from "../../components/user/userPortalShared";
 import useManagedJournal from "../../hooks/useManagedJournal";
 
-function LabelRow({ label, children }) {
+function LabelRow({ label, required = false, children }) {
   return (
     <div className="grid gap-5 lg:grid-cols-[230px_1fr] lg:items-start">
-      <div className="pt-3 text-sm font-semibold text-brand-ink">{label}</div>
+      <div className="form-side-label" data-required={required ? "true" : undefined}>{label}</div>
       <div>{children}</div>
     </div>
   );
@@ -173,7 +172,7 @@ export default function UserArticleFormPage({
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <LabelRow label="Managing Journal *">
+          <LabelRow label="Managing Journal" required>
             <select
               value={selectedJournalId}
               onChange={(event) => setSelectedJournalId(event.target.value)}
@@ -189,7 +188,7 @@ export default function UserArticleFormPage({
             </select>
           </LabelRow>
 
-          <LabelRow label="Article Access Type *">
+          <LabelRow label="Article Access Type" required>
             <select value={form.accessType} onChange={(event) => setForm((current) => ({ ...current, accessType: event.target.value }))} required>
               <option value="">Select Access type</option>
               {accessTypeOptions.map((item) => (
@@ -201,7 +200,7 @@ export default function UserArticleFormPage({
           </LabelRow>
 
           <div className="grid gap-5 lg:grid-cols-[230px_1fr] lg:items-start">
-            <div className="pt-3 text-sm font-semibold text-brand-ink">Volume and Issue no: *</div>
+            <div className="form-side-label" data-required="true">Volume and Issue no</div>
             <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
               <div className="grid gap-4 sm:grid-cols-2">
                 <input
@@ -250,7 +249,7 @@ export default function UserArticleFormPage({
             </div>
           </div>
 
-          <LabelRow label="Special Issue Title:">
+          <LabelRow label="Special Issue Title">
             <input
               placeholder="Special Issue Title"
               value={form.specialIssueTitle}
@@ -258,25 +257,19 @@ export default function UserArticleFormPage({
             />
           </LabelRow>
 
-          <LabelRow label="Article Type:">
+          <LabelRow label="Article Type">
             <input
               placeholder="Enter Article Type"
               value={form.articleType}
               onChange={(event) => setForm((current) => ({ ...current, articleType: event.target.value }))}
-              list="article-type-options"
             />
-            <datalist id="article-type-options">
-              {articleTypeOptions.map((item) => (
-                <option key={item} value={item} />
-              ))}
-            </datalist>
           </LabelRow>
 
-          <LabelRow label="Upload PDF:">
+          <LabelRow label="Upload PDF">
             <input type="file" accept=".pdf" onChange={(event) => setForm((current) => ({ ...current, pdfFile: event.target.files?.[0] || null }))} />
           </LabelRow>
 
-          <LabelRow label="Article Title *">
+          <LabelRow label="Article Title" required>
             <RichTextEditor
               label=""
               value={form.title}
@@ -286,7 +279,7 @@ export default function UserArticleFormPage({
             />
           </LabelRow>
 
-          <LabelRow label="Author Names *">
+          <LabelRow label="Author Names" required>
             <RichTextEditor
               label=""
               value={form.authorNames}
@@ -297,25 +290,31 @@ export default function UserArticleFormPage({
           </LabelRow>
 
           <div className="grid gap-5 lg:grid-cols-[230px_1fr] lg:items-start">
-            <div className="pt-3 text-sm font-semibold text-brand-ink">Corresponding Author&apos;s Email *</div>
+            <div className="form-side-label" data-required="true">Corresponding Author&apos;s Email</div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <input
-                type="email"
-                placeholder="Enter corresponding author's email"
-                value={form.correspondingAuthorEmail}
-                onChange={(event) => setForm((current) => ({ ...current, correspondingAuthorEmail: event.target.value }))}
-                required
-              />
-              <input
-                placeholder="Enter Keywords"
-                value={form.keywords}
-                onChange={(event) => setForm((current) => ({ ...current, keywords: event.target.value }))}
-                required
-              />
+              <div>
+                <label className="form-label" data-required="true">Corresponding Author&apos;s Email</label>
+                <input
+                  type="email"
+                  placeholder="Enter corresponding author's email"
+                  value={form.correspondingAuthorEmail}
+                  onChange={(event) => setForm((current) => ({ ...current, correspondingAuthorEmail: event.target.value }))}
+                  required
+                />
+              </div>
+              <div>
+                <label className="form-label" data-required="true">Keywords</label>
+                <input
+                  placeholder="Enter Keywords"
+                  value={form.keywords}
+                  onChange={(event) => setForm((current) => ({ ...current, keywords: event.target.value }))}
+                  required
+                />
+              </div>
             </div>
           </div>
 
-          <LabelRow label="Cite this article As *">
+          <LabelRow label="Cite this article As" required>
             <RichTextEditor
               label=""
               value={form.citeAs}
@@ -326,18 +325,21 @@ export default function UserArticleFormPage({
           </LabelRow>
 
           <div className="grid gap-5 lg:grid-cols-[230px_1fr] lg:items-start">
-            <div className="pt-3 text-sm font-semibold text-brand-ink">Enter First Page Number: *</div>
+            <div className="form-side-label" data-required="true">Enter First Page Number</div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <input
-                type="number"
-                min="1"
-                placeholder="Enter First Page Number.."
-                value={form.firstPageNumber}
-                onChange={(event) => setForm((current) => ({ ...current, firstPageNumber: event.target.value }))}
-                required
-              />
-              <div className="grid gap-2 sm:grid-cols-[220px_1fr] sm:items-center">
-                <label className="text-sm font-semibold text-brand-ink">Enter Last Page Number: *</label>
+              <div>
+                <label className="form-label" data-required="true">Enter First Page Number</label>
+                <input
+                  type="number"
+                  min="1"
+                  placeholder="Enter First Page Number.."
+                  value={form.firstPageNumber}
+                  onChange={(event) => setForm((current) => ({ ...current, firstPageNumber: event.target.value }))}
+                  required
+                />
+              </div>
+              <div>
+                <label className="form-label" data-required="true">Enter Last Page Number</label>
                 <input
                   type="number"
                   min="1"
@@ -350,7 +352,7 @@ export default function UserArticleFormPage({
             </div>
           </div>
 
-          <LabelRow label="Enter Doi Number:">
+          <LabelRow label="Enter Doi Number">
             <input
               placeholder="Enter Doi Number.."
               value={form.doiNumber}
@@ -358,7 +360,7 @@ export default function UserArticleFormPage({
             />
           </LabelRow>
 
-          <LabelRow label="Enter Abstract">
+          <LabelRow label="Enter Abstract" required>
             <RichTextEditor
               label=""
               value={form.abstractText}
@@ -369,11 +371,14 @@ export default function UserArticleFormPage({
           </LabelRow>
 
           <div className="grid gap-5 lg:grid-cols-[230px_1fr] lg:items-start">
-            <div className="pt-3 text-sm font-semibold text-brand-ink">Country:</div>
+            <div className="form-side-label" data-required="true">Country</div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <input value={form.country} onChange={(event) => setForm((current) => ({ ...current, country: event.target.value }))} required />
-              <div className="grid gap-2 sm:grid-cols-[230px_1fr] sm:items-center">
-                <label className="text-sm font-semibold text-brand-ink">Select Article Published Date:</label>
+              <div>
+                <label className="form-label" data-required="true">Country</label>
+                <input value={form.country} onChange={(event) => setForm((current) => ({ ...current, country: event.target.value }))} required />
+              </div>
+              <div>
+                <label className="form-label" data-required="true">Select Article Published Date</label>
                 <input
                   type="date"
                   value={form.publishedDate}
@@ -384,8 +389,11 @@ export default function UserArticleFormPage({
             </div>
           </div>
 
+          <div className="rounded-3xl border border-brand-border bg-brand-elevated p-5 sm:p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-teal">Optional Indexing Links</p>
+            <div className="mt-5 grid gap-5">
           {indexingLinkFields.map((item) => (
-            <LabelRow key={item.key} label={`${item.label}:`}>
+              <LabelRow key={item.key} label={item.label}>
               <input
                 type="url"
                 placeholder={`Enter Article's ${item.label}`}
@@ -400,10 +408,12 @@ export default function UserArticleFormPage({
                   }))
                 }
               />
-            </LabelRow>
+              </LabelRow>
           ))}
+            </div>
+          </div>
 
-          <LabelRow label="Enter Supplimentory file:">
+          <LabelRow label="Enter Supplimentory file">
             <div className="grid gap-4 md:grid-cols-2">
               <input
                 type="file"

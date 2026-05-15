@@ -25,6 +25,24 @@ button {
   @apply transition duration-200;
 }
 
+.form-label {
+  @apply mb-2 block text-sm font-medium text-brand-slate;
+}
+
+.form-side-label {
+  @apply pt-3 text-sm font-semibold text-brand-ink;
+}
+
+.required-asterisk {
+  @apply ml-1 text-rose-600;
+}
+
+.form-label[data-required="true"]::after,
+.form-side-label[data-required="true"]::after {
+  content: " *";
+  @apply text-rose-600;
+}
+
 .container-shell {
   @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
 }

@@ -1,4 +1,4 @@
-import { Download, ExternalLink, FileText, PlayCircle } from "lucide-react";
+import { Download, ExternalLink, FileText, PlayCircle, ScrollText } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
@@ -11,7 +11,7 @@ import useAutoRefresh from "../../hooks/useAutoRefresh";
 import { normalizePptItem, warmPreviewUrl } from "../../utils/pptPreview";
 import { buildPdfProxyUrl } from "../../utils/pdfProxy";
 import { normalizeVideoItem } from "../../utils/videoPlayer";
-import { buildJournalSectionPath, getJournalRouteSlug } from "../../utils/journalLinks";
+import { buildJournalArticleAbstractPath, buildJournalSectionPath, getJournalRouteSlug } from "../../utils/journalLinks";
 
 const sectionTitles = {
   home: "Home",
@@ -26,6 +26,32 @@ const sectionTitles = {
 
 function hasHtmlContent(value) {
   return /<\/?[a-z][\s\S]*>/i.test(String(value || ""));
+}
+
+function formatPublishedDate(value) {
+  if (!value) {
+    return "NA";
+  }
+
+  const parsed = new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return String(value).slice(0, 10) || "NA";
+  }
+
+  return parsed.toISOString().slice(0, 10);
+}
+
+function resolveAuthorText(article) {
+  if (article.authorNames) {
+    return article.authorNames;
+  }
+
+  if (Array.isArray(article.authors) && article.authors.length) {
+    return article.authors.join(", ");
+  }
+
+  return "NA";
 }
 
 function renderCopyBlock(value, emptyState) {
@@ -95,41 +121,68 @@ export default function JournalShell() {
   const authorGuidelinesContent = journal.authorGuidelines || journal.journalInstructions;
 
   const renderArticleCard = (article, keyPrefix = "article") => (
-    <article key={`${keyPrefix}-${article.id}`} className="rounded-3xl border border-brand-border bg-brand-surface p-5">
-      <div className="flex flex-wrap items-center gap-3 text-sm">
-        {article.releaseYear ? (
-          <span className="eyebrow mb-0">
-            {article.releaseMonth ? `${article.releaseMonth} ` : ""}
-            {article.releaseYear}
-          </span>
-        ) : null}
-        {article.volume || article.issueNumber ? (
-          <p className="text-brand-slate">
-            Volume {article.volume || "NA"}, Issue {article.issueNumber || "NA"}
-          </p>
-        ) : null}
+    <article key={`${keyPrefix}-${article.id}`} className="overflow-hidden rounded-3xl border border-cyan-500/60 bg-white shadow-sm">
+      <div className="flex items-center justify-between gap-4 bg-[linear-gradient(135deg,#0ea5b7_0%,#0891b2_100%)] px-5 py-3 text-white">
+        <p className="text-lg font-semibold italic">{article.articleType || "Article"}</p>
+        {article.country ? <p className="text-lg font-semibold">{article.country}</p> : null}
       </div>
-      <h4 className="mt-3 text-xl font-semibold text-brand-ink">{article.title}</h4>
-      <p className="mt-2 text-sm text-brand-slate">{(article.authors || []).join(", ") || "Author details unavailable"}</p>
-      {article.abstractText ? <p className="mt-4 leading-7 text-brand-slate">{article.abstractText}</p> : null}
-      {article.doiNumber ? <p className="mt-3 text-sm text-brand-slate">DOI: {article.doiNumber}</p> : null}
-      {article.pdfUrl ? (() => {
-        const viewPdfUrl = buildPdfProxyUrl(article.pdfUrl);
-        const downloadPdfUrl = buildPdfProxyUrl(article.pdfUrl, { download: true });
 
-        return (
-        <div className="mt-4 flex flex-wrap gap-3">
-          <a href={viewPdfUrl || article.pdfUrl} className="button-soft px-4 py-2" target="_blank" rel="noreferrer">
-            <ExternalLink size={16} className="mr-2" />
-            View PDF
-          </a>
-          <a href={downloadPdfUrl || article.pdfUrl} className="button-primary px-4 py-2" target="_blank" rel="noreferrer">
-            <Download size={16} className="mr-2" />
-            Download PDF
-          </a>
+      <div className="space-y-5 p-5">
+        <div>
+          <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Take this journal reference</p>
+          <p className="mt-2 text-sm font-medium text-brand-slate">Publication article Should follow</p>
         </div>
-        );
-      })() : null}
+
+        <div className="grid gap-4 text-sm text-brand-slate md:grid-cols-2">
+          <div>
+            <span className="font-semibold text-brand-ink">DOI:</span>{" "}
+            <span>{article.doiNumber || "NA"}</span>
+          </div>
+          <div>
+            <span className="font-semibold text-brand-ink">Article type:</span>{" "}
+            <span>{article.articleType || "Article"}</span>
+          </div>
+        </div>
+
+        <div className="text-sm text-brand-slate">
+          <span className="font-semibold text-brand-ink">Title:</span>{" "}
+          <span className="text-base font-medium text-brand-ink">{article.title || "Untitled article"}</span>
+        </div>
+
+        <div className="text-sm text-brand-slate">
+          <span className="font-semibold text-brand-ink">Author:</span>{" "}
+          <span>{resolveAuthorText(article)}</span>
+        </div>
+
+        <div className="text-sm text-brand-slate">
+          <span className="font-semibold text-brand-ink">Publication Date:</span>{" "}
+          <span>{formatPublishedDate(article.publishedDate)}</span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            to={buildJournalArticleAbstractPath(journalRoute, article.id)}
+            state={{ article }}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-brand-border bg-brand-elevated text-brand-ink transition hover:border-brand-teal hover:bg-brand-sky"
+            aria-label={`Open abstract for ${article.title || "article"}`}
+            title="Open abstract"
+          >
+            <ScrollText size={18} />
+          </Link>
+          {article.pdfUrl ? (
+            <a
+              href={buildPdfProxyUrl(article.pdfUrl) || article.pdfUrl}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-brand-border bg-brand-elevated text-brand-ink transition hover:border-brand-teal hover:bg-brand-sky"
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`Open PDF for ${article.title || "article"}`}
+              title="Open PDF in new tab"
+            >
+              <FileText size={18} />
+            </a>
+          ) : null}
+        </div>
+      </div>
     </article>
   );
 
@@ -364,37 +417,23 @@ export default function JournalShell() {
             <JournalMenu journalUrl={journal.publicJournalUrl || journal.journalUrl} />
           </div>
           <div className="grid gap-6 px-5 py-5 sm:px-8 sm:py-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-8">
-            <div className="rounded-3xl border border-brand-border bg-brand-elevated p-6">
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-                {journal.coverImage ? (
-                  <img
-                    src={journal.coverImage}
-                    alt={`${journal.managingJournalName} cover`}
-                    className="h-52 w-40 rounded-3xl border border-brand-border object-cover shadow-panel"
-                  />
-                ) : (
-                  <div className="flex h-52 w-40 items-center justify-center rounded-3xl border border-brand-border bg-brand-surface p-4 text-center text-sm font-semibold text-brand-slate shadow-panel">
-                    Journal Cover
-                  </div>
-                )}
-                <div className="flex-1">
-                  <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">Managing Journal Name</p>
-                  <h1 className="mt-3 font-display text-3xl font-semibold text-brand-ink sm:text-4xl">{journal.managingJournalName}</h1>
-                  <p className="mt-4 text-sm text-brand-slate">Managed by {journal.firstName} {journal.lastName}</p>
+            <div className="flex min-h-[368px] items-center justify-center">
+              {journal.coverImage ? (
+                <img
+                  src={journal.coverImage}
+                  alt={`${journal.managingJournalName} cover`}
+                  className="h-full min-h-[368px] w-full rounded-3xl object-contain"
+                />
+              ) : (
+                <div className="flex h-full min-h-[368px] w-full items-center justify-center rounded-3xl bg-brand-surface p-4 text-center text-sm font-semibold text-brand-slate">
+                  Journal Cover
                 </div>
-              </div>
+              )}
             </div>
             <div className="rounded-3xl border border-brand-border bg-brand-surface p-6">
-              <div className="grid gap-5 sm:grid-cols-2">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-brand-gold">Journal Domain Name</p>
-                  <p className="mt-2 text-lg font-semibold text-brand-ink">{journal.journalDomainName}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-brand-gold">Journal URL</p>
-                  <p className="mt-2 text-lg font-semibold text-brand-ink">{journal.journalUrl}</p>
-                </div>
-              </div>
+              <p className="text-xs uppercase tracking-[0.18em] text-brand-gold">Managing Journal Name</p>
+              <h1 className="mt-3 font-display text-3xl font-semibold text-brand-ink sm:text-4xl">{journal.managingJournalName}</h1>
+              <p className="mt-4 text-sm text-brand-slate">Managed by {journal.firstName} {journal.lastName}</p>
               {journal.pdfFiles?.length ? (
                 <div className="mt-5 flex flex-wrap gap-3">
                   {journal.pdfFiles.map((item) => (

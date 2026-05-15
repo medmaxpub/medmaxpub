@@ -72,7 +72,7 @@ export default function JournalPdfUploadModal({ open, journalId, journalName, on
           </div>
 
           <div className="mt-6 rounded-3xl border border-brand-border bg-brand-elevated p-5">
-            <label className="mb-3 block text-sm font-semibold text-brand-ink">Choose PDF files</label>
+            <label className="form-label" data-required="true">Choose PDF files</label>
             <input
               type="file"
               accept=".pdf,application/pdf"

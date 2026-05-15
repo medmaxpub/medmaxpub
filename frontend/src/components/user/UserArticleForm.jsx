@@ -1,5 +1,5 @@
 import RichTextEditor from "./RichTextEditor";
-import { accessTypeOptions, articleTypeOptions, indexingLinkFields, monthOptions, stripHtml } from "./userPortalShared";
+import { accessTypeOptions, indexingLinkFields, monthOptions, stripHtml } from "./userPortalShared";
 
 export default function UserArticleForm({
   form,
@@ -28,7 +28,7 @@ export default function UserArticleForm({
       <form onSubmit={onSubmit} className="mt-8 space-y-8">
         <div className="grid gap-5 xl:grid-cols-2">
           <div>
-            <label className="mb-2 block text-sm font-medium text-brand-slate">Article Access Type *</label>
+            <label className="form-label" data-required="true">Article Access Type</label>
             <select value={form.accessType} onChange={(event) => setForm((current) => ({ ...current, accessType: event.target.value }))} required>
               <option value="">Select access type</option>
               {accessTypeOptions.map((item) => (
@@ -41,7 +41,7 @@ export default function UserArticleForm({
 
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-medium text-brand-slate">Volume no *</label>
+              <label className="form-label" data-required="true">Volume no</label>
               <input
                 type="number"
                 min="1"
@@ -51,7 +51,7 @@ export default function UserArticleForm({
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-brand-slate">Issue no *</label>
+              <label className="form-label" data-required="true">Issue no</label>
               <input
                 type="number"
                 min="1"
@@ -64,7 +64,7 @@ export default function UserArticleForm({
 
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-medium text-brand-slate">Issue Releasing Month *</label>
+              <label className="form-label" data-required="true">Issue Releasing Month</label>
               <select
                 value={form.releaseMonth}
                 onChange={(event) => setForm((current) => ({ ...current, releaseMonth: event.target.value }))}
@@ -79,7 +79,7 @@ export default function UserArticleForm({
               </select>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-brand-slate">Issue Releasing Year *</label>
+              <label className="form-label" data-required="true">Issue Releasing Year</label>
               <select
                 value={form.releaseYear}
                 onChange={(event) => setForm((current) => ({ ...current, releaseYear: event.target.value }))}
@@ -96,7 +96,7 @@ export default function UserArticleForm({
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-brand-slate">Special Issue Title</label>
+            <label className="form-label">Special Issue Title</label>
             <input
               value={form.specialIssueTitle}
               onChange={(event) => setForm((current) => ({ ...current, specialIssueTitle: event.target.value }))}
@@ -105,29 +105,26 @@ export default function UserArticleForm({
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-brand-slate">Article Type</label>
-            <select value={form.articleType} onChange={(event) => setForm((current) => ({ ...current, articleType: event.target.value }))}>
-              <option value="">Select article type</option>
-              {articleTypeOptions.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
+            <label className="form-label">Article Type</label>
+            <input
+              value={form.articleType}
+              onChange={(event) => setForm((current) => ({ ...current, articleType: event.target.value }))}
+              placeholder="Enter article type"
+            />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-brand-slate">Upload PDF</label>
+            <label className="form-label">Upload PDF</label>
             <input type="file" accept=".pdf" onChange={(event) => setForm((current) => ({ ...current, pdfFile: event.target.files?.[0] || null }))} />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-brand-slate">Enter DOI Number</label>
+            <label className="form-label">Enter DOI Number</label>
             <input value={form.doiNumber} onChange={(event) => setForm((current) => ({ ...current, doiNumber: event.target.value }))} />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-brand-slate">Corresponding Author's Email *</label>
+            <label className="form-label" data-required="true">Corresponding Author's Email</label>
             <input
               type="email"
               value={form.correspondingAuthorEmail}
@@ -137,13 +134,13 @@ export default function UserArticleForm({
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-brand-slate">Enter Keywords *</label>
+            <label className="form-label" data-required="true">Enter Keywords</label>
             <input value={form.keywords} onChange={(event) => setForm((current) => ({ ...current, keywords: event.target.value }))} required />
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-medium text-brand-slate">Enter First Page Number *</label>
+              <label className="form-label" data-required="true">Enter First Page Number</label>
               <input
                 type="number"
                 min="1"
@@ -153,7 +150,7 @@ export default function UserArticleForm({
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-brand-slate">Enter Last Page Number *</label>
+              <label className="form-label" data-required="true">Enter Last Page Number</label>
               <input
                 type="number"
                 min="1"
@@ -165,12 +162,12 @@ export default function UserArticleForm({
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-brand-slate">Country *</label>
+            <label className="form-label" data-required="true">Country</label>
             <input value={form.country} onChange={(event) => setForm((current) => ({ ...current, country: event.target.value }))} required />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-brand-slate">Select Article Published Date *</label>
+            <label className="form-label" data-required="true">Select Article Published Date</label>
             <input
               type="date"
               value={form.publishedDate}
@@ -215,11 +212,11 @@ export default function UserArticleForm({
         </div>
 
         <div className="rounded-3xl border border-brand-border bg-brand-elevated p-5 sm:p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-teal">Indexing Links</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-teal">Optional Indexing Links</p>
           <div className="mt-5 grid gap-5 xl:grid-cols-2">
             {indexingLinkFields.map((item) => (
               <div key={item.key}>
-                <label className="mb-2 block text-sm font-medium text-brand-slate">Enter Article's {item.label}</label>
+                <label className="form-label">Enter Article's {item.label}</label>
                 <input
                   type="url"
                   placeholder={`https://example.com/${item.key}`}
@@ -243,14 +240,14 @@ export default function UserArticleForm({
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-teal">Supplementary Files</p>
           <div className="mt-5 grid gap-5 md:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-medium text-brand-slate">Enter Supplementary file (Upload)</label>
+              <label className="form-label">Enter Supplementary file (Upload)</label>
               <input
                 type="file"
                 onChange={(event) => setForm((current) => ({ ...current, supplementaryFileOne: event.target.files?.[0] || null }))}
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-brand-slate">Enter Supplementary file (Upload)</label>
+              <label className="form-label">Enter Supplementary file (Upload)</label>
               <input
                 type="file"
                 onChange={(event) => setForm((current) => ({ ...current, supplementaryFileTwo: event.target.files?.[0] || null }))}

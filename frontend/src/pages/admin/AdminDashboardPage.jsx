@@ -110,6 +110,7 @@ export default function AdminDashboardPage({ mode = "admin" }) {
   const [userQuery, setUserQuery] = useState(defaultUserMeta);
   const [userMeta, setUserMeta] = useState(defaultUserMeta);
   const [journalStatus, setJournalStatus] = useState("");
+  const [isSavingJournal, setIsSavingJournal] = useState(false);
   const [userStatus, setUserStatus] = useState("");
   const [testimonialStatus, setTestimonialStatus] = useState("");
   const isSuperPortal = mode === "super";
@@ -238,6 +239,7 @@ export default function AdminDashboardPage({ mode = "admin" }) {
   const submitJournal = async (event) => {
     event.preventDefault();
     setJournalStatus("");
+    setIsSavingJournal(true);
 
     try {
       const payload = new FormData();
@@ -279,6 +281,8 @@ export default function AdminDashboardPage({ mode = "admin" }) {
       await Promise.all([loadUsers(), loadJournals()]);
     } catch (error) {
       setJournalStatus(error.response?.data?.message || "Journal save failed.");
+    } finally {
+      setIsSavingJournal(false);
     }
   };
 
@@ -463,7 +467,7 @@ export default function AdminDashboardPage({ mode = "admin" }) {
           description={
             canManageAll
               ? "Create a journal and its linked user in one form. Updating a journal also updates the linked user credentials."
-              : "Manage only the journals linked to your user account, including optional PPT, PDF, and video uploads."
+              : "Manage only the journals linked to your user account, including optional PDF uploads."
           }
         />
 
@@ -487,108 +491,115 @@ export default function AdminDashboardPage({ mode = "admin" }) {
             />
             <form onSubmit={submitJournal} className="mt-6 grid gap-4">
               <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="form-label" data-required="true">First Name</label>
+                  <input
+                    value={journalForm.firstName}
+                    onChange={(event) => setJournalForm({ ...journalForm, firstName: event.target.value })}
+                    placeholder="First Name"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="form-label" data-required="true">Last Name</label>
+                  <input
+                    value={journalForm.lastName}
+                    onChange={(event) => setJournalForm({ ...journalForm, lastName: event.target.value })}
+                    placeholder="Last Name"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="form-label" data-required="true">Managing Journal Name</label>
                 <input
-                  value={journalForm.firstName}
-                  onChange={(event) => setJournalForm({ ...journalForm, firstName: event.target.value })}
-                  placeholder="First Name"
-                  required
-                />
-                <input
-                  value={journalForm.lastName}
-                  onChange={(event) => setJournalForm({ ...journalForm, lastName: event.target.value })}
-                  placeholder="Last Name"
+                  value={journalForm.managingJournalName}
+                  onChange={(event) => setJournalForm({ ...journalForm, managingJournalName: event.target.value })}
+                  placeholder="Managing Journal Name"
                   required
                 />
               </div>
-              <input
-                value={journalForm.managingJournalName}
-                onChange={(event) => setJournalForm({ ...journalForm, managingJournalName: event.target.value })}
-                placeholder="Managing Journal Name"
-                required
-              />
-              <input
-                value={journalForm.journalDomainName}
-                onChange={(event) => setJournalForm({ ...journalForm, journalDomainName: event.target.value })}
-                placeholder="Journal Domain Name"
-                required
-              />
-              <input
-                value={journalForm.journalUrl}
-                onChange={(event) => setJournalForm({ ...journalForm, journalUrl: event.target.value })}
-                placeholder="Enter Journal URL"
-                required
-              />
+              <div>
+                <label className="form-label" data-required="true">Journal Domain Name</label>
+                <input
+                  value={journalForm.journalDomainName}
+                  onChange={(event) => setJournalForm({ ...journalForm, journalDomainName: event.target.value })}
+                  placeholder="Journal Domain Name"
+                  required
+                />
+              </div>
+              <div>
+                <label className="form-label" data-required="true">Journal URL</label>
+                <input
+                  value={journalForm.journalUrl}
+                  onChange={(event) => setJournalForm({ ...journalForm, journalUrl: event.target.value })}
+                  placeholder="Enter Journal URL"
+                  required
+                />
+              </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <input
-                  value={journalForm.username}
-                  onChange={(event) => setJournalForm({ ...journalForm, username: event.target.value })}
-                  placeholder="User Name"
-                  required
-                />
-                <input
-                  value={journalForm.password}
-                  onChange={(event) => setJournalForm({ ...journalForm, password: event.target.value })}
-                  placeholder="Password"
-                  type="password"
+                <div>
+                  <label className="form-label" data-required="true">User Name</label>
+                  <input
+                    value={journalForm.username}
+                    onChange={(event) => setJournalForm({ ...journalForm, username: event.target.value })}
+                    placeholder="User Name"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="form-label" data-required="true">Password</label>
+                  <input
+                    value={journalForm.password}
+                    onChange={(event) => setJournalForm({ ...journalForm, password: event.target.value })}
+                    placeholder="Password"
+                    type="password"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="form-label" data-required="true">About Journal</label>
+                <textarea
+                  value={journalForm.aboutJournal}
+                  onChange={(event) => setJournalForm({ ...journalForm, aboutJournal: event.target.value })}
+                  placeholder="About Journal"
+                  rows="5"
                   required
                 />
               </div>
-              <textarea
-                value={journalForm.aboutJournal}
-                onChange={(event) => setJournalForm({ ...journalForm, aboutJournal: event.target.value })}
-                placeholder="About Journal"
-                rows="5"
-                required
-              />
-              <textarea
-                value={journalForm.journalInstructions}
-                onChange={(event) => setJournalForm({ ...journalForm, journalInstructions: event.target.value })}
-                placeholder="Journal Instructions"
-                rows="5"
-                required
-              />
+              <div>
+                <label className="form-label" data-required="true">Journal Instructions</label>
+                <textarea
+                  value={journalForm.journalInstructions}
+                  onChange={(event) => setJournalForm({ ...journalForm, journalInstructions: event.target.value })}
+                  placeholder="Journal Instructions"
+                  rows="5"
+                  required
+                />
+              </div>
               <div className="rounded-3xl border border-brand-border bg-brand-surface p-5">
                 <p className="text-sm font-semibold text-brand-ink">Optional Uploads</p>
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div className="mt-4 grid gap-4">
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-brand-slate">PPT</label>
-                    <input
-                      type="file"
-                      accept=".ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"
-                      onChange={(event) => setJournalForm({ ...journalForm, pptFile: event.target.files?.[0] || null })}
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-brand-slate">PPT Preview PDF</label>
-                    <input
-                      type="file"
-                      accept=".pdf,application/pdf"
-                      onChange={(event) => setJournalForm({ ...journalForm, pptPreviewFile: event.target.files?.[0] || null })}
-                    />
-                    <p className="mt-2 text-xs text-brand-slate">Recommended for production so PPT preview and presentation mode stay smooth.</p>
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-brand-slate">PDF</label>
+                    <label className="form-label">PDF</label>
                     <input
                       type="file"
                       accept=".pdf,application/pdf"
                       onChange={(event) => setJournalForm({ ...journalForm, pdfFile: event.target.files?.[0] || null })}
                     />
                   </div>
-                  <div className="sm:col-span-2">
-                    <label className="mb-2 block text-sm font-medium text-brand-slate">Video</label>
-                    <input type="file" accept="video/*" onChange={(event) => setJournalForm({ ...journalForm, videoFile: event.target.files?.[0] || null })} />
-                  </div>
                 </div>
               </div>
               <div className="flex flex-wrap gap-3">
-                <button type="submit" className="button-primary">
-                  {editingJournalId ? "Update Journal" : "Add User & Journal"}
+                <button type="submit" className="button-primary" disabled={isSavingJournal}>
+                  {isSavingJournal ? "Saving..." : editingJournalId ? "Update Journal" : "Add User & Journal"}
                 </button>
                 {editingJournalId ? (
                   <button
                     type="button"
                     className="button-secondary"
+                    disabled={isSavingJournal}
                     onClick={() => {
                       setEditingJournalId("");
                       setJournalForm(initialJournalForm);
@@ -843,26 +854,35 @@ export default function AdminDashboardPage({ mode = "admin" }) {
           <div className="mt-8 grid gap-8 xl:grid-cols-[0.85fr_1.15fr]">
             <div className="rounded-3xl border border-brand-border bg-brand-elevated p-6">
               <form onSubmit={submitTestimonial} className="grid gap-4">
-                <input
-                  value={testimonialForm.name}
-                  onChange={(event) => setTestimonialForm({ ...testimonialForm, name: event.target.value })}
-                  placeholder="Name"
-                  required
-                />
-                <input
-                  value={testimonialForm.designation}
-                  onChange={(event) => setTestimonialForm({ ...testimonialForm, designation: event.target.value })}
-                  placeholder="Designation (optional)"
-                />
-                <textarea
-                  value={testimonialForm.message}
-                  onChange={(event) => setTestimonialForm({ ...testimonialForm, message: event.target.value })}
-                  placeholder="Message"
-                  rows="5"
-                  required
-                />
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-brand-slate">Image (optional)</label>
+                  <label className="form-label" data-required="true">Name</label>
+                  <input
+                    value={testimonialForm.name}
+                    onChange={(event) => setTestimonialForm({ ...testimonialForm, name: event.target.value })}
+                    placeholder="Name"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="form-label">Designation</label>
+                  <input
+                    value={testimonialForm.designation}
+                    onChange={(event) => setTestimonialForm({ ...testimonialForm, designation: event.target.value })}
+                    placeholder="Designation (optional)"
+                  />
+                </div>
+                <div>
+                  <label className="form-label" data-required="true">Message</label>
+                  <textarea
+                    value={testimonialForm.message}
+                    onChange={(event) => setTestimonialForm({ ...testimonialForm, message: event.target.value })}
+                    placeholder="Message"
+                    rows="5"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="form-label">Image</label>
                   <input type="file" accept="image/*" onChange={(event) => setTestimonialForm({ ...testimonialForm, image: event.target.files?.[0] || null })} />
                 </div>
                 <div className="flex flex-wrap gap-3">
@@ -932,33 +952,43 @@ export default function AdminDashboardPage({ mode = "admin" }) {
             />
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <input
-                value={userForm.firstName}
-                onChange={(event) => setUserForm((current) => ({ ...current, firstName: event.target.value }))}
-                placeholder="First Name"
-                required
-              />
-              <input
-                value={userForm.lastName}
-                onChange={(event) => setUserForm((current) => ({ ...current, lastName: event.target.value }))}
-                placeholder="Last Name"
-                required
-              />
-              <input
-                className="sm:col-span-2"
-                value={userForm.username}
-                onChange={(event) => setUserForm((current) => ({ ...current, username: event.target.value }))}
-                placeholder="User Name"
-                required
-              />
-              <input
-                className="sm:col-span-2"
-                value={userForm.password}
-                onChange={(event) => setUserForm((current) => ({ ...current, password: event.target.value }))}
-                placeholder="New Password (optional)"
-                type="password"
-                required={false}
-              />
+              <div>
+                <label className="form-label" data-required="true">First Name</label>
+                <input
+                  value={userForm.firstName}
+                  onChange={(event) => setUserForm((current) => ({ ...current, firstName: event.target.value }))}
+                  placeholder="First Name"
+                  required
+                />
+              </div>
+              <div>
+                <label className="form-label" data-required="true">Last Name</label>
+                <input
+                  value={userForm.lastName}
+                  onChange={(event) => setUserForm((current) => ({ ...current, lastName: event.target.value }))}
+                  placeholder="Last Name"
+                  required
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="form-label" data-required="true">User Name</label>
+                <input
+                  value={userForm.username}
+                  onChange={(event) => setUserForm((current) => ({ ...current, username: event.target.value }))}
+                  placeholder="User Name"
+                  required
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="form-label">New Password</label>
+                <input
+                  value={userForm.password}
+                  onChange={(event) => setUserForm((current) => ({ ...current, password: event.target.value }))}
+                  placeholder="New Password (optional)"
+                  type="password"
+                  required={false}
+                />
+              </div>
             </div>
 
             {userStatus ? <p className="mt-4 text-sm text-brand-slate">{userStatus}</p> : null}

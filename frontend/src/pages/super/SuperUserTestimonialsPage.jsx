@@ -90,26 +90,35 @@ export default function SuperUserTestimonialsPage() {
         <div className="mt-8 grid gap-8 xl:grid-cols-[0.85fr_1.15fr]">
           <div className="rounded-3xl border border-brand-border bg-brand-elevated p-6">
             <form onSubmit={submitTestimonial} className="grid gap-4">
-              <input
-                value={testimonialForm.name}
-                onChange={(event) => setTestimonialForm({ ...testimonialForm, name: event.target.value })}
-                placeholder="Name"
-                required
-              />
-              <input
-                value={testimonialForm.designation}
-                onChange={(event) => setTestimonialForm({ ...testimonialForm, designation: event.target.value })}
-                placeholder="Designation (optional)"
-              />
-              <textarea
-                value={testimonialForm.message}
-                onChange={(event) => setTestimonialForm({ ...testimonialForm, message: event.target.value })}
-                placeholder="Message"
-                rows="5"
-                required
-              />
               <div>
-                <label className="mb-2 block text-sm font-medium text-brand-slate">Image (optional)</label>
+                <label className="form-label" data-required="true">Name</label>
+                <input
+                  value={testimonialForm.name}
+                  onChange={(event) => setTestimonialForm({ ...testimonialForm, name: event.target.value })}
+                  placeholder="Name"
+                  required
+                />
+              </div>
+              <div>
+                <label className="form-label">Designation</label>
+                <input
+                  value={testimonialForm.designation}
+                  onChange={(event) => setTestimonialForm({ ...testimonialForm, designation: event.target.value })}
+                  placeholder="Designation (optional)"
+                />
+              </div>
+              <div>
+                <label className="form-label" data-required="true">Message</label>
+                <textarea
+                  value={testimonialForm.message}
+                  onChange={(event) => setTestimonialForm({ ...testimonialForm, message: event.target.value })}
+                  placeholder="Message"
+                  rows="5"
+                  required
+                />
+              </div>
+              <div>
+                <label className="form-label">Image</label>
                 <input type="file" accept="image/*" onChange={(event) => setTestimonialForm({ ...testimonialForm, image: event.target.files?.[0] || null })} />
               </div>
               <div className="flex flex-wrap gap-3">

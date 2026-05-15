@@ -23,33 +23,43 @@ export default function UserEditorModal({
         />
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <input
-            value={form.firstName}
-            onChange={(event) => setForm((current) => ({ ...current, firstName: event.target.value }))}
-            placeholder="First Name"
-            required
-          />
-          <input
-            value={form.lastName}
-            onChange={(event) => setForm((current) => ({ ...current, lastName: event.target.value }))}
-            placeholder="Last Name"
-            required
-          />
-          <input
-            className="sm:col-span-2"
-            value={form.username}
-            onChange={(event) => setForm((current) => ({ ...current, username: event.target.value }))}
-            placeholder="User Name"
-            required
-          />
-          <input
-            className="sm:col-span-2"
-            value={form.password}
-            onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
-            placeholder="New Password (optional)"
-            type="password"
-            required={false}
-          />
+          <div>
+            <label className="form-label" data-required="true">First Name</label>
+            <input
+              value={form.firstName}
+              onChange={(event) => setForm((current) => ({ ...current, firstName: event.target.value }))}
+              placeholder="First Name"
+              required
+            />
+          </div>
+          <div>
+            <label className="form-label" data-required="true">Last Name</label>
+            <input
+              value={form.lastName}
+              onChange={(event) => setForm((current) => ({ ...current, lastName: event.target.value }))}
+              placeholder="Last Name"
+              required
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="form-label" data-required="true">User Name</label>
+            <input
+              value={form.username}
+              onChange={(event) => setForm((current) => ({ ...current, username: event.target.value }))}
+              placeholder="User Name"
+              required
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="form-label">New Password</label>
+            <input
+              value={form.password}
+              onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
+              placeholder="New Password (optional)"
+              type="password"
+              required={false}
+            />
+          </div>
         </div>
 
         {status ? <p className="mt-4 text-sm text-brand-slate">{status}</p> : null}

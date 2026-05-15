@@ -5,6 +5,7 @@ import SuperUserLayout from "./components/super/SuperUserLayout";
 import UserLayout from "./components/user/UserLayout";
 import WebsiteLayout from "./components/layout/WebsiteLayout";
 import JournalShell from "./pages/journal/JournalShell";
+import JournalArticleAbstractPage from "./pages/journal/JournalArticleAbstractPage";
 import AdminLoginPage from "./pages/public/AdminLoginPage";
 import AboutPage from "./pages/public/AboutPage";
 import ContactPage from "./pages/public/ContactPage";
@@ -50,6 +51,7 @@ export default function App() {
       <Route element={<JournalLayout />}>
         <Route path="/journals" element={<JournalsPage />} />
         <Route path="/journals/:journalUrl" element={<Navigate to="home" replace />} />
+        <Route path="/journals/:journalUrl/article-in-press/:articleId/abstract" element={<JournalArticleAbstractPage />} />
         <Route path="/journals/:journalUrl/:section" element={<JournalShell />} />
       </Route>
 
