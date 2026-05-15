@@ -4,8 +4,8 @@ import { medmaxTransparentLogo } from "../../assets/branding";
 import { useAuth } from "../../context/AuthContext";
 
 export default function AdminLoginPage() {
-  const [identifier, setIdentifier] = useState("admin");
-  const [password, setPassword] = useState("ChangeMe123!");
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login, logout } = useAuth();
@@ -38,7 +38,7 @@ export default function AdminLoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-brand-mist px-4 py-12">
-      <form onSubmit={handleSubmit} className="card-panel w-full max-w-md p-8">
+      <form onSubmit={handleSubmit} className="card-panel w-full max-w-md p-8" autoComplete="off">
         <img src={medmaxTransparentLogo} alt="Medmax Publishers" className="h-16 w-auto" />
         <span className="eyebrow">{requestedUserPortal ? "User Portal" : "Portal Login"}</span>
         <h1 className="font-display text-4xl font-semibold text-brand-ink">Secure Login</h1>
@@ -47,7 +47,13 @@ export default function AdminLoginPage() {
         <div className="mt-8 space-y-4">
           <div>
             <label className="form-label" data-required="true">User Name or Email</label>
-            <input value={identifier} onChange={(event) => setIdentifier(event.target.value)} placeholder="User Name or Email" required />
+            <input
+              value={identifier}
+              onChange={(event) => setIdentifier(event.target.value)}
+              placeholder="User Name or Email"
+              autoComplete="username"
+              required
+            />
           </div>
           <div>
             <label className="form-label" data-required="true">Password</label>
@@ -56,6 +62,7 @@ export default function AdminLoginPage() {
               onChange={(event) => setPassword(event.target.value)}
               placeholder="Password"
               type="password"
+              autoComplete="current-password"
               required
             />
           </div>

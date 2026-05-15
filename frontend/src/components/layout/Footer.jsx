@@ -63,16 +63,16 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-brand-border bg-white">
-        <div className="container-shell flex flex-col items-center gap-3 py-4 text-center text-sm text-brand-ink">
+      <div className="border-t border-brand-navy/20 bg-brand-navy">
+        <div className="container-shell flex flex-col items-center gap-3 py-4 text-center text-sm text-white">
           <div className="flex items-center justify-center gap-5 whitespace-nowrap font-medium">
-            <Link to="/terms-and-conditions" className="transition hover:text-brand-slate">
+            <Link to="/terms-and-conditions" className="transition hover:text-brand-gold">
               Terms and Conditions
             </Link>
-            <Link to="/withdraw-policy" className="transition hover:text-brand-slate">
+            <Link to="/withdraw-policy" className="transition hover:text-brand-gold">
               Withdraw Policy
             </Link>
-            <Link to="/privacy-policy" className="transition hover:text-brand-slate">
+            <Link to="/privacy-policy" className="transition hover:text-brand-gold">
               Privacy Policy
             </Link>
           </div>

@@ -107,7 +107,14 @@ export default function JournalShell() {
   const renderArticleCard = (article, keyPrefix = "article") => (
     <article key={`${keyPrefix}-${article.id}`} className="overflow-hidden rounded-3xl border border-cyan-500/60 bg-white shadow-sm">
       <div className="flex items-center justify-between gap-4 bg-[linear-gradient(135deg,#0ea5b7_0%,#0891b2_100%)] px-5 py-3 text-white">
-        <p className="text-sm font-semibold md:text-base">DOI: {article.doiNumber || "NA"}</p>
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#f3c623] text-sm font-black lowercase text-brand-ink shadow-sm">
+            doi
+          </span>
+          <span className="min-w-0 truncate rounded-md bg-white/20 px-3 py-1 text-sm font-semibold text-white md:text-base">
+            {article.doiNumber || "NA"}
+          </span>
+        </div>
         <p className="text-lg font-semibold italic">{article.articleType || "Article"}</p>
       </div>
 
