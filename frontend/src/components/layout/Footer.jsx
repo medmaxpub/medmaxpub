@@ -1,15 +1,15 @@
 import { Facebook, Linkedin, Mail, MapPin, Phone, Twitter } from "lucide-react";
 import { Link } from "react-router-dom";
-import { medmaxTransparentLogo } from "../../assets/branding";
+import { medmaxPrimaryLogo } from "../../assets/branding";
 import { companyInfo } from "../../data/mockData";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-brand-border bg-white text-brand-ink">
+    <footer className="border-t border-brand-navy/10 bg-[#9fc3f2] text-brand-ink">
       <div className="container-shell grid gap-8 py-10 sm:py-12 md:grid-cols-2 xl:grid-cols-[1.15fr_0.8fr_1fr] xl:gap-12">
         <div className="xl:pr-6">
           <Link to="/" className="inline-flex transition hover:opacity-90">
-            <img src={medmaxTransparentLogo} alt="Medmax Publishers" className="h-24 w-auto sm:h-28" />
+            <img src={medmaxPrimaryLogo} alt="Medmax Publishers" className="h-24 w-auto sm:h-28" />
           </Link>
           <p className="mt-4 max-w-md text-sm leading-7 text-brand-slate">
             Medmax Publishers is a peer-reviewed, open access publisher covering a comprehensive range of topics in
@@ -53,7 +53,7 @@ export default function Footer() {
               {[Facebook, Twitter, Linkedin].map((Icon, index) => (
                 <span
                   key={index}
-                  className="rounded-full border border-brand-border bg-brand-surface p-2 text-brand-ink transition hover:border-brand-gold hover:bg-brand-sky hover:text-brand-gold"
+                  className="rounded-full border border-brand-navy/12 bg-white/95 p-2 text-brand-ink transition hover:border-brand-gold hover:bg-white hover:text-brand-gold"
                 >
                   <Icon size={16} />
                 </span>
@@ -63,7 +63,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-brand-navy/20 bg-brand-navy">
+      <div className="border-t border-brand-navy/20 bg-[#173b87]">
         <div className="container-shell flex flex-col items-center gap-3 py-4 text-center text-sm text-white">
           <div className="flex items-center justify-center gap-5 whitespace-nowrap font-medium">
             <Link to="/terms-and-conditions" className="transition hover:text-brand-gold">

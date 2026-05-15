@@ -25,43 +25,40 @@ export default function IssueAccordion({ archive }) {
             <div className="border-t border-brand-border px-4 py-5 sm:px-6">
               <div className="space-y-6">
                 {yearBlock.volumes.map((volumeBlock) => (
-                  <div key={volumeBlock.volume}>
-                    <h4 className="text-lg font-semibold text-brand-ink">Volume {volumeBlock.volume}</h4>
-                    <div className="mt-3 space-y-4">
-                      {volumeBlock.issues.map((issue) => (
-                        <div key={issue.issue} className="rounded-2xl border border-brand-border bg-brand-elevated p-4">
-                          <p className="font-medium text-brand-ink">Issue {issue.issue}</p>
-                          <div className="mt-3 space-y-3">
-                            {issue.articles.map((article) => {
-                              const viewPdfUrl = buildPdfProxyUrl(article.pdfUrl) || article.pdfUrl;
-                              const downloadPdfUrl = buildPdfProxyUrl(article.pdfUrl, { download: true });
+                  <div key={volumeBlock.volume} className="space-y-4">
+                    {volumeBlock.issues.map((issue) => (
+                      <div key={`${volumeBlock.volume}-${issue.issue}`} className="space-y-3">
+                        <p className="text-lg font-semibold text-brand-ink">
+                          Volume {volumeBlock.volume}, Issue {issue.issue}
+                        </p>
+                        {issue.articles.map((article) => {
+                          const viewPdfUrl = buildPdfProxyUrl(article.pdfUrl) || article.pdfUrl;
+                          const downloadPdfUrl = buildPdfProxyUrl(article.pdfUrl, { download: true });
 
-                              return (
-                                <div
-                                  key={article.id}
-                                  className="flex flex-col gap-3 rounded-2xl border border-brand-border bg-brand-surface p-4 lg:flex-row lg:items-center lg:justify-between"
-                                >
-                                  <div>
-                                    <h5 className="font-semibold text-brand-ink">{article.title}</h5>
-                                    <p className="mt-1 text-sm text-brand-slate">{article.authors.join(", ")}</p>
-                                  </div>
-                                  <div className="flex flex-wrap gap-2">
-                                    <a className="button-soft px-4 py-2" href={viewPdfUrl || article.pdfUrl} target="_blank" rel="noreferrer">
-                                      <ExternalLink size={16} className="mr-2" />
-                                      View PDF
-                                    </a>
-                                    <a className="button-primary px-4 py-2" href={downloadPdfUrl || article.pdfUrl} target="_blank" rel="noreferrer">
-                                      <Download size={16} className="mr-2" />
-                                      Download PDF
-                                    </a>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                          return (
+                            <div
+                              key={article.id}
+                              className="flex flex-col gap-3 rounded-2xl border border-brand-border bg-brand-surface p-4 lg:flex-row lg:items-center lg:justify-between"
+                            >
+                              <div>
+                                <h5 className="font-semibold text-brand-ink">{article.title}</h5>
+                                <p className="mt-1 text-sm text-brand-slate">{article.authors.join(", ")}</p>
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                <a className="button-soft px-4 py-2" href={viewPdfUrl || article.pdfUrl} target="_blank" rel="noreferrer">
+                                  <ExternalLink size={16} className="mr-2" />
+                                  View PDF
+                                </a>
+                                <a className="button-primary px-4 py-2" href={downloadPdfUrl || article.pdfUrl} target="_blank" rel="noreferrer">
+                                  <Download size={16} className="mr-2" />
+                                  Download PDF
+                                </a>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>
