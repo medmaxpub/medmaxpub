@@ -17,6 +17,16 @@ function buildRawUploadPublicId(file) {
   return `${Date.now()}-${sanitizePublicIdSegment(name) || "file"}${extension}`;
 }
 
+function getFileExtension(file) {
+  const originalName = String(file?.originalname || "");
+  const lastDotIndex = originalName.lastIndexOf(".");
+  return lastDotIndex > -1 ? originalName.slice(lastDotIndex).toLowerCase() : "";
+}
+
+function isPresentationFile(file) {
+  return [".ppt", ".pptx", ".odp"].includes(getFileExtension(file));
+}
+
 function normalizeDeliveryUrl(url, file, asset) {
   if (!url) {
     return null;
@@ -90,6 +100,10 @@ export async function uploadToCloudinary(file, folder, resourceType = "auto") {
       options.unique_filename = false;
       options.overwrite = false;
       options.access_mode = "public";
+
+      if (isPresentationFile(file)) {
+        options.raw_convert = "aspose";
+      }
     }
 
     const stream = cloudinary.uploader.upload_stream(

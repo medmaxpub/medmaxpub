@@ -194,7 +194,7 @@ async function requestCloudinaryAsposeConversion(asset) {
   }
 
   try {
-    await cloudinary.api.update(asset.public_id, undefined, {
+    await cloudinary.uploader.explicit(asset.public_id, {
       resource_type: "raw",
       type: "upload",
       raw_convert: "aspose"
