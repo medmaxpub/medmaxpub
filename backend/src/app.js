@@ -21,20 +21,48 @@ const configuredOrigins = [
   .map((value) => value.trim())
   .filter(Boolean);
 const allowedOrigins = [...new Set([...defaultOrigins, ...configuredOrigins])];
+const allowedOriginHostnames = ["medmaxpub.pages.dev"];
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-        return;
-      }
+function matchesAllowedOrigin(origin) {
+  if (!origin) {
+    return true;
+  }
 
-      callback(new Error(`CORS blocked for origin: ${origin}`));
-    },
-    credentials: true
-  })
-);
+  if (allowedOrigins.includes(origin)) {
+    return true;
+  }
+
+  try {
+    const { hostname, protocol } = new URL(origin);
+
+    if (protocol !== "https:") {
+      return false;
+    }
+
+    return allowedOriginHostnames.some((allowedHostname) => hostname === allowedHostname || hostname.endsWith(`.${allowedHostname}`));
+  } catch {
+    return false;
+  }
+}
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (matchesAllowedOrigin(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"],
+  exposedHeaders: ["Content-Disposition", "Content-Type"],
+  optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
