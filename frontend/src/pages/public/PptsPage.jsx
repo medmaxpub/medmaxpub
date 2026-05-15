@@ -1,9 +1,8 @@
-import { Download, Eye, Search } from "lucide-react";
+import { Download, ExternalLink, Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
-import PptPreviewModal from "../../components/common/PptPreviewModal";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockJournals, mockPpts } from "../../data/mockData";
 import useAutoRefresh from "../../hooks/useAutoRefresh";
@@ -13,7 +12,6 @@ import { normalizePptItem, warmPreviewUrl } from "../../utils/pptPreview";
 
 export default function PptsPage() {
   const [items, setItems] = useState([]);
-  const [activePreview, setActivePreview] = useState(null);
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
@@ -56,17 +54,6 @@ export default function PptsPage() {
   }, [loadItems]);
 
   useAutoRefresh(loadItems, { intervalMs: 15000 });
-
-  useEffect(() => {
-    const handleEscape = (event) => {
-      if (event.key === "Escape") {
-        setActivePreview(null);
-      }
-    };
-
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, []);
 
   const filteredItems = items.filter((ppt) => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -156,16 +143,17 @@ export default function PptsPage() {
                       <div className="rounded-3xl border border-brand-border bg-brand-elevated p-5">
                         <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Actions</p>
                         <div className="mt-4 flex flex-wrap gap-3">
-                          <button
-                            type="button"
+                          <a
+                            href={ppt.browserPreviewUrl || ppt.previewUrl || ppt.previewPdfUrl || ppt.originalPptUrl || ppt.pptFileUrl}
+                            target="_blank"
+                            rel="noreferrer"
                             className="button-soft px-4 py-2"
                             onMouseEnter={() => warmPreviewUrl(ppt.previewUrl)}
                             onFocus={() => warmPreviewUrl(ppt.previewUrl)}
-                            onClick={() => setActivePreview(ppt)}
                           >
-                            <Eye size={16} className="mr-2" />
-                            Preview
-                          </button>
+                            <ExternalLink size={16} className="mr-2" />
+                            Open Preview
+                          </a>
                           <a href={ppt.downloadUrl} target="_blank" rel="noreferrer" download className="button-primary px-4 py-2">
                             <Download size={16} className="mr-2" />
                             Download PPT
@@ -225,8 +213,6 @@ export default function PptsPage() {
           </div>
         )}
       </div>
-
-      <PptPreviewModal ppt={activePreview} onClose={() => setActivePreview(null)} />
     </div>
   );
 }

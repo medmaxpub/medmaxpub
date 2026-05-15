@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
-import PptPreviewModal from "../../components/common/PptPreviewModal";
 import JournalMenu from "../../components/journal/JournalMenu";
 import IssueAccordion from "../../components/journal/IssueAccordion";
 import { mockJournals } from "../../data/mockData";
@@ -73,7 +72,6 @@ function renderCopyBlock(value, emptyState) {
 export default function JournalShell() {
   const { journalUrl, section = "home" } = useParams();
   const [journal, setJournal] = useState(null);
-  const [activePreview, setActivePreview] = useState(null);
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
   const loadJournal = useCallback(() => {
@@ -90,17 +88,6 @@ export default function JournalShell() {
   }, [loadJournal]);
 
   useAutoRefresh(loadJournal, { intervalMs: 15000 });
-
-  useEffect(() => {
-    const handleEscape = (event) => {
-      if (event.key === "Escape") {
-        setActivePreview(null);
-      }
-    };
-
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, []);
 
   if (!journal) {
     return (
@@ -222,25 +209,24 @@ export default function JournalShell() {
             <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Journal PPTs</p>
             <h3 className="mt-3 text-xl font-semibold text-brand-ink">{journal.ppts?.length || 0} presentations</h3>
             <div className="mt-4 flex flex-wrap gap-3">
-              {(journal.ppts || []).slice(0, 2).map((ppt) => (
-                <button
-                  key={ppt.id}
-                  type="button"
-                  className="button-soft px-4 py-2"
-                  onMouseEnter={() => {
-                    const normalized = normalizePptItem(ppt);
-                    warmPreviewUrl(normalized.previewUrl);
-                  }}
-                  onFocus={() => {
-                    const normalized = normalizePptItem(ppt);
-                    warmPreviewUrl(normalized.previewUrl);
-                  }}
-                  onClick={() => setActivePreview(normalizePptItem(ppt))}
-                >
-                  <FileText size={16} className="mr-2" />
-                  {ppt.title}
-                </button>
-              ))}
+              {(journal.ppts || []).slice(0, 2).map((ppt) => {
+                const normalized = normalizePptItem(ppt);
+
+                return (
+                  <a
+                    key={ppt.id}
+                    href={normalized.browserPreviewUrl || normalized.previewUrl || normalized.previewPdfUrl || normalized.pptFileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="button-soft px-4 py-2"
+                    onMouseEnter={() => warmPreviewUrl(normalized.previewUrl)}
+                    onFocus={() => warmPreviewUrl(normalized.previewUrl)}
+                  >
+                    <FileText size={16} className="mr-2" />
+                    {ppt.title}
+                  </a>
+                );
+              })}
             </div>
           </div>
 
@@ -451,7 +437,6 @@ export default function JournalShell() {
           <div className="mt-6">{renderSection()}</div>
         </div>
       </div>
-      <PptPreviewModal ppt={activePreview} onClose={() => setActivePreview(null)} />
     </div>
   );
 }

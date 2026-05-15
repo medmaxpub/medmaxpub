@@ -78,7 +78,7 @@ export default function PptPreviewModal({ ppt, onClose }) {
       subtitle={resolvedPpt.journalTitle || ""}
       fileUrl={inlinePreviewUrl}
       onClose={onClose}
-      allowPresentation
+      basicViewer
       actions={[
         ...(resolvedPpt.previewPdfUrl
           ? [

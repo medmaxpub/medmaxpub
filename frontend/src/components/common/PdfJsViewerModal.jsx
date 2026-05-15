@@ -33,6 +33,7 @@ export default function PdfJsViewerModal({
   fileUrl,
   onClose,
   allowPresentation = false,
+  basicViewer = false,
   actions = [],
   emptyTitle = "Preview unavailable",
   emptyDescription = "This document preview is not available right now.",
@@ -58,12 +59,12 @@ export default function PdfJsViewerModal({
 
   useEffect(() => {
     setPageNumber(1);
-    setZoomMode("width");
+    setZoomMode(basicViewer ? "page" : "width");
     setCustomScale(1.25);
     setOutlineOpen(false);
     setPresentationMode(false);
     setError("");
-  }, [fileUrl]);
+  }, [basicViewer, fileUrl]);
 
   useEffect(() => {
     let cancelled = false;
@@ -410,37 +411,44 @@ export default function PdfJsViewerModal({
           {!presentationMode ? (
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-brand-border bg-white px-6 py-4">
               <div className="flex flex-wrap items-center gap-2">
-                {Object.entries(viewModes).map(([key, mode]) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => {
-                      if (key === "outline") {
-                        setOutlineOpen((current) => !current);
-                        setZoomMode("width");
-                        return;
-                      }
+                {!basicViewer ? (
+                  Object.entries(viewModes).map(([key, mode]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => {
+                        if (key === "outline") {
+                          setOutlineOpen((current) => !current);
+                          setZoomMode("width");
+                          return;
+                        }
 
-                      if (key === "zoom") {
-                        setCustomScale(1.25);
-                        setZoomMode("custom");
+                        if (key === "zoom") {
+                          setCustomScale(1.25);
+                          setZoomMode("custom");
+                          setOutlineOpen(false);
+                          return;
+                        }
+
+                        setZoomMode(mode.zoomMode);
                         setOutlineOpen(false);
-                        return;
-                      }
-
-                      setZoomMode(mode.zoomMode);
-                      setOutlineOpen(false);
-                    }}
-                    className={`inline-flex items-center rounded-full px-4 py-2 text-sm ${
-                      (key === "outline" ? outlineOpen : zoomMode === mode.zoomMode && (key !== "zoom" || customScale === 1.25))
-                        ? "bg-slate-950 text-white"
-                        : "bg-brand-elevated text-brand-slate"
-                    }`}
-                  >
-                    {key === "outline" ? <ListTree size={16} className="mr-2" /> : <FileText size={16} className="mr-2" />}
-                    {key === "zoom" ? zoomLabel : mode.label}
-                  </button>
-                ))}
+                      }}
+                      className={`inline-flex items-center rounded-full px-4 py-2 text-sm ${
+                        (key === "outline" ? outlineOpen : zoomMode === mode.zoomMode && (key !== "zoom" || customScale === 1.25))
+                          ? "bg-slate-950 text-white"
+                          : "bg-brand-elevated text-brand-slate"
+                      }`}
+                    >
+                      {key === "outline" ? <ListTree size={16} className="mr-2" /> : <FileText size={16} className="mr-2" />}
+                      {key === "zoom" ? zoomLabel : mode.label}
+                    </button>
+                  ))
+                ) : (
+                  <div className="inline-flex items-center rounded-full bg-brand-elevated px-4 py-2 text-sm font-medium text-brand-slate">
+                    <FileText size={16} className="mr-2" />
+                    Page View
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-wrap gap-3">
@@ -455,7 +463,7 @@ export default function PdfJsViewerModal({
                     <ChevronRight size={16} />
                   </button>
                 </div>
-                {allowPresentation ? (
+                {allowPresentation && !basicViewer ? (
                   <button type="button" className="button-secondary px-4 py-2" onClick={togglePresentationMode}>
                     <MonitorPlay size={16} className="mr-2" />
                     Presentation View
@@ -527,7 +535,7 @@ export default function PdfJsViewerModal({
           )}
 
           <div className={`relative flex flex-1 bg-slate-950 ${presentationMode ? "p-0" : "p-4 sm:p-5"}`}>
-            {outlineOpen && !presentationMode ? (
+            {outlineOpen && !presentationMode && !basicViewer ? (
               <aside className="mr-4 hidden w-72 shrink-0 overflow-y-auto rounded-[1.5rem] border border-white/10 bg-white/95 p-4 lg:block">
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-brand-teal">Outline</p>
                 <div className="mt-4 space-y-2">
@@ -550,8 +558,13 @@ export default function PdfJsViewerModal({
               </aside>
             ) : null}
 
-            <div ref={stageRef} className={`relative flex-1 overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#0f172a] ${presentationMode ? "rounded-none border-0" : ""}`}>
-              <div className="flex h-full items-center justify-center p-4">
+            <div
+              ref={stageRef}
+              className={`relative flex-1 rounded-[1.5rem] border border-white/10 bg-[#0f172a] ${
+                presentationMode ? "overflow-hidden rounded-none border-0" : basicViewer ? "overflow-auto" : "overflow-hidden"
+              }`}
+            >
+              <div className={`flex min-h-full p-4 ${basicViewer ? "items-start justify-center" : "items-center justify-center"}`}>
                 {isLoading ? (
                   <div className="text-center text-white">
                     <LoaderCircle size={28} className="mx-auto animate-spin" />
@@ -590,7 +603,7 @@ export default function PdfJsViewerModal({
             </div>
           </div>
 
-          {!presentationMode ? (
+          {!presentationMode && !basicViewer ? (
             <div className="flex items-center gap-2 border-t border-brand-border bg-brand-elevated px-6 py-3 text-sm text-brand-slate">
               <FileText size={16} className="text-brand-teal" />
               PDF.js viewer with page navigation, zoom modes, outline, fullscreen, and responsive rendering.
