@@ -297,25 +297,23 @@ export default function UserArticleFormPage({
           </LabelRow>
 
           <div className="grid gap-5 lg:grid-cols-[230px_1fr] lg:items-start">
-            <div className="form-side-label" data-required="true">Corresponding Author&apos;s Email</div>
+            <div className="form-side-label">Corresponding Author&apos;s Email</div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="form-label" data-required="true">Corresponding Author&apos;s Email</label>
+                <label className="form-label">Corresponding Author&apos;s Email</label>
                 <input
                   type="email"
                   placeholder="Enter corresponding author's email"
                   value={form.correspondingAuthorEmail}
                   onChange={(event) => setForm((current) => ({ ...current, correspondingAuthorEmail: event.target.value }))}
-                  required
                 />
               </div>
               <div>
-                <label className="form-label" data-required="true">Keywords</label>
+                <label className="form-label">Keywords</label>
                 <input
                   placeholder="Enter Keywords"
                   value={form.keywords}
                   onChange={(event) => setForm((current) => ({ ...current, keywords: event.target.value }))}
-                  required
                 />
               </div>
             </div>

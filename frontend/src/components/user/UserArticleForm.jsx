@@ -115,18 +115,17 @@ export default function UserArticleForm({
           </div>
 
           <div>
-            <label className="form-label" data-required="true">Corresponding Author's Email</label>
+            <label className="form-label">Corresponding Author's Email</label>
             <input
               type="email"
               value={form.correspondingAuthorEmail}
               onChange={(event) => setForm((current) => ({ ...current, correspondingAuthorEmail: event.target.value }))}
-              required
             />
           </div>
 
           <div>
-            <label className="form-label" data-required="true">Enter Keywords</label>
-            <input value={form.keywords} onChange={(event) => setForm((current) => ({ ...current, keywords: event.target.value }))} required />
+            <label className="form-label">Enter Keywords</label>
+            <input value={form.keywords} onChange={(event) => setForm((current) => ({ ...current, keywords: event.target.value }))} />
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2">

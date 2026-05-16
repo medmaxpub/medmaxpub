@@ -60,8 +60,8 @@ export default function UserEditorialBoardFormPage() {
       return;
     }
 
-    if (!stripHtml(form.editorDescription) || !stripHtml(form.editorBiography)) {
-      setStatus("Editor description and editor biography must contain content.");
+    if (!stripHtml(form.editorDescription)) {
+      setStatus("Editor description must contain content.");
       return;
     }
 
@@ -159,12 +159,11 @@ export default function UserEditorialBoardFormPage() {
             </div>
 
             <div className="grid gap-5 lg:grid-cols-[220px_1fr] lg:items-start">
-              <div className="form-side-label" data-required="true">Editor Biography</div>
+              <div className="form-side-label">Editor Biography</div>
               <RichTextEditor
                 label=""
                 value={form.editorBiography}
                 onChange={(value) => setForm((current) => ({ ...current, editorBiography: value }))}
-                required
                 placeholder="Enter editor biography"
               />
             </div>
