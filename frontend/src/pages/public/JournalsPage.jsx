@@ -11,10 +11,14 @@ export default function JournalsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [journals, setJournals] = useState([]);
   const [query, setQuery] = useState(searchParams.get("search") || "");
+  const [isLoading, setIsLoading] = useState(true);
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
   const loadJournals = useCallback(() => {
-    return withFallback(() => api.get("/journals"), useDevelopmentFallback ? mockJournals : []).then(setJournals);
+    setIsLoading(true);
+    return withFallback(() => api.get("/journals"), useDevelopmentFallback ? mockJournals : [])
+      .then(setJournals)
+      .finally(() => setIsLoading(false));
   }, [useDevelopmentFallback]);
 
   useEffect(() => {
@@ -57,7 +61,14 @@ export default function JournalsPage() {
           </div>
         </div>
 
-        {filtered.length ? (
+        {isLoading ? (
+          <div className="mt-10">
+            <EmptyState
+              title="Loading journals"
+              description="The journal directory is being prepared."
+            />
+          </div>
+        ) : filtered.length ? (
           <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {filtered.map((journal) => (
               <JournalCard key={journal.id} journal={journal} />
@@ -65,10 +76,17 @@ export default function JournalsPage() {
           </div>
         ) : (
           <div className="mt-10">
-            <EmptyState
-              title="No journals matched this search"
-              description="Try a broader managing journal name, domain name, or URL search."
-            />
+            {query.trim() ? (
+              <EmptyState
+                title="No journals matched this search"
+                description="Try a broader managing journal name, domain name, or URL search."
+              />
+            ) : (
+              <EmptyState
+                title="No live journals published yet"
+                description="Published journals will appear here once they are available."
+              />
+            )}
           </div>
         )}
       </div>
