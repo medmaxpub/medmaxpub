@@ -353,8 +353,20 @@ export default function JournalShell() {
                   {member.country ? <p className="mt-1 text-sm text-brand-slate">{member.country}</p> : null}
                 </div>
               </div>
-              {member.editorDescription ? <p className="mt-4 leading-7 text-brand-slate">{member.editorDescription}</p> : null}
-              {member.editorBiography ? <p className="mt-4 leading-7 text-brand-slate">{member.editorBiography}</p> : null}
+              {member.editorDescription ? (
+                hasHtmlContent(member.editorDescription) ? (
+                  <div className="rich-copy mt-4 text-brand-slate" dangerouslySetInnerHTML={{ __html: member.editorDescription }} />
+                ) : (
+                  <p className="mt-4 leading-7 text-brand-slate">{member.editorDescription}</p>
+                )
+              ) : null}
+              {member.editorBiography ? (
+                hasHtmlContent(member.editorBiography) ? (
+                  <div className="rich-copy mt-4 text-brand-slate" dangerouslySetInnerHTML={{ __html: member.editorBiography }} />
+                ) : (
+                  <p className="mt-4 leading-7 text-brand-slate">{member.editorBiography}</p>
+                )
+              ) : null}
               {member.profileUrl ? (
                 <a href={member.profileUrl} target="_blank" rel="noreferrer" className="button-soft mt-4 px-4 py-2">
                   <ExternalLink size={16} className="mr-2" />
