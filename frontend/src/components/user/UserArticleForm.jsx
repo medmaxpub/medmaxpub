@@ -96,15 +96,6 @@ export default function UserArticleForm({
           </div>
 
           <div>
-            <label className="form-label">Special Issue Title</label>
-            <input
-              value={form.specialIssueTitle}
-              onChange={(event) => setForm((current) => ({ ...current, specialIssueTitle: event.target.value }))}
-              placeholder="Special issue title"
-            />
-          </div>
-
-          <div>
             <label className="form-label">Article Type</label>
             <input
               value={form.articleType}
@@ -179,11 +170,22 @@ export default function UserArticleForm({
 
         <div className="grid gap-6">
           <RichTextEditor
+            label="Special Issue Title"
+            value={form.specialIssueTitle}
+            onChange={(value) => setForm((current) => ({ ...current, specialIssueTitle: value }))}
+            placeholder="Special issue title"
+            toolbarPreset="full"
+            minHeight={140}
+          />
+
+          <RichTextEditor
             label="Article Title"
             value={form.title}
             onChange={(value) => setForm((current) => ({ ...current, title: value }))}
             required
             placeholder="Enter article title"
+            toolbarPreset="full"
+            minHeight={140}
           />
 
           <RichTextEditor
@@ -192,6 +194,8 @@ export default function UserArticleForm({
             onChange={(value) => setForm((current) => ({ ...current, authorNames: value }))}
             required
             placeholder="Enter author names"
+            toolbarPreset="full"
+            minHeight={140}
           />
 
           <RichTextEditor
@@ -200,6 +204,8 @@ export default function UserArticleForm({
             onChange={(value) => setForm((current) => ({ ...current, citeAs: value }))}
             required
             placeholder="Enter citation text"
+            toolbarPreset="full"
+            minHeight={180}
           />
 
           <RichTextEditor
@@ -208,6 +214,8 @@ export default function UserArticleForm({
             onChange={(value) => setForm((current) => ({ ...current, abstractText: value }))}
             required
             placeholder="Enter abstract"
+            toolbarPreset="full"
+            minHeight={260}
           />
         </div>
 

@@ -249,14 +249,6 @@ export default function UserArticleFormPage({
             </div>
           </div>
 
-          <LabelRow label="Special Issue Title">
-            <input
-              placeholder="Special Issue Title"
-              value={form.specialIssueTitle}
-              onChange={(event) => setForm((current) => ({ ...current, specialIssueTitle: event.target.value }))}
-            />
-          </LabelRow>
-
           <LabelRow label="Article Type">
             <input
               placeholder="Enter Article Type"
@@ -269,6 +261,17 @@ export default function UserArticleFormPage({
             <input type="file" accept=".pdf" onChange={(event) => setForm((current) => ({ ...current, pdfFile: event.target.files?.[0] || null }))} />
           </LabelRow>
 
+          <LabelRow label="Special Issue Title">
+            <RichTextEditor
+              label=""
+              value={form.specialIssueTitle}
+              onChange={(value) => setForm((current) => ({ ...current, specialIssueTitle: value }))}
+              placeholder="Special Issue Title"
+              toolbarPreset="full"
+              minHeight={140}
+            />
+          </LabelRow>
+
           <LabelRow label="Article Title" required>
             <RichTextEditor
               label=""
@@ -276,6 +279,8 @@ export default function UserArticleFormPage({
               onChange={(value) => setForm((current) => ({ ...current, title: value }))}
               required
               placeholder="Enter article title"
+              toolbarPreset="full"
+              minHeight={140}
             />
           </LabelRow>
 
@@ -286,6 +291,8 @@ export default function UserArticleFormPage({
               onChange={(value) => setForm((current) => ({ ...current, authorNames: value }))}
               required
               placeholder="Enter author names"
+              toolbarPreset="full"
+              minHeight={140}
             />
           </LabelRow>
 
@@ -321,6 +328,8 @@ export default function UserArticleFormPage({
               onChange={(value) => setForm((current) => ({ ...current, citeAs: value }))}
               required
               placeholder="Enter citation text"
+              toolbarPreset="full"
+              minHeight={180}
             />
           </LabelRow>
 
@@ -367,6 +376,8 @@ export default function UserArticleFormPage({
               onChange={(value) => setForm((current) => ({ ...current, abstractText: value }))}
               required
               placeholder="Enter abstract"
+              toolbarPreset="full"
+              minHeight={260}
             />
           </LabelRow>
 

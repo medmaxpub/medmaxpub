@@ -91,8 +91,41 @@ button {
   @apply mb-4 leading-7 text-brand-slate;
 }
 
+.rich-copy ol,
 .rich-copy ul {
   @apply mb-4 list-disc space-y-2 pl-5 text-brand-slate;
+}
+
+.rich-copy ol {
+  @apply list-decimal;
+}
+
+.rich-copy table {
+  @apply my-4 w-full border-collapse;
+}
+
+.rich-copy th,
+.rich-copy td {
+  @apply border border-brand-border px-3 py-2 align-top text-brand-slate;
+}
+
+.rich-copy blockquote {
+  @apply my-4 border-l-4 border-brand-crimson pl-4 text-brand-slate;
+}
+
+.rich-copy hr {
+  @apply my-5 border-0 border-t border-brand-border;
+}
+
+.rich-copy .rich-page-break {
+  border-top-style: dashed;
+  border-top-width: 2px;
+  border-top-color: #7c3aed;
+}
+
+.rich-copy iframe,
+.rich-copy img {
+  max-width: 100%;
 }
 
 .rich-editor-shell {
@@ -103,17 +136,84 @@ button {
   @apply flex flex-wrap gap-2 border-b border-brand-border bg-brand-elevated p-3;
 }
 
+.rich-editor-toolbar-full {
+  @apply gap-3;
+}
+
+.rich-editor-toolbar-group {
+  @apply flex flex-wrap items-center gap-2;
+}
+
 .rich-editor-button {
   @apply inline-flex min-h-9 items-center justify-center gap-2 rounded-full border border-brand-border bg-white px-3 py-2 text-xs font-semibold text-brand-ink hover:border-brand-teal hover:bg-brand-sky;
+}
+
+.rich-editor-select,
+.rich-editor-source {
+  @apply rounded-2xl border border-brand-border bg-white text-brand-ink;
+}
+
+.rich-editor-select {
+  @apply min-h-9 px-3 py-2 text-xs shadow-none;
+}
+
+.rich-editor-color {
+  @apply inline-flex items-center gap-2 rounded-full border border-brand-border bg-white px-3 py-2 text-xs font-semibold text-brand-ink;
+}
+
+.rich-editor-color input {
+  height: 1.4rem;
+  width: 1.6rem;
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.rich-editor-meta {
+  @apply flex flex-wrap gap-3 px-4 pt-3 text-xs text-brand-slate;
 }
 
 .rich-editor-surface {
   @apply min-h-36 bg-white px-4 py-3 text-sm text-brand-ink outline-none;
 }
 
+.rich-editor-source,
+.rich-editor-preview {
+  @apply min-h-36 w-full px-4 py-3 text-sm leading-7 text-brand-ink;
+}
+
+.rich-editor-source {
+  @apply block resize-y rounded-none border-0 border-t border-brand-border font-mono;
+}
+
+.rich-editor-preview {
+  @apply border-t border-brand-border bg-white;
+}
+
+.rich-editor-surface-blocks > * {
+  outline: 1px dashed rgba(124, 58, 237, 0.35);
+  outline-offset: 3px;
+}
+
 .rich-editor-surface:empty::before {
   content: attr(data-placeholder);
   @apply text-brand-slate;
+}
+
+.rich-editor-shell-maximized {
+  position: fixed;
+  inset: 1rem;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.28);
+}
+
+.rich-editor-shell-maximized .rich-editor-surface,
+.rich-editor-shell-maximized .rich-editor-source,
+.rich-editor-shell-maximized .rich-editor-preview {
+  flex: 1;
+  min-height: 50vh !important;
 }
 
 .hero-marquee {

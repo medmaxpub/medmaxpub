@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import SectionHeader from "../../components/common/SectionHeader";
+import RichTextEditor from "../../components/user/RichTextEditor";
 import { useAuth } from "../../context/AuthContext";
 import { mockJournals, mockTestimonials } from "../../data/mockData";
 import useAutoRefresh from "../../hooks/useAutoRefresh";
@@ -566,30 +567,36 @@ export default function AdminDashboardPage({ mode = "admin" }) {
               </div>
               <div>
                 <label className="form-label" data-required="true">About Journal</label>
-                <textarea
+                <RichTextEditor
+                  label=""
                   value={journalForm.aboutJournal}
-                  onChange={(event) => setJournalForm({ ...journalForm, aboutJournal: event.target.value })}
+                  onChange={(value) => setJournalForm({ ...journalForm, aboutJournal: value })}
                   placeholder="About Journal"
-                  rows="5"
+                  toolbarPreset="full"
+                  minHeight={220}
                   required
                 />
               </div>
               <div>
                 <label className="form-label">Aim &amp; Scope</label>
-                <textarea
+                <RichTextEditor
+                  label=""
                   value={journalForm.aimScope}
-                  onChange={(event) => setJournalForm({ ...journalForm, aimScope: event.target.value })}
+                  onChange={(value) => setJournalForm({ ...journalForm, aimScope: value })}
                   placeholder="Aim & Scope"
-                  rows="5"
+                  toolbarPreset="full"
+                  minHeight={220}
                 />
               </div>
               <div>
                 <label className="form-label" data-required="true">Journal Instructions</label>
-                <textarea
+                <RichTextEditor
+                  label=""
                   value={journalForm.journalInstructions}
-                  onChange={(event) => setJournalForm({ ...journalForm, journalInstructions: event.target.value })}
+                  onChange={(value) => setJournalForm({ ...journalForm, journalInstructions: value })}
                   placeholder="Journal Instructions"
-                  rows="5"
+                  toolbarPreset="full"
+                  minHeight={220}
                   required
                 />
               </div>

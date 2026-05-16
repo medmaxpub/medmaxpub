@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import SectionHeader from "../common/SectionHeader";
 import { X } from "lucide-react";
+import RichTextEditor from "../user/RichTextEditor";
 
 export default function JournalEditorModal({
   open,
@@ -195,30 +196,36 @@ export default function JournalEditorModal({
             </div>
             <div>
               <label className="form-label" data-required="true">About Journal</label>
-              <textarea
+              <RichTextEditor
+                label=""
                 value={form.aboutJournal}
-                onChange={(event) => setForm((current) => ({ ...current, aboutJournal: event.target.value }))}
+                onChange={(value) => setForm((current) => ({ ...current, aboutJournal: value }))}
                 placeholder="About Journal"
-                rows="4"
+                toolbarPreset="full"
+                minHeight={220}
                 required
               />
             </div>
             <div>
               <label className="form-label">Aim &amp; Scope</label>
-              <textarea
+              <RichTextEditor
+                label=""
                 value={form.aimScope}
-                onChange={(event) => setForm((current) => ({ ...current, aimScope: event.target.value }))}
+                onChange={(value) => setForm((current) => ({ ...current, aimScope: value }))}
                 placeholder="Aim & Scope"
-                rows="4"
+                toolbarPreset="full"
+                minHeight={220}
               />
             </div>
             <div>
               <label className="form-label" data-required="true">Journal Instructions</label>
-              <textarea
+              <RichTextEditor
+                label=""
                 value={form.journalInstructions}
-                onChange={(event) => setForm((current) => ({ ...current, journalInstructions: event.target.value }))}
+                onChange={(value) => setForm((current) => ({ ...current, journalInstructions: value }))}
                 placeholder="Journal Instructions"
-                rows="4"
+                toolbarPreset="full"
+                minHeight={220}
                 required
               />
             </div>
