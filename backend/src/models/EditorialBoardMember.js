@@ -20,7 +20,8 @@ const editorialBoardMemberSchema = new mongoose.Schema(
     journal: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Journal",
-      required: true
+      required: true,
+      index: true
     },
     editorType: {
       type: String,
@@ -66,6 +67,8 @@ const editorialBoardMemberSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+editorialBoardMemberSchema.index({ journal: 1, createdAt: -1 });
 
 const EditorialBoardMember = mongoose.model("EditorialBoardMember", editorialBoardMemberSchema);
 

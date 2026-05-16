@@ -20,12 +20,14 @@ const articleSchema = new mongoose.Schema(
     journal: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Journal",
-      required: true
+      required: true,
+      index: true
     },
     issue: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Issue",
-      required: false
+      required: false,
+      index: true
     },
     title: { type: String, required: true },
     authors: [{ type: String }],
@@ -71,6 +73,8 @@ const articleSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+articleSchema.index({ journal: 1, status: 1 });
 
 const Article = mongoose.model("Article", articleSchema);
 

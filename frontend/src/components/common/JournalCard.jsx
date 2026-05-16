@@ -17,6 +17,8 @@ export default function JournalCard({ journal }) {
           <img
             src={getJournalCoverImage(journal)}
             alt={`${journal.managingJournalName} cover`}
+            loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover object-center transition duration-500 hover:scale-[1.03]"
           />
         </div>

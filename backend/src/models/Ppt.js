@@ -20,7 +20,8 @@ const pptSchema = new mongoose.Schema(
     journal: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Journal",
-      required: true
+      required: true,
+      index: true
     },
     title: { type: String, required: true },
     description: { type: String, required: true },
@@ -48,6 +49,8 @@ const pptSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+pptSchema.index({ journal: 1, createdAt: -1 });
 
 const Ppt = mongoose.model("Ppt", pptSchema);
 

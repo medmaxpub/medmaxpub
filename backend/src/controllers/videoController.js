@@ -39,18 +39,23 @@ export const createVideo = asyncHandler(async (req, res) => {
     videoFile
   });
 
-  const populatedVideo = await Video.findById(video._id).populate("journal", "managingJournalName journalUrl journalDomainName").lean();
+  const populatedVideo = await Video.findById(video._id)
+    .populate("journal", "managingJournalName journalUrl journalDomainName slug firstName lastName aboutJournal")
+    .lean();
   res.status(201).json(populatedVideo);
 });
 
 export const getVideos = asyncHandler(async (req, res) => {
-  const videos = await Video.find().populate("journal", "managingJournalName journalUrl journalDomainName").sort({ createdAt: -1 }).lean();
+  const videos = await Video.find()
+    .populate("journal", "managingJournalName journalUrl journalDomainName slug firstName lastName aboutJournal")
+    .sort({ createdAt: -1 })
+    .lean();
   res.json(filterSampleMediaItems(videos));
 });
 
 export const getAdminVideos = asyncHandler(async (req, res) => {
   const videos = await Video.find(buildAccessibleJournalFilter(req.user))
-    .populate("journal", "managingJournalName journalUrl journalDomainName")
+    .populate("journal", "managingJournalName journalUrl journalDomainName slug firstName lastName aboutJournal")
     .sort({ createdAt: -1 })
     .lean();
 

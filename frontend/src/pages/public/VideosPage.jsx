@@ -34,28 +34,32 @@ export default function VideosPage() {
       return;
     }
 
-    const journalSummaries = await withFallback(() => api.get("/journals"), []);
-    const journalDetails = await Promise.all(
-      (Array.isArray(journalSummaries) ? journalSummaries : []).map((journal) =>
-        withFallback(() => api.get(`/journals/${journal.publicJournalUrl || journal.journalUrl}`), null)
-      )
+    const [journalSummaries, videoRecords] = await Promise.all([
+      withFallback(() => api.get("/journals"), []),
+      withFallback(() => api.get("/videos"), [])
+    ]);
+
+    const journalLookup = new Map(
+      (Array.isArray(journalSummaries) ? journalSummaries : []).map((journal) => [
+        journal.publicJournalUrl || journal.journalUrl,
+        buildJournalArchiveInfo(journal)
+      ])
     );
 
-    const liveItems = journalDetails
-      .filter(Boolean)
-      .flatMap((journal) => {
-        const journalInfo = buildJournalArchiveInfo(journal);
+    const liveItems = (Array.isArray(videoRecords) ? videoRecords : []).map((video) => {
+      const normalizedItem = normalizeVideoItem(video);
+      const journalInfo =
+        buildJournalArchiveInfo(video.journal || {}) ||
+        journalLookup.get(normalizedItem.publicJournalUrl || normalizedItem.journalUrl) ||
+        null;
 
-        return (journal.videos || []).map((video) => ({
-          ...normalizeVideoItem({
-            ...video,
-            journalTitle: journal.managingJournalName,
-            journalUrl: journal.journalUrl,
-            publicJournalUrl: journal.publicJournalUrl
-          }),
+      return {
+        ...normalizedItem,
+        journalInfo:
+          journalLookup.get(normalizedItem.publicJournalUrl || normalizedItem.journalUrl) ||
           journalInfo
-        }));
-      });
+      };
+    });
 
     setItems(liveItems);
     setIsLoading(false);

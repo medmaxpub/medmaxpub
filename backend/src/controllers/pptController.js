@@ -36,27 +36,23 @@ export const uploadPpt = asyncHandler(async (req, res) => {
 });
 
 export const getPpts = asyncHandler(async (req, res) => {
-  const ppts = await Ppt.find().populate("journal", "managingJournalName journalUrl journalDomainName").sort({ createdAt: -1 });
-
-  for (const ppt of ppts) {
-    await ensurePptPreviewAsset(ppt, req);
-  }
+  const ppts = await Ppt.find()
+    .populate("journal", "managingJournalName journalUrl journalDomainName slug firstName lastName aboutJournal")
+    .sort({ createdAt: -1 })
+    .lean();
 
   res.set("Cache-Control", "no-store");
-  res.json(filterSampleMediaItems(ppts.map((ppt) => ppt.toObject())).map((ppt) => serializePpt(ppt)));
+  res.json(filterSampleMediaItems(ppts).map((ppt) => serializePpt(ppt)));
 });
 
 export const getAdminPpts = asyncHandler(async (req, res) => {
   const ppts = await Ppt.find(buildAccessibleJournalFilter(req.user))
-    .populate("journal", "managingJournalName journalUrl journalDomainName")
-    .sort({ createdAt: -1 });
-
-  for (const ppt of ppts) {
-    await ensurePptPreviewAsset(ppt, req);
-  }
+    .populate("journal", "managingJournalName journalUrl journalDomainName slug firstName lastName aboutJournal")
+    .sort({ createdAt: -1 })
+    .lean();
 
   res.set("Cache-Control", "no-store");
-  res.json(filterSampleMediaItems(ppts.map((ppt) => ppt.toObject())).map((ppt) => serializePpt(ppt)));
+  res.json(filterSampleMediaItems(ppts).map((ppt) => serializePpt(ppt)));
 });
 
 export const getPptById = asyncHandler(async (req, res) => {
@@ -70,7 +66,6 @@ export const getPptById = asyncHandler(async (req, res) => {
     throw new AppError("PPT not found", 404);
   }
 
-  await ensurePptPreviewAsset(ppt, req);
   res.set("Cache-Control", "no-store");
   res.json(serializePpt(ppt.toObject()));
 });

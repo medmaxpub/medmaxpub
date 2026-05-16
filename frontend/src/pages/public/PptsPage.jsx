@@ -34,28 +34,32 @@ export default function PptsPage() {
       return;
     }
 
-    const journalSummaries = await withFallback(() => api.get("/journals"), []);
-    const journalDetails = await Promise.all(
-      (Array.isArray(journalSummaries) ? journalSummaries : []).map((journal) =>
-        withFallback(() => api.get(`/journals/${journal.publicJournalUrl || journal.journalUrl}`), null)
-      )
+    const [journalSummaries, pptRecords] = await Promise.all([
+      withFallback(() => api.get("/journals"), []),
+      withFallback(() => api.get("/ppts"), [])
+    ]);
+
+    const journalLookup = new Map(
+      (Array.isArray(journalSummaries) ? journalSummaries : []).map((journal) => [
+        journal.publicJournalUrl || journal.journalUrl,
+        buildJournalArchiveInfo(journal)
+      ])
     );
 
-    const liveItems = journalDetails
-      .filter(Boolean)
-      .flatMap((journal) => {
-        const journalInfo = buildJournalArchiveInfo(journal);
+    const liveItems = (Array.isArray(pptRecords) ? pptRecords : []).map((ppt) => {
+      const normalizedItem = normalizePptItem(ppt);
+      const journalInfo =
+        buildJournalArchiveInfo(ppt.journal || {}) ||
+        journalLookup.get(normalizedItem.publicJournalUrl || normalizedItem.journalUrl) ||
+        null;
 
-        return (journal.ppts || []).map((ppt) => ({
-          ...normalizePptItem({
-            ...ppt,
-            journalTitle: journal.managingJournalName,
-            journalUrl: journal.journalUrl,
-            publicJournalUrl: journal.publicJournalUrl
-          }),
+      return {
+        ...normalizedItem,
+        journalInfo:
+          journalLookup.get(normalizedItem.publicJournalUrl || normalizedItem.journalUrl) ||
           journalInfo
-        }));
-      });
+      };
+    });
 
     setItems(liveItems);
     setIsLoading(false);

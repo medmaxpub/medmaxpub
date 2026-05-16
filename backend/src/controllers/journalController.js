@@ -7,7 +7,7 @@ import Ppt from "../models/Ppt.js";
 import User from "../models/User.js";
 import Video from "../models/Video.js";
 import { ARTICLE_STATUSES, deriveArticleStatus } from "./articleController.js";
-import { ensurePptPreviewAsset, normalizeStoredAssetUrl, serializePpt } from "../services/pptService.js";
+import { normalizeStoredAssetUrl, serializePpt } from "../services/pptService.js";
 import { ensureJournalAccess, ensureSuperAdmin, hasElevatedAccess } from "../utils/accessControl.js";
 import { deleteAsset, uploadAsset } from "../utils/assetStorage.js";
 import { AppError } from "../utils/appError.js";
@@ -248,10 +248,6 @@ async function buildJournalDetails(journal, req) {
       issues: issuesList
     }))
   }));
-
-  for (const ppt of ppts) {
-    await ensurePptPreviewAsset(ppt, req);
-  }
 
   return {
     ...serializeJournalSummary(journal),

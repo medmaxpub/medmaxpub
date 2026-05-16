@@ -20,7 +20,8 @@ const videoSchema = new mongoose.Schema(
     journal: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Journal",
-      required: true
+      required: true,
+      index: true
     },
     title: { type: String, required: true },
     description: { type: String, default: "" },
@@ -32,6 +33,8 @@ const videoSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+videoSchema.index({ journal: 1, createdAt: -1 });
 
 const Video = mongoose.model("Video", videoSchema);
 

@@ -190,6 +190,9 @@ export default function HomePage() {
                   <img
                     src={dnaImage}
                     alt="DNA visualization"
+                    loading="lazy"
+                    decoding="async"
+                    fetchPriority="low"
                     className="relative mx-auto w-full object-contain drop-shadow-[0_24px_45px_rgba(15,23,42,0.12)] lg:mx-0"
                   />
                 </div>

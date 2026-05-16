@@ -5,7 +5,8 @@ const issueSchema = new mongoose.Schema(
     journal: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Journal",
-      required: true
+      required: true,
+      index: true
     },
     volume: { type: Number, required: true },
     issue: { type: Number, required: true },
@@ -15,6 +16,8 @@ const issueSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+issueSchema.index({ journal: 1, year: -1, volume: -1, issue: -1 });
 
 const Issue = mongoose.model("Issue", issueSchema);
 
