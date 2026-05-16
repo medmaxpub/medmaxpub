@@ -12,10 +12,15 @@ export default function AboutMedmaxSection() {
               title="A peer-reviewed open access platform built for global scientific knowledge sharing"
               description="The following profile appears directly below the homepage hero so visitors immediately understand the Medmax publishing mission."
             />
-            <div className="rich-copy mt-8 text-base">
-              {aboutMedmaxParagraphs.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
+            <div className="mt-8 space-y-5 text-brand-slate">
+              <p className="text-justify text-base leading-8 sm:text-lg">
+                {aboutMedmaxParagraphs[0]}
+              </p>
+              <div className="space-y-4 text-justify text-sm leading-8 sm:text-base">
+                {aboutMedmaxParagraphs.slice(1).map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
             </div>
           </div>
 

@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import SectionHeader from "../common/SectionHeader";
 import { X } from "lucide-react";
 
@@ -14,17 +15,71 @@ export default function JournalEditorModal({
   ownerNotice = "",
   description = ""
 }) {
+  const userNameInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
+  const [allowCredentialTyping, setAllowCredentialTyping] = useState(false);
+
   if (!open) {
     return null;
   }
 
   const normalizedModeLabel = String(modeLabel || "").toLowerCase();
   const isCreateMode = !normalizedModeLabel.includes("edit") && !normalizedModeLabel.includes("update");
+  const shouldGuardCredentials = !isCreateForExistingUser && !ownerNotice && isCreateMode;
+
+  useEffect(() => {
+    if (!open || !shouldGuardCredentials) {
+      return;
+    }
+
+    setAllowCredentialTyping(false);
+
+    const clearAutofilledCredentials = () => {
+      setForm((current) => ({
+        ...current,
+        username: "",
+        password: ""
+      }));
+
+      if (userNameInputRef.current) {
+        userNameInputRef.current.value = "";
+      }
+
+      if (passwordInputRef.current) {
+        passwordInputRef.current.value = "";
+      }
+    };
+
+    clearAutofilledCredentials();
+    const timeoutId = window.setTimeout(clearAutofilledCredentials, 150);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [open, setForm, shouldGuardCredentials]);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 px-4 py-6">
       <div className="flex min-h-full items-start justify-center">
-        <form onSubmit={onSubmit} className="card-panel relative my-2 w-full max-w-4xl max-h-[calc(100vh-2rem)] overflow-y-auto p-6 sm:p-7">
+        <form onSubmit={onSubmit} className="card-panel relative my-2 w-full max-w-4xl max-h-[calc(100vh-2rem)] overflow-y-auto p-6 sm:p-7" autoComplete="off">
+          {shouldGuardCredentials ? (
+            <>
+              <input
+                type="text"
+                name="username"
+                autoComplete="username"
+                tabIndex={-1}
+                aria-hidden="true"
+                className="pointer-events-none absolute h-0 w-0 opacity-0"
+              />
+              <input
+                type="password"
+                name="password"
+                autoComplete="current-password"
+                tabIndex={-1}
+                aria-hidden="true"
+                className="pointer-events-none absolute h-0 w-0 opacity-0"
+              />
+            </>
+          ) : null}
           <button
             type="button"
             className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-brand-border bg-white text-brand-slate hover:border-brand-crimson hover:text-brand-crimson"
@@ -68,19 +123,29 @@ export default function JournalEditorModal({
             <div>
               <label className="form-label" data-required="true">User Name</label>
               <input
+                ref={userNameInputRef}
+                name={shouldGuardCredentials ? "journal-owner-identifier" : "username"}
                 value={form.username}
                 onChange={(event) => setForm((current) => ({ ...current, username: event.target.value }))}
+                onFocus={() => setAllowCredentialTyping(true)}
                 placeholder="User Name"
+                autoComplete={shouldGuardCredentials ? "off" : "username"}
+                readOnly={shouldGuardCredentials && !allowCredentialTyping}
                 required
               />
             </div>
             <div>
               <label className="form-label" data-required="true">Password</label>
               <input
+                ref={passwordInputRef}
+                name={shouldGuardCredentials ? "journal-owner-secret" : "password"}
                 value={form.password}
                 onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
+                onFocus={() => setAllowCredentialTyping(true)}
                 placeholder="Password"
                 type="password"
+                autoComplete={shouldGuardCredentials ? "new-password" : "current-password"}
+                readOnly={shouldGuardCredentials && !allowCredentialTyping}
                 required
               />
             </div>

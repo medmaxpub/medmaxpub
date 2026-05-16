@@ -25,9 +25,11 @@ export default function JournalCard({ journal }) {
           <h3 className="font-display text-xl font-semibold leading-tight text-brand-ink sm:text-2xl">
             {journal.managingJournalName}
           </h3>
-          <p className="mt-3 text-sm font-medium uppercase tracking-[0.18em] text-brand-gold">
-            {journal.issn || "ISSN pending"}
-          </p>
+          {journal.issn ? (
+            <p className="mt-3 text-sm font-medium uppercase tracking-[0.18em] text-brand-gold">
+              {journal.issn}
+            </p>
+          ) : null}
         </div>
       </article>
     </Link>

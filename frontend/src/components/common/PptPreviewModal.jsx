@@ -1,10 +1,11 @@
 import { Download, ExternalLink } from "lucide-react";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import api from "../../api/client";
 import { buildAssetProxyUrl } from "../../utils/assetProxy";
 import { buildPdfProxyUrl } from "../../utils/pdfProxy";
 import { normalizePptItem } from "../../utils/pptPreview";
-import PdfJsViewerModal from "./PdfJsViewerModal";
+
+const PdfJsViewerModal = lazy(() => import("./PdfJsViewerModal"));
 
 export default function PptPreviewModal({ ppt, onClose }) {
   const [resolvedPpt, setResolvedPpt] = useState(ppt ? normalizePptItem(ppt) : null);
@@ -72,55 +73,57 @@ export default function PptPreviewModal({ ppt, onClose }) {
   });
 
   return (
-    <PdfJsViewerModal
-      label="PPT Preview"
-      title={resolvedPpt.title}
-      subtitle={resolvedPpt.journalTitle || ""}
-      fileUrl={inlinePreviewUrl}
-      onClose={onClose}
-      basicViewer
-      actions={[
-        ...(resolvedPpt.previewPdfUrl
-          ? [
-              {
-                label: "Open Preview PDF",
-                href: inlinePreviewUrl || resolvedPpt.previewPdfUrl,
-                variant: "soft",
-                icon: ExternalLink
-              }
-            ]
-          : []),
-        ...(originalPptDownloadUrl
-          ? [
-              {
-                label: "Download PPT",
-                href: originalPptDownloadUrl,
-                variant: "primary",
-                icon: Download,
-                download: true
-              }
-            ]
-          : [])
-      ]}
-      emptyTitle={waitingForPreview ? "Preview is being generated" : "Preview unavailable"}
-      emptyDescription={
-        waitingForPreview
-          ? "The PDF preview for this PPT is being generated automatically. Please try again shortly."
-          : resolvedPpt.previewError || "Preview PDF generation failed for this PPT. You can still download the original presentation."
-      }
-      emptyActions={
-        originalPptDownloadUrl
-          ? [
-              {
-                label: "Download PPT",
-                href: originalPptDownloadUrl,
-                variant: "primary",
-                icon: Download,
-                download: true
-              }
-            ]
-          : []
-      }
-    />
+    <Suspense fallback={null}>
+      <PdfJsViewerModal
+        label="PPT Preview"
+        title={resolvedPpt.title}
+        subtitle={resolvedPpt.journalTitle || ""}
+        fileUrl={inlinePreviewUrl}
+        onClose={onClose}
+        basicViewer
+        actions={[
+          ...(resolvedPpt.previewPdfUrl
+            ? [
+                {
+                  label: "Open Preview PDF",
+                  href: inlinePreviewUrl || resolvedPpt.previewPdfUrl,
+                  variant: "soft",
+                  icon: ExternalLink
+                }
+              ]
+            : []),
+          ...(originalPptDownloadUrl
+            ? [
+                {
+                  label: "Download PPT",
+                  href: originalPptDownloadUrl,
+                  variant: "primary",
+                  icon: Download,
+                  download: true
+                }
+              ]
+            : [])
+        ]}
+        emptyTitle={waitingForPreview ? "Preview is being generated" : "Preview unavailable"}
+        emptyDescription={
+          waitingForPreview
+            ? "The PDF preview for this PPT is being generated automatically. Please try again shortly."
+            : resolvedPpt.previewError || "Preview PDF generation failed for this PPT. You can still download the original presentation."
+        }
+        emptyActions={
+          originalPptDownloadUrl
+            ? [
+                {
+                  label: "Download PPT",
+                  href: originalPptDownloadUrl,
+                  variant: "primary",
+                  icon: Download,
+                  download: true
+                }
+              ]
+            : []
+        }
+      />
+    </Suspense>
   );
 }

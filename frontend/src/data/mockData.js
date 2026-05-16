@@ -58,10 +58,11 @@ export const heroShowcaseImages = [
 ];
 
 export const aboutMedmaxParagraphs = [
-  "Medmax Publishers is a peer-reviewed, open access publisher covering a comprehensive range of topics in Clinical, Medicine, Life Sciences, Pharma, and Engineering & Technology. We help scientific researchers, institutions, academic professionals, and young professionals advance healthcare, open science, and performance for the benefit of humanity.",
-  "Medmax Publishers is moving ahead with a vision to develop an optimized knowledge-sharing platform and an enlightening interactive network for scholars and scientific researchers all over the world through its scientific publications. Medmax Publishers works with well-qualified community and advisory board members who support new research and development for the organization. Medmax Journals follow a single-blind peer-review process, where each manuscript submitted by an author is assigned to a particular editor.",
-  "Medmax Publishers publishes many kinds of manuscripts, including Original Research, Review Articles, Case Reports, Rapid Communications, Short Communications, Mini Reviews, Editorials, Letters to the Editor, Commentary, Perspectives, Case in Images, Clinical Images, and Research Highlights across medical, clinical, and engineering fields.",
-  "All listed journals are part of the open access process and are available to read without access fees or subscription charges."
+  "Medmax Publishers is a peer-reviewed, open access publisher covering a comprehensive range of topics in Clinical, Medicine, Life Sciences, Pharma, and Engineering & Technology. We support researchers, institutions, academic professionals, and emerging scholars in advancing healthcare, open science, and knowledge sharing for the benefit of humanity.",
+  "Our vision is to build an optimized publishing platform and a meaningful scientific network for scholars and researchers around the world. Medmax Publishers works with qualified editorial and advisory members who support research development, publication quality, and long-term academic visibility.",
+  "Medmax Journals follow a single-blind peer-review process, where each submitted manuscript is assigned to a relevant editor for editorial assessment and reviewer coordination. This helps maintain clarity, consistency, and scholarly publishing standards across every journal.",
+  "We publish a wide range of manuscript types, including Original Research, Review Articles, Case Reports, Rapid Communications, Short Communications, Mini Reviews, Editorials, Letters to the Editor, Commentary, Perspectives, Case in Images, Clinical Images, and Research Highlights across medical, clinical, and engineering disciplines.",
+  "All listed journals follow the open access model and are available to readers without subscription charges or access fees."
 ];
 
 export const aboutMedmaxHighlights = [
