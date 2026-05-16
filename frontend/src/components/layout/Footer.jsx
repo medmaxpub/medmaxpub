@@ -8,8 +8,8 @@ export default function Footer() {
     <footer className="border-t border-brand-navy/20 bg-[#173b87] text-white">
       <div className="container-shell grid gap-8 py-10 sm:py-12 md:grid-cols-2 xl:grid-cols-[1.15fr_0.8fr_1fr] xl:gap-12">
         <div className="xl:pr-6">
-          <Link to="/" className="inline-flex transition hover:opacity-90">
-            <img src={medmaxPrimaryLogo} alt="Medmax Publishers" className="h-24 w-auto sm:h-28" />
+          <Link to="/" className="inline-flex overflow-hidden rounded-2xl bg-white p-3 shadow-[0_14px_32px_rgba(15,23,42,0.16)] transition hover:opacity-90">
+            <img src={medmaxPrimaryLogo} alt="Medmax Publishers" className="h-24 w-auto rounded-xl sm:h-28" />
           </Link>
           <p className="mt-4 max-w-md text-sm leading-7 text-blue-100">
             Medmax Publishers is a peer-reviewed, open access publisher covering a comprehensive range of topics in
