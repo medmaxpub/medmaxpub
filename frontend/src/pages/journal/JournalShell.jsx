@@ -71,20 +71,34 @@ function renderCopyBlock(value, emptyState) {
 export default function JournalShell() {
   const { journalUrl, section = "home" } = useParams();
   const [journal, setJournal] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
   const loadJournal = useCallback(() => {
+    setIsLoading(true);
     return withFallback(
       () => api.get(`/journals/${journalUrl}`),
       useDevelopmentFallback
         ? mockJournals.find((item) => getJournalRouteSlug(item.publicJournalUrl || item.journalUrl) === journalUrl)
         : null
-    ).then(setJournal);
+    )
+      .then(setJournal)
+      .finally(() => setIsLoading(false));
   }, [journalUrl, useDevelopmentFallback]);
 
   useEffect(() => {
     loadJournal();
   }, [loadJournal]);
+
+  if (isLoading) {
+    return (
+      <div className="section-shell">
+        <div className="container-shell">
+          <EmptyState title="Loading journal" description="The selected journal page is being prepared." />
+        </div>
+      </div>
+    );
+  }
 
   if (!journal) {
     return (
