@@ -25,7 +25,9 @@ function buildMockUsers() {
       managingJournalName: journal.managingJournalName,
       journalDomainName: journal.journalDomainName,
       journalUrl: journal.journalUrl,
+      issn: journal.issn,
       aboutJournal: journal.aboutJournal,
+      aimScope: journal.aimScope,
       journalInstructions: journal.journalInstructions,
       firstName: journal.firstName,
       lastName: journal.lastName

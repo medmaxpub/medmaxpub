@@ -28,7 +28,9 @@ const journalSchema = new mongoose.Schema(
     journalDomainName: { type: String, required: true, trim: true },
     slug: { type: String, required: true, unique: true, trim: true, lowercase: true },
     journalUrl: { type: String, required: true, unique: true, trim: true, lowercase: true },
+    issn: { type: String, default: "", trim: true },
     aboutJournal: { type: String, required: true, trim: true },
+    aimScope: { type: String, default: "", trim: true },
     journalInstructions: { type: String, required: true, trim: true },
     coverImage: assetSchema,
     pdfFile: assetSchema

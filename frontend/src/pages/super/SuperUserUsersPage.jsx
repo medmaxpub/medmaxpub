@@ -201,7 +201,9 @@ export default function SuperUserUsersPage() {
       payload.append("managingJournalName", journalForm.managingJournalName);
       payload.append("journalDomainName", journalForm.journalDomainName);
       payload.append("journalUrl", journalForm.journalUrl);
+      payload.append("issn", journalForm.issn);
       payload.append("aboutJournal", journalForm.aboutJournal);
+      payload.append("aimScope", journalForm.aimScope);
       payload.append("journalInstructions", journalForm.journalInstructions);
 
       if (journalForm.coverImageFile) {

@@ -16,7 +16,9 @@ const initialJournalForm = {
   managingJournalName: "",
   journalDomainName: "",
   journalUrl: "",
+  issn: "",
   aboutJournal: "",
+  aimScope: "",
   journalInstructions: "",
   pptFile: null,
   pptPreviewFile: null,
@@ -54,7 +56,9 @@ function mapJournalToForm(journal) {
     managingJournalName: journal?.managingJournalName || "",
     journalDomainName: journal?.journalDomainName || "",
     journalUrl: journal?.journalUrl || "",
+    issn: journal?.issn || "",
     aboutJournal: journal?.aboutJournal || "",
+    aimScope: journal?.aimScope || "",
     journalInstructions: journal?.journalInstructions || "",
     pptFile: null,
     pptPreviewFile: null,
@@ -250,7 +254,9 @@ export default function AdminDashboardPage({ mode = "admin" }) {
       payload.append("managingJournalName", journalForm.managingJournalName);
       payload.append("journalDomainName", journalForm.journalDomainName);
       payload.append("journalUrl", journalForm.journalUrl);
+      payload.append("issn", journalForm.issn);
       payload.append("aboutJournal", journalForm.aboutJournal);
+      payload.append("aimScope", journalForm.aimScope);
       payload.append("journalInstructions", journalForm.journalInstructions);
 
       if (journalForm.coverImageFile) {
@@ -569,6 +575,15 @@ export default function AdminDashboardPage({ mode = "admin" }) {
                 />
               </div>
               <div>
+                <label className="form-label">Aim &amp; Scope</label>
+                <textarea
+                  value={journalForm.aimScope}
+                  onChange={(event) => setJournalForm({ ...journalForm, aimScope: event.target.value })}
+                  placeholder="Aim & Scope"
+                  rows="5"
+                />
+              </div>
+              <div>
                 <label className="form-label" data-required="true">Journal Instructions</label>
                 <textarea
                   value={journalForm.journalInstructions}
@@ -581,6 +596,14 @@ export default function AdminDashboardPage({ mode = "admin" }) {
               <div className="rounded-3xl border border-brand-border bg-brand-surface p-5">
                 <p className="text-sm font-semibold text-brand-ink">Optional Uploads</p>
                 <div className="mt-4 grid gap-4">
+                  <div>
+                    <label className="form-label">ISSN</label>
+                    <input
+                      value={journalForm.issn}
+                      onChange={(event) => setJournalForm({ ...journalForm, issn: event.target.value })}
+                      placeholder="ISSN"
+                    />
+                  </div>
                   <div>
                     <label className="form-label">PDF</label>
                     <input

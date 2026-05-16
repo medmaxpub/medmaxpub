@@ -408,6 +408,7 @@ export default function JournalShell() {
               <p className="text-xs uppercase tracking-[0.18em] text-brand-gold">Managing Journal Name</p>
               <h1 className="mt-3 font-display text-3xl font-semibold text-brand-ink sm:text-4xl">{journal.managingJournalName}</h1>
               <p className="mt-4 text-sm text-brand-slate">Managed by {journal.firstName} {journal.lastName}</p>
+              {journal.issn ? <p className="mt-2 text-sm font-medium uppercase tracking-[0.16em] text-brand-gold">{journal.issn}</p> : null}
               {journal.pdfFiles?.length ? (
                 <div className="mt-5 flex flex-wrap gap-3">
                   {journal.pdfFiles.map((item) => (

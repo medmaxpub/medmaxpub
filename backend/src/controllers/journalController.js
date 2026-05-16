@@ -78,7 +78,9 @@ function buildJournalPayload(body) {
     journalDomainName: normalizeText(body.journalDomainName),
     journalUrl: normalizedJournalUrl,
     slug: normalizeJournalSlug(body.slug || normalizedJournalUrl || body.managingJournalName),
+    issn: normalizeText(body.issn),
     aboutJournal: normalizeText(body.aboutJournal),
+    aimScope: normalizeText(body.aimScope),
     journalInstructions: normalizeText(body.journalInstructions)
   };
 }
@@ -140,7 +142,9 @@ function serializeJournalSummary(journal) {
     managingJournalName: normalizeText(journal.managingJournalName),
     journalDomainName: normalizeText(journal.journalDomainName),
     journalUrl: normalizeText(journal.journalUrl),
+    issn: normalizeText(journal.issn),
     aboutJournal: normalizeText(journal.aboutJournal),
+    aimScope: normalizeText(journal.aimScope),
     journalInstructions: normalizeText(journal.journalInstructions),
     coverImage: normalizeStoredAssetUrl(journal.coverImage?.secure_url || "", journal.coverImage),
     pdfFileUrl: normalizeStoredAssetUrl(journal.pdfFile?.secure_url || "", journal.pdfFile),
@@ -441,7 +445,9 @@ export const createJournal = asyncHandler(async (req, res) => {
     managingJournalName: payload.managingJournalName,
     journalDomainName: payload.journalDomainName,
     journalUrl: payload.journalUrl,
+    issn: payload.issn,
     aboutJournal: payload.aboutJournal,
+    aimScope: payload.aimScope,
     journalInstructions: payload.journalInstructions,
     coverImage
   });
@@ -475,7 +481,9 @@ export const updateJournal = asyncHandler(async (req, res) => {
   journal.managingJournalName = payload.managingJournalName;
   journal.journalDomainName = payload.journalDomainName;
   journal.journalUrl = payload.journalUrl;
+  journal.issn = payload.issn;
   journal.aboutJournal = payload.aboutJournal;
+  journal.aimScope = payload.aimScope;
   journal.journalInstructions = payload.journalInstructions;
 
   if (nextCoverImage) {

@@ -134,6 +134,15 @@ export default function JournalEditorModal({
             />
           </div>
           <div>
+            <label className="form-label">Aim &amp; Scope</label>
+            <textarea
+              value={form.aimScope}
+              onChange={(event) => setForm((current) => ({ ...current, aimScope: event.target.value }))}
+              placeholder="Aim & Scope"
+              rows="4"
+            />
+          </div>
+          <div>
             <label className="form-label" data-required="true">Journal Instructions</label>
             <textarea
               value={form.journalInstructions}
@@ -146,6 +155,14 @@ export default function JournalEditorModal({
           <div className="rounded-3xl border border-brand-border bg-brand-surface p-5">
             <p className="text-sm font-semibold text-brand-ink">Optional Uploads</p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className="form-label">ISSN</label>
+                <input
+                  value={form.issn}
+                  onChange={(event) => setForm((current) => ({ ...current, issn: event.target.value }))}
+                  placeholder="ISSN"
+                />
+              </div>
               <div className="sm:col-span-2">
                 <label className="form-label">Journal Cover Image</label>
                 <input
