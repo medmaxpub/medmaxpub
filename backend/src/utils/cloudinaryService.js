@@ -1,6 +1,9 @@
 import cloudinary from "../config/cloudinary.js";
 import { AppError } from "./appError.js";
 
+const LARGE_RAW_UPLOAD_THRESHOLD = 20 * 1024 * 1024;
+const LARGE_RAW_UPLOAD_CHUNK_SIZE = 6 * 1024 * 1024;
+
 function sanitizePublicIdSegment(value) {
   return String(value || "file")
     .replace(/[^a-zA-Z0-9-_.]/g, "-")
@@ -79,6 +82,7 @@ export async function uploadToCloudinary(file, folder, resourceType = "auto") {
   ensureConfigured();
 
   return new Promise((resolve, reject) => {
+    const useChunkedUpload = resourceType === "raw" && Number(file?.size || 0) >= LARGE_RAW_UPLOAD_THRESHOLD;
     const options = {
       folder,
       resource_type: resourceType
@@ -92,17 +96,23 @@ export async function uploadToCloudinary(file, folder, resourceType = "auto") {
       options.access_mode = "public";
     }
 
-    const stream = cloudinary.uploader.upload_stream(
-      options,
-      (error, result) => {
-        if (error) {
-          reject(new AppError(error.message || "Cloudinary upload failed", 500));
-          return;
-        }
+    if (useChunkedUpload) {
+      options.chunk_size = LARGE_RAW_UPLOAD_CHUNK_SIZE;
+    }
 
-        resolve(formatAsset(result, file));
+    const handleResult = (error, result) => {
+      if (error || result?.error) {
+        const message = error?.message || result?.error?.message || "Cloudinary upload failed";
+        reject(new AppError(message, 500));
+        return;
       }
-    );
+
+      resolve(formatAsset(result, file));
+    };
+
+    const stream = useChunkedUpload
+      ? cloudinary.uploader.upload_chunked_stream((result) => handleResult(null, result), options)
+      : cloudinary.uploader.upload_stream((error, result) => handleResult(error, result), options);
 
     stream.end(file.buffer);
   });

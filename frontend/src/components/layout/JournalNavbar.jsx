@@ -3,10 +3,6 @@ import { useMemo, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { medmaxTransparentLogo } from "../../assets/branding";
 
-const journalNavItems = [
-  { label: "Back", to: "/home" }
-];
-
 function isItemActive(item, pathname) {
   if (item.kind === "journal-home") {
     return pathname === "/journals";
@@ -22,9 +18,10 @@ function isItemActive(item, pathname) {
 export default function JournalNavbar() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const backTo = location.pathname === "/journals" ? "/" : "/journals";
   const activeItems = useMemo(
-    () => journalNavItems.map((item) => ({ ...item, active: isItemActive(item, location.pathname) })),
-    [location.pathname]
+    () => [{ label: "Back", to: backTo, active: isItemActive({ to: backTo }, location.pathname) }],
+    [backTo, location.pathname]
   );
 
   return (
@@ -32,7 +29,7 @@ export default function JournalNavbar() {
       <div className="container-shell flex items-center justify-between py-4">
         <div className="flex items-center">
           <Link to="/" className="inline-flex items-center">
-            <img src={medmaxTransparentLogo} alt="Medmax Publishers" className="h-20 w-auto sm:h-24 lg:h-24" />
+            <img src={medmaxTransparentLogo} alt="Medmax Publishers" className="h-24 w-auto sm:h-28 lg:h-28" />
           </Link>
         </div>
 

@@ -9,6 +9,7 @@ import WebsiteLayout from "./components/layout/WebsiteLayout";
 
 const JournalShell = lazy(() => import("./pages/journal/JournalShell"));
 const JournalArticleAbstractPage = lazy(() => import("./pages/journal/JournalArticleAbstractPage"));
+const JournalArchiveIssuePage = lazy(() => import("./pages/journal/JournalArchiveIssuePage"));
 const AdminLoginPage = lazy(() => import("./pages/public/AdminLoginPage"));
 const AboutPage = lazy(() => import("./pages/public/AboutPage"));
 const ContactPage = lazy(() => import("./pages/public/ContactPage"));
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="/journals" element={<JournalsPage />} />
           <Route path="/journals/:journalUrl" element={<Navigate to="home" replace />} />
           <Route path="/journals/:journalUrl/article-in-press/:articleId/abstract" element={<JournalArticleAbstractPage />} />
+          <Route path="/journals/:journalUrl/archive/:year/:volume/:issueNumber" element={<JournalArchiveIssuePage />} />
           <Route path="/journals/:journalUrl/:section" element={<JournalShell />} />
         </Route>
 
@@ -70,7 +72,7 @@ export default function App() {
         <Route element={<ProtectedRoute allowedRoles={["user"]} redirectTo="/login" />}>
           <Route path="/user" element={<UserLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<Navigate to="/user/articles-in-press" replace />} />
+            <Route path="dashboard" element={<UserWelcomePage />} />
             <Route path="welcome" element={<UserWelcomePage />} />
             <Route path="editorial-board" element={<UserEditorialBoardPage />} />
             <Route path="editorial-board/add" element={<UserEditorialBoardFormPage />} />

@@ -1,85 +1,50 @@
-import { ChevronDown, Download, ExternalLink } from "lucide-react";
-import { useState } from "react";
-import { buildPdfProxyUrl } from "../../utils/pdfProxy";
+import { Link } from "react-router-dom";
+import { buildJournalArchiveIssuePath } from "../../utils/journalLinks";
 
-export default function IssueAccordion({ archive }) {
-  const [openYear, setOpenYear] = useState(archive[0]?.year ?? null);
+function flattenIssues(yearBlock) {
+  return (yearBlock?.volumes || []).flatMap((volumeBlock) =>
+    (volumeBlock.issues || []).map((issue) => ({
+      year: yearBlock.year,
+      volume: volumeBlock.volume,
+      issueNumber: issue.issue,
+      issueKey: `${yearBlock.year}-${volumeBlock.volume}-${issue.issue}`
+    }))
+  );
+}
 
+export default function IssueAccordion({ archive, journalUrl }) {
   return (
     <div className="space-y-4">
-      {archive.map((yearBlock) => (
-        <div key={yearBlock.year} className="card-panel overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setOpenYear((current) => (current === yearBlock.year ? null : yearBlock.year))}
-            className="flex w-full items-center justify-between gap-4 px-4 py-5 text-left sm:px-6"
-          >
-            <div>
-              <p className="text-sm uppercase tracking-[0.2em] text-brand-teal">Archive Year</p>
-              <h3 className="mt-1 text-xl font-semibold text-brand-ink">{yearBlock.year}</h3>
+      {archive.map((yearBlock) => {
+        const issues = flattenIssues(yearBlock);
+
+        return (
+          <div key={yearBlock.year} className="card-panel overflow-hidden">
+            <div className="px-4 py-5 sm:px-6">
+              <div>
+                <p className="text-sm uppercase tracking-[0.2em] text-brand-teal">Archive Year</p>
+                <h3 className="mt-1 text-xl font-semibold text-brand-ink">{yearBlock.year}</h3>
+              </div>
             </div>
-            <ChevronDown className={openYear === yearBlock.year ? "rotate-180 text-brand-ink" : "text-brand-ink"} />
-          </button>
 
-          {openYear === yearBlock.year ? (
             <div className="border-t border-brand-border px-4 py-5 sm:px-6">
-              <div className="space-y-6">
-                {yearBlock.volumes.map((volumeBlock) => (
-                  <div key={volumeBlock.volume} className="space-y-4">
-                    {volumeBlock.issues.map((issue) => (
-                      <div key={`${volumeBlock.volume}-${issue.issue}`} className="space-y-3">
-                        <p className="text-lg font-semibold text-brand-ink">
-                          Volume {volumeBlock.volume}, Issue {issue.issue}
-                        </p>
-                        {issue.articles.map((article) => {
-                          const viewPdfUrl = buildPdfProxyUrl(article.pdfUrl) || article.pdfUrl;
-                          const downloadPdfUrl = buildPdfProxyUrl(article.pdfUrl, { download: true });
-
-                          return (
-                            <article
-                              key={article.id}
-                              className="overflow-hidden rounded-3xl border border-cyan-500/60 bg-white shadow-sm"
-                            >
-                              <div className="flex items-center justify-between gap-4 bg-[linear-gradient(135deg,#0ea5b7_0%,#0891b2_100%)] px-5 py-3 text-white">
-                                <div className="flex min-w-0 items-center gap-2">
-                                  <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#f3c623] text-sm font-black lowercase text-brand-ink shadow-sm">
-                                    doi
-                                  </span>
-                                  <span className="min-w-0 truncate rounded-md bg-white/20 px-3 py-1 text-sm font-semibold text-white md:text-base">
-                                    {article.doiNumber || "NA"}
-                                  </span>
-                                </div>
-                                <p className="text-lg font-semibold italic">{article.articleType || "Article"}</p>
-                              </div>
-
-                              <div className="flex flex-col gap-3 p-4 lg:flex-row lg:items-center lg:justify-between">
-                                <div>
-                                  <h5 className="font-semibold text-brand-ink">{article.title}</h5>
-                                  <p className="mt-1 text-sm text-brand-slate">{article.authors.join(", ")}</p>
-                                </div>
-                                <div className="flex flex-wrap gap-2">
-                                  <a className="button-soft px-4 py-2" href={viewPdfUrl || article.pdfUrl} target="_blank" rel="noreferrer">
-                                    <ExternalLink size={16} className="mr-2" />
-                                    View PDF
-                                  </a>
-                                  <a className="button-primary px-4 py-2" href={downloadPdfUrl || article.pdfUrl} target="_blank" rel="noreferrer">
-                                    <Download size={16} className="mr-2" />
-                                    Download PDF
-                                  </a>
-                                </div>
-                              </div>
-                            </article>
-                          );
-                        })}
-                      </div>
-                    ))}
-                  </div>
+              <div className="space-y-1">
+                {issues.map((issue) => (
+                  <Link
+                    key={issue.issueKey}
+                    to={buildJournalArchiveIssuePath(journalUrl, issue.year, issue.volume, issue.issueNumber)}
+                    className="block px-3 py-2 text-left text-[#405bb7] transition hover:bg-brand-surface"
+                  >
+                    <span className="text-lg font-medium">
+                      Volume {issue.volume} Issue {issue.issueNumber}
+                    </span>
+                  </Link>
                 ))}
               </div>
             </div>
-          ) : null}
-        </div>
-      ))}
+          </div>
+        );
+      })}
     </div>
   );
 }

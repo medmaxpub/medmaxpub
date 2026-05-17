@@ -43,3 +43,8 @@ export function buildJournalArticleAbstractPath(journalUrl, articleId) {
   const slug = getJournalRouteSlug(journalUrl);
   return slug && articleId ? `/journals/${slug}/article-in-press/${articleId}/abstract` : "/journals";
 }
+
+export function buildJournalArchiveIssuePath(journalUrl, year, volume, issueNumber) {
+  const slug = getJournalRouteSlug(journalUrl);
+  return slug && year && volume && issueNumber ? `/journals/${slug}/archive/${year}/${volume}/${issueNumber}` : "/journals";
+}

@@ -3,15 +3,15 @@ import SectionHeader from "../../components/common/SectionHeader";
 const membershipPlans = [
   {
     type: "Individual",
-    oneYear: "$5,619",
-    twoYears: "$10,019",
-    threeYears: "$15,999"
+    oneYear: "$4,019",
+    twoYears: "$8,019",
+    threeYears: "$12,999"
   },
   {
     type: "Institutional",
-    oneYear: "$15,019",
-    twoYears: "$19,999",
-    threeYears: "$23,999"
+    oneYear: "$12,999",
+    twoYears: "$15,999",
+    threeYears: "$19,999"
   }
 ];
 
@@ -84,7 +84,7 @@ export default function MembershipPage() {
               </div>
             </div>
 
-            <p className="mt-5 text-sm italic text-brand-slate">
+            <p className="mt-5 text-base italic text-brand-slate sm:text-lg">
               Valid for 365 days from the date of registration for each 1-year membership term.
             </p>
           </div>

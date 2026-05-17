@@ -71,24 +71,37 @@ export default function JournalArticleAbstractPage() {
   const { journalUrl, articleId } = useParams();
   const location = useLocation();
   const [journal, setJournal] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
-  const loadJournal = useCallback(() => {
-    return withFallback(
+  const loadJournal = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) {
+      setIsLoading(true);
+    }
+
+    const data = await withFallback(
       () => api.get(`/journals/${journalUrl}`),
       useDevelopmentFallback
         ? mockJournals.find((item) => getJournalRouteSlug(item.publicJournalUrl || item.journalUrl) === journalUrl)
         : null
-    ).then(setJournal);
+    );
+
+    if (data || !silent) {
+      setJournal(data);
+    }
+
+    if (!silent) {
+      setIsLoading(false);
+    }
   }, [journalUrl, useDevelopmentFallback]);
 
   useEffect(() => {
     loadJournal();
   }, [loadJournal]);
 
-  useAutoRefresh(loadJournal, {
+  useAutoRefresh(() => loadJournal({ silent: true }), {
     enabled: !useDevelopmentFallback,
-    intervalMs: 15000
+    intervalMs: 0
   });
 
   const article = useMemo(() => {
@@ -98,6 +111,16 @@ export default function JournalArticleAbstractPage() {
 
     return findArticleInJournal(journal, articleId);
   }, [articleId, journal, location.state]);
+
+  if (isLoading) {
+    return (
+      <div className="section-shell">
+        <div className="container-shell">
+          <EmptyState title="Loading article" description="The selected article page is being prepared." />
+        </div>
+      </div>
+    );
+  }
 
   if (!journal) {
     return (
