@@ -94,6 +94,12 @@ export async function createPptRecord({ journalId, title, description, authorNam
   }
 
   const pptAsset = await uploadAsset(pptUpload, "medmaxpub/ppts", "raw", req);
+  const normalizedPptUrl = normalizeStoredAssetUrl(pptAsset?.secure_url, pptAsset);
+
+  if (!pptAsset?.public_id || !normalizedPptUrl) {
+    throw new AppError("PPT upload failed to produce a valid file URL. Please try uploading the file again.", 502);
+  }
+
   const previewAsset =
     (await uploadAsset(previewUpload, "medmaxpub/ppts-previews", "image", req)) ||
     (await generatePreviewAssetFromUpload(pptUpload, req)) ||
@@ -109,7 +115,7 @@ export async function createPptRecord({ journalId, title, description, authorNam
     file: pptAsset,
     previewFile: previewAsset,
     pptFileName: pptUpload.originalname || "",
-    pptUrl: normalizeStoredAssetUrl(pptAsset?.secure_url, pptAsset),
+    pptUrl: normalizedPptUrl,
     pptPublicId: pptAsset?.public_id || null,
     previewPdfUrl: normalizeStoredAssetUrl(previewAsset?.secure_url, previewAsset),
     previewPublicId: previewAsset?.public_id || null,
@@ -124,7 +130,7 @@ export async function createPptRecord({ journalId, title, description, authorNam
       pptId: String(pptRecord._id),
       journalId,
       title,
-      pptUrl: normalizeStoredAssetUrl(pptAsset?.secure_url, pptAsset),
+      pptUrl: normalizedPptUrl,
       storage: pptAsset?.storage || null,
       hasManualPreviewUpload: Boolean(previewUpload)
     });
@@ -133,7 +139,7 @@ export async function createPptRecord({ journalId, title, description, authorNam
       pptId: String(pptRecord._id),
       journalId,
       title,
-      pptUrl: normalizeStoredAssetUrl(pptAsset?.secure_url, pptAsset),
+      pptUrl: normalizedPptUrl,
       previewPdfUrl: normalizeStoredAssetUrl(previewAsset?.secure_url, previewAsset),
       storage: previewAsset?.storage || null
     });
