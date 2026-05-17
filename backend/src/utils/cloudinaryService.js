@@ -1,7 +1,9 @@
 import cloudinary from "../config/cloudinary.js";
 import { AppError } from "./appError.js";
 
-const LARGE_RAW_UPLOAD_THRESHOLD = 20 * 1024 * 1024;
+// Cloudinary raw uploads can reject medium-sized files on the regular upload path,
+// so switch to chunked uploads before hitting that provider-side ceiling.
+const LARGE_RAW_UPLOAD_THRESHOLD = 8 * 1024 * 1024;
 const LARGE_RAW_UPLOAD_CHUNK_SIZE = 6 * 1024 * 1024;
 
 function sanitizePublicIdSegment(value) {
