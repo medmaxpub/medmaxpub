@@ -10,7 +10,6 @@ import {
   updateArticle,
   updateArticleStatus
 } from "../controllers/articleController.js";
-import { postContactMessage } from "../controllers/contactController.js";
 import { createManuscriptSubmission, getAdminManuscriptSubmissions } from "../controllers/manuscriptSubmissionController.js";
 import {
   createEditorialBoardMember,
@@ -36,13 +35,14 @@ import { createTestimonial, deleteTestimonial, getTestimonials, updateTestimonia
 import { createUser, deleteUser, getSuperUsers, getUsers, revealUserPassword, updateUser } from "../controllers/userController.js";
 import { protect } from "../middleware/auth.js";
 import { pptUpload, upload } from "../middleware/upload.js";
+import contactRoutes from "./contactRoutes.js";
 
 const router = express.Router();
 
 router.post("/auth/login", login);
 router.post("/auth/signup-admin", protect, signupAdmin);
 router.post("/auth/impersonate/:id", protect, impersonateUser);
-router.post("/contact", ...postContactMessage);
+router.use("/contact", contactRoutes);
 router.post("/submissions", upload.array("files", 10), createManuscriptSubmission);
 router.get("/assets/pdf-proxy", proxyPdfAsset);
 router.get("/assets/file-proxy", proxyFileAsset);

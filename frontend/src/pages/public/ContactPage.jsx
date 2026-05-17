@@ -1,57 +1,96 @@
-import { Mail, MapPin, Phone } from "lucide-react";
-import { useState } from "react";
+import { LoaderCircle, Mail, MapPin, Phone } from "lucide-react";
+import { useEffect, useState } from "react";
 import api from "../../api/client";
 import SectionHeader from "../../components/common/SectionHeader";
 import { companyInfo } from "../../data/mockData";
 
+const initialForm = {
+  fullName: "",
+  email: "",
+  subject: "",
+  message: ""
+};
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function Toast({ toast, onClose }) {
+  useEffect(() => {
+    if (!toast.message) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      onClose();
+    }, 4000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [onClose, toast.message]);
+
+  if (!toast.message) {
+    return null;
+  }
+
+  const toneClassName =
+    toast.type === "success"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+      : "border-rose-200 bg-rose-50 text-rose-700";
+
+  return (
+    <div className="pointer-events-none fixed right-4 top-24 z-50 w-full max-w-sm">
+      <div className={`pointer-events-auto rounded-2xl border px-4 py-3 shadow-lg ${toneClassName}`}>
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-sm font-medium leading-6">{toast.message}</p>
+          <button type="button" className="text-xs font-semibold uppercase tracking-[0.14em]" onClick={onClose}>
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ContactPage() {
-  const [form, setForm] = useState({
-    fullName: "",
-    email: "",
-    subject: "",
-    message: ""
-  });
-  const [status, setStatus] = useState({ type: "", message: "" });
+  const [form, setForm] = useState(initialForm);
+  const [toast, setToast] = useState({ type: "", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const showToast = (type, message) => {
+    setToast({ type, message });
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setStatus({ type: "", message: "" });
 
-    if (!form.fullName.trim() || !form.email.trim() || !form.subject.trim() || !form.message.trim()) {
-      setStatus({ type: "error", message: "All contact form fields are required." });
+    const payload = {
+      fullName: form.fullName.trim(),
+      email: form.email.trim(),
+      subject: form.subject.trim(),
+      message: form.message.trim()
+    };
+
+    if (!payload.fullName || !payload.email || !payload.subject || !payload.message) {
+      showToast("error", "All contact form fields are required.");
       return;
     }
 
-    if (!isValidEmail(form.email.trim())) {
-      setStatus({ type: "error", message: "Please enter a valid email address." });
+    if (!isValidEmail(payload.email)) {
+      showToast("error", "Please enter a valid email address.");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const response = await api.post("/contact", {
-        fullName: form.fullName.trim(),
-        email: form.email.trim(),
-        subject: form.subject.trim(),
-        message: form.message.trim()
-      });
-
-      setStatus({ type: "success", message: response.data.message || "Message sent successfully." });
-      setForm({
-        fullName: "",
-        email: "",
-        subject: "",
-        message: ""
-      });
+      const response = await api.post("/contact/send", payload);
+      showToast("success", response.data?.message || "Your message has been sent successfully.");
+      setForm(initialForm);
     } catch (error) {
-      setStatus({
-        type: "error",
-        message: error.response?.data?.message || "Unable to send your message right now. Please try again later."
-      });
+      showToast(
+        "error",
+        error.response?.data?.message || "Unable to send your message right now. Please try again later."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -59,6 +98,8 @@ export default function ContactPage() {
 
   return (
     <div className="section-shell">
+      <Toast toast={toast} onClose={() => setToast({ type: "", message: "" })} />
+
       <div className="container-shell space-y-8">
         <section className="card-panel p-6 sm:p-8 lg:p-10">
           <SectionHeader
@@ -114,6 +155,7 @@ export default function ContactPage() {
                   value={form.fullName}
                   onChange={(event) => setForm((current) => ({ ...current, fullName: event.target.value }))}
                   placeholder="Enter your full name"
+                  disabled={isSubmitting}
                   required
                 />
               </div>
@@ -125,6 +167,7 @@ export default function ContactPage() {
                   value={form.email}
                   onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
                   placeholder="Enter your email address"
+                  disabled={isSubmitting}
                   required
                 />
               </div>
@@ -135,6 +178,7 @@ export default function ContactPage() {
                   value={form.subject}
                   onChange={(event) => setForm((current) => ({ ...current, subject: event.target.value }))}
                   placeholder="Enter the message subject"
+                  disabled={isSubmitting}
                   required
                 />
               </div>
@@ -146,19 +190,15 @@ export default function ContactPage() {
                   value={form.message}
                   onChange={(event) => setForm((current) => ({ ...current, message: event.target.value }))}
                   placeholder="Write your message"
+                  disabled={isSubmitting}
                   required
                 />
               </div>
             </div>
 
-            {status.message ? (
-              <p className={`mt-5 text-sm ${status.type === "success" ? "text-emerald-400" : "text-rose-400"}`}>
-                {status.message}
-              </p>
-            ) : null}
-
             <div className="mt-6">
-              <button type="submit" className="button-primary px-5 py-3" disabled={isSubmitting}>
+              <button type="submit" className="button-primary inline-flex items-center gap-2 px-5 py-3" disabled={isSubmitting}>
+                {isSubmitting ? <LoaderCircle size={18} className="animate-spin" /> : null}
                 {isSubmitting ? "Sending..." : "Submit"}
               </button>
             </div>
