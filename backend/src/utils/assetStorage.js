@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
+import { AppError } from "./appError.js";
 import { deleteFromCloudinary, hasCloudinaryConfig, uploadToCloudinary } from "./cloudinaryService.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -36,6 +37,27 @@ function inferResourceType(fileType) {
 
 function sanitizeSegment(value) {
   return value.replace(/[^a-zA-Z0-9-_]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+}
+
+function hasRawPresentationExtension(filename = "") {
+  const extension = path.extname(String(filename || "")).toLowerCase();
+  return extension === ".ppt" || extension === ".pptx" || extension === ".odp";
+}
+
+function isConvertiblePresentationFile(file) {
+  const mimeType = String(file?.mimetype || "").toLowerCase();
+
+  return (
+    mimeType === "application/vnd.ms-powerpoint" ||
+    mimeType === "application/vnd.openxmlformats-officedocument.presentationml.presentation" ||
+    mimeType === "application/vnd.oasis.opendocument.presentation" ||
+    hasRawPresentationExtension(file?.originalname)
+  );
+}
+
+function isCloudinaryRawFileSizeLimitError(error) {
+  const message = String(error?.message || "");
+  return message.includes("File size too large") && message.includes("Maximum is 10485760");
 }
 
 function buildLocalFilename(file) {
@@ -124,15 +146,7 @@ export async function ensureUploadsDirectory() {
   await fs.mkdir(uploadsRoot, { recursive: true });
 }
 
-export async function uploadAsset(file, folder, resourceType = "auto", req) {
-  if (!file) {
-    return null;
-  }
-
-  if (getStorageMode() === "cloudinary") {
-    return uploadToCloudinary(file, folder, resourceType);
-  }
-
+async function writeAssetLocally(file, folder, resourceType, req) {
   const safeFolderPath = folder
     .split("/")
     .filter(Boolean)
@@ -148,6 +162,29 @@ export async function uploadAsset(file, folder, resourceType = "auto", req) {
 
   const relativePath = path.relative(uploadsRoot, absolutePath);
   return formatLocalAsset(relativePath, file, resourceType, req);
+}
+
+export async function uploadAsset(file, folder, resourceType = "auto", req) {
+  if (!file) {
+    return null;
+  }
+
+  if (getStorageMode() === "cloudinary") {
+    try {
+      return await uploadToCloudinary(file, folder, resourceType);
+    } catch (error) {
+      const shouldFallbackToLocal =
+        resourceType === "raw" &&
+        isConvertiblePresentationFile(file) &&
+        isCloudinaryRawFileSizeLimitError(error);
+
+      if (!shouldFallbackToLocal) {
+        throw error instanceof AppError ? error : new AppError(error?.message || "Asset upload failed", 500);
+      }
+    }
+  }
+
+  return writeAssetLocally(file, folder, resourceType, req);
 }
 
 export async function deleteAsset(asset, fallbackResourceType = "image") {
