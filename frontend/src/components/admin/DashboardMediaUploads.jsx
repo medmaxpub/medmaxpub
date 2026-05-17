@@ -58,6 +58,12 @@ export default function DashboardMediaUploads({
   const submitPpt = async (event) => {
     event.preventDefault();
     setPptStatus("");
+
+    if (!pptForm.pptFile) {
+      setPptStatus("Please choose a PPT or PPTX file before uploading.");
+      return;
+    }
+
     setIsSavingPpt(true);
 
     try {
@@ -69,9 +75,7 @@ export default function DashboardMediaUploads({
       payload.append("doiNumber", pptForm.doiNumber);
       payload.append("pptFile", pptForm.pptFile);
 
-      await api.post(`/journals/${pptForm.journalId}/ppts`, payload, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
+      await api.post(`/journals/${pptForm.journalId}/ppts`, payload);
 
       setPptStatus("PPT uploaded successfully.");
       setPptForm(initialPptForm);
@@ -86,6 +90,12 @@ export default function DashboardMediaUploads({
   const submitVideo = async (event) => {
     event.preventDefault();
     setVideoStatus("");
+
+    if (!videoForm.videoFile) {
+      setVideoStatus("Please choose a video file before uploading.");
+      return;
+    }
+
     setIsSavingVideo(true);
 
     try {
@@ -96,9 +106,7 @@ export default function DashboardMediaUploads({
       payload.append("doiNumber", videoForm.doiNumber);
       payload.append("videoFile", videoForm.videoFile);
 
-      await api.post(`/journals/${videoForm.journalId}/videos`, payload, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
+      await api.post(`/journals/${videoForm.journalId}/videos`, payload);
 
       setVideoStatus("Video uploaded successfully.");
       setVideoForm(initialVideoForm);
