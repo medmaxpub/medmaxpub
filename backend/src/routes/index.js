@@ -29,7 +29,7 @@ import {
 } from "../controllers/journalController.js";
 import { createIssue } from "../controllers/issueController.js";
 import { getAdminSiteStats, getSiteStats, updateAdminSiteStats } from "../controllers/siteStatsController.js";
-import { getAdminPpts, getPptById, getPpts, regeneratePptPreview, uploadPpt } from "../controllers/pptController.js";
+import { deletePpt, getAdminPpts, getPptById, getPpts, regeneratePptPreview, uploadPpt } from "../controllers/pptController.js";
 import { createVideo, getAdminVideos, getVideos } from "../controllers/videoController.js";
 import { createTestimonial, deleteTestimonial, getTestimonials, updateTestimonial } from "../controllers/testimonialController.js";
 import { createUser, deleteUser, getSuperUsers, getUsers, revealUserPassword, updateUser } from "../controllers/userController.js";
@@ -130,6 +130,7 @@ router.post(
 router.get("/ppts", getPpts);
 router.get("/ppts/:id", getPptById);
 router.post("/ppts/:id/regenerate-preview", protect, regeneratePptPreview);
+router.delete("/ppts/:id", protect, deletePpt);
 
 router.post(
   "/journals/:journalId/videos",

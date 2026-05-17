@@ -1,4 +1,4 @@
-import { ExternalLink, FileVideo, Presentation } from "lucide-react";
+import { ExternalLink, FileVideo, Presentation, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import SectionHeader from "../common/SectionHeader";
 import api from "../../api/client";
@@ -28,6 +28,7 @@ function normalizeJournalOption(journal) {
 
 export default function DashboardMediaUploads({
   journals = [],
+  ppts = [],
   onUploaded = null,
   showSubmission = true,
   showPpt = true,
@@ -42,6 +43,7 @@ export default function DashboardMediaUploads({
   const [videoStatus, setVideoStatus] = useState("");
   const [isSavingPpt, setIsSavingPpt] = useState(false);
   const [isSavingVideo, setIsSavingVideo] = useState(false);
+  const [deletingPptId, setDeletingPptId] = useState("");
 
   const journalOptions = useMemo(
     () =>
@@ -54,6 +56,7 @@ export default function DashboardMediaUploads({
   const visibleSectionsCount = [showSubmission, showPpt, showVideo].filter(Boolean).length;
   const gridClassName =
     visibleSectionsCount === 1 ? "xl:grid-cols-1" : visibleSectionsCount === 2 ? "xl:grid-cols-2" : "xl:grid-cols-3";
+  const pptItems = Array.isArray(ppts) ? ppts : [];
 
   const submitPpt = async (event) => {
     event.preventDefault();
@@ -115,6 +118,31 @@ export default function DashboardMediaUploads({
       setVideoStatus(error.response?.data?.message || "Video upload failed.");
     } finally {
       setIsSavingVideo(false);
+    }
+  };
+
+  const deletePptItem = async (ppt) => {
+    if (!ppt?.id) {
+      return;
+    }
+
+    const confirmed = window.confirm(`Delete PPT "${ppt.title || "Untitled PPT"}"?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    setPptStatus("");
+    setDeletingPptId(ppt.id);
+
+    try {
+      await api.delete(`/ppts/${ppt.id}`);
+      setPptStatus("PPT deleted successfully.");
+      await onUploaded?.();
+    } catch (error) {
+      setPptStatus(error.response?.data?.message || "Unable to delete PPT.");
+    } finally {
+      setDeletingPptId("");
     }
   };
 
@@ -201,6 +229,43 @@ export default function DashboardMediaUploads({
             </button>
             {pptStatus ? <p className="text-sm text-brand-slate">{pptStatus}</p> : null}
           </form>
+
+          <div className="mt-8 border-t border-brand-border pt-6">
+            <div className="flex items-center justify-between gap-3">
+              <h4 className="text-lg font-semibold text-brand-ink">Uploaded PPTs</h4>
+              <p className="text-sm text-brand-slate">{pptItems.length} records</p>
+            </div>
+
+            {pptItems.length ? (
+              <div className="mt-4 space-y-3">
+                {pptItems.map((ppt) => (
+                  <div key={ppt.id} className="rounded-2xl border border-brand-border bg-white p-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-brand-ink">{ppt.title || "Untitled PPT"}</p>
+                        <p className="mt-1 text-sm text-brand-slate">{ppt.authorName || "Author not provided"}</p>
+                        <p className="mt-1 text-xs text-brand-slate">
+                          {ppt.journal?.managingJournalName || "Journal unavailable"} · {new Date(ppt.uploadedDate || ppt.createdAt || Date.now()).toLocaleDateString()}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="inline-flex items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-600 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        onClick={() => deletePptItem(ppt)}
+                        disabled={deletingPptId === ppt.id}
+                      >
+                        <Trash2 size={16} className="mr-2" />
+                        {deletingPptId === ppt.id ? "Deleting..." : "Delete"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-4 text-sm text-brand-slate">No PPT records uploaded yet.</p>
+            )}
+          </div>
         </div>
         ) : null}
 

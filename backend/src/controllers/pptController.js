@@ -2,6 +2,7 @@ import Journal from "../models/Journal.js";
 import Ppt from "../models/Ppt.js";
 import { createPptRecord, ensurePptPreviewAsset, serializePpt } from "../services/pptService.js";
 import { buildAccessibleJournalFilter, ensureJournalAccess } from "../utils/accessControl.js";
+import { deleteAsset } from "../utils/assetStorage.js";
 import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { filterSampleMediaItems, isSampleJournalRecord } from "../utils/sampleContent.js";
@@ -84,4 +85,23 @@ export const regeneratePptPreview = asyncHandler(async (req, res) => {
     ...serializePpt(ppt.toObject()),
     message: ppt.previewPdfUrl ? "Preview PDF regenerated successfully." : "Preview PDF regeneration failed."
   });
+});
+
+export const deletePpt = asyncHandler(async (req, res) => {
+  const ppt = await Ppt.findById(req.params.id).populate("journal", "managingJournalName journalUrl journalDomainName");
+
+  if (!ppt) {
+    throw new AppError("PPT not found", 404);
+  }
+
+  if (isSampleJournalRecord(ppt.journal)) {
+    throw new AppError("PPT not found", 404);
+  }
+
+  await ensureJournalAccess(req.user, ppt.journal?._id || ppt.journal);
+  await deleteAsset(ppt.file || ppt.pptFile, "raw");
+  await deleteAsset(ppt.previewFile || ppt.pdfPreviewFile, "image");
+  await ppt.deleteOne();
+
+  res.status(204).send();
 });

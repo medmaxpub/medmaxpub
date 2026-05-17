@@ -6,6 +6,7 @@ import { getSuperUserJournalsFallback } from "./superUserFallbacks";
 
 export default function SuperUserMediaPage({ variant = "submission" }) {
   const [journals, setJournals] = useState([]);
+  const [ppts, setPpts] = useState([]);
   const [submissions, setSubmissions] = useState([]);
   const [isLoadingSubmissions, setIsLoadingSubmissions] = useState(false);
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
@@ -18,6 +19,19 @@ export default function SuperUserMediaPage({ variant = "submission" }) {
   useEffect(() => {
     loadJournals();
   }, [loadJournals]);
+
+  const loadPpts = useCallback(async () => {
+    if (variant !== "ppt") {
+      return;
+    }
+
+    const data = await withFallback(() => api.get("/admin/ppts"), []);
+    setPpts(Array.isArray(data) ? data : []);
+  }, [variant]);
+
+  useEffect(() => {
+    loadPpts();
+  }, [loadPpts]);
 
   const loadSubmissions = useCallback(async () => {
     if (variant !== "submission") {
@@ -71,5 +85,10 @@ export default function SuperUserMediaPage({ variant = "submission" }) {
     );
   }
 
-  return <DashboardMediaUploads journals={journals} onUploaded={loadJournals} {...config} />;
+  const handleUploaded = async () => {
+    await loadJournals();
+    await loadPpts();
+  };
+
+  return <DashboardMediaUploads journals={journals} ppts={ppts} onUploaded={handleUploaded} {...config} />;
 }
