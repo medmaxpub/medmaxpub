@@ -157,21 +157,25 @@ export default function PptsPage() {
                       <div className="rounded-3xl border border-brand-border bg-brand-elevated p-5">
                         <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Actions</p>
                         <div className="mt-4 flex flex-wrap gap-3">
-                          <a
-                            href={ppt.browserPreviewUrl || ppt.previewUrl || ppt.previewPdfUrl || ppt.originalPptUrl || ppt.pptFileUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="button-soft px-4 py-2"
-                            onMouseEnter={() => warmPreviewUrl(ppt.previewUrl)}
-                            onFocus={() => warmPreviewUrl(ppt.previewUrl)}
-                          >
-                            <ExternalLink size={16} className="mr-2" />
-                            Open Preview
-                          </a>
-                          <a href={ppt.downloadUrl} target="_blank" rel="noreferrer" download className="button-primary px-4 py-2">
-                            <Download size={16} className="mr-2" />
-                            Download PPT
-                          </a>
+                          {ppt.browserPreviewUrl ? (
+                            <a
+                              href={ppt.browserPreviewUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="button-soft px-4 py-2"
+                              onMouseEnter={() => warmPreviewUrl(ppt.previewUrl || ppt.browserPreviewUrl)}
+                              onFocus={() => warmPreviewUrl(ppt.previewUrl || ppt.browserPreviewUrl)}
+                            >
+                              <ExternalLink size={16} className="mr-2" />
+                              Open Preview
+                            </a>
+                          ) : null}
+                          {ppt.downloadUrl ? (
+                            <a href={ppt.downloadUrl} target="_blank" rel="noreferrer" download className="button-primary px-4 py-2">
+                              <Download size={16} className="mr-2" />
+                              Download PPT
+                            </a>
+                          ) : null}
                           {ppt.journalInfo?.journalUrl ? (
                             <Link
                               to={buildJournalSectionPath(ppt.journalInfo.publicJournalUrl || ppt.journalInfo.journalUrl, "home")}
@@ -181,6 +185,7 @@ export default function PptsPage() {
                             </Link>
                           ) : null}
                         </div>
+                        {ppt.previewIssue ? <p className="mt-3 text-sm text-rose-500">{ppt.previewIssue}</p> : null}
                       </div>
 
                       <div className="rounded-3xl border border-brand-border bg-brand-surface p-5">

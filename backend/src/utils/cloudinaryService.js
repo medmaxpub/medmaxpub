@@ -82,6 +82,7 @@ export async function uploadToCloudinary(file, folder, resourceType = "auto") {
   ensureConfigured();
 
   return new Promise((resolve, reject) => {
+    let settled = false;
     const useChunkedUpload = resourceType === "raw" && Number(file?.size || 0) >= LARGE_RAW_UPLOAD_THRESHOLD;
     const options = {
       folder,
@@ -101,12 +102,23 @@ export async function uploadToCloudinary(file, folder, resourceType = "auto") {
     }
 
     const handleResult = (error, result) => {
+      if (settled) {
+        return;
+      }
+
       if (error || result?.error) {
+        settled = true;
         const message = error?.message || result?.error?.message || "Cloudinary upload failed";
         reject(new AppError(message, 500));
         return;
       }
 
+      // Cloudinary chunked uploads emit interim callbacks with done: false before the final asset payload.
+      if (useChunkedUpload && result?.done === false) {
+        return;
+      }
+
+      settled = true;
       resolve(formatAsset(result, file));
     };
 
