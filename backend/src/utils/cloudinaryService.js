@@ -111,8 +111,8 @@ export async function uploadToCloudinary(file, folder, resourceType = "auto") {
     };
 
     const stream = useChunkedUpload
-      ? cloudinary.uploader.upload_chunked_stream((result) => handleResult(null, result), options)
-      : cloudinary.uploader.upload_stream((error, result) => handleResult(error, result), options);
+      ? cloudinary.uploader.upload_chunked_stream(options, (result) => handleResult(null, result))
+      : cloudinary.uploader.upload_stream(options, (error, result) => handleResult(error, result));
 
     stream.end(file.buffer);
   });
