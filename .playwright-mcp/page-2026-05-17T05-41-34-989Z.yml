@@ -1,0 +1,1 @@
+- generic [ref=e2]: "{\"Status\":0,\"TC\":false,\"RD\":true,\"RA\":true,\"AD\":false,\"CD\":false,\"Question\":[{\"name\":\"www.medmaxpub.com.\",\"type\":5}],\"Authority\":[{\"name\":\"medmaxpub.com.\",\"type\":6,\"TTL\":1800,\"data\":\"fonzie.ns.cloudflare.com. dns.cloudflare.com. 2404342557 10000 2400 604800 1800\"}],\"Comment\":\"Response from 108.162.192.146.\"}"

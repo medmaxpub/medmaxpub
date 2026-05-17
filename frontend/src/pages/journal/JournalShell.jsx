@@ -5,6 +5,7 @@ import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/clien
 import EmptyState from "../../components/common/EmptyState";
 import JournalMenu from "../../components/journal/JournalMenu";
 import IssueAccordion from "../../components/journal/IssueAccordion";
+import useAutoRefresh from "../../hooks/useAutoRefresh";
 import { mockJournals } from "../../data/mockData";
 import { normalizePptItem, warmPreviewUrl } from "../../utils/pptPreview";
 import { buildPdfProxyUrl } from "../../utils/pdfProxy";
@@ -89,6 +90,11 @@ export default function JournalShell() {
   useEffect(() => {
     loadJournal();
   }, [loadJournal]);
+
+  useAutoRefresh(loadJournal, {
+    enabled: !useDevelopmentFallback,
+    intervalMs: 15000
+  });
 
   if (isLoading) {
     return (
@@ -283,18 +289,32 @@ export default function JournalShell() {
             </h3>
           </div>
           {journal.currentIssue.articles.map((article) => (
-            <article key={article.id} className="rounded-3xl border border-brand-border bg-brand-surface p-5">
-              <h4 className="text-xl font-semibold text-brand-ink">{article.title}</h4>
-              <p className="mt-2 text-sm text-brand-slate">{article.authors.join(", ")}</p>
-              <div className="mt-4 flex gap-3">
-                <a href={buildPdfProxyUrl(article.pdfUrl) || article.pdfUrl} className="button-soft px-4 py-2" target="_blank" rel="noreferrer">
-                  <ExternalLink size={16} className="mr-2" />
-                  View PDF
-                </a>
-                <a href={buildPdfProxyUrl(article.pdfUrl, { download: true }) || article.pdfUrl} className="button-primary px-4 py-2" target="_blank" rel="noreferrer">
-                  <Download size={16} className="mr-2" />
-                  Download PDF
-                </a>
+            <article key={article.id} className="overflow-hidden rounded-3xl border border-cyan-500/60 bg-white shadow-sm">
+              <div className="flex items-center justify-between gap-4 bg-[linear-gradient(135deg,#0ea5b7_0%,#0891b2_100%)] px-5 py-3 text-white">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#f3c623] text-sm font-black lowercase text-brand-ink shadow-sm">
+                    doi
+                  </span>
+                  <span className="min-w-0 truncate rounded-md bg-white/20 px-3 py-1 text-sm font-semibold text-white md:text-base">
+                    {article.doiNumber || "NA"}
+                  </span>
+                </div>
+                <p className="text-lg font-semibold italic">{article.articleType || "Article"}</p>
+              </div>
+
+              <div className="p-5">
+                <h4 className="text-xl font-semibold text-brand-ink">{article.title}</h4>
+                <p className="mt-2 text-sm text-brand-slate">{article.authors.join(", ")}</p>
+                <div className="mt-4 flex gap-3">
+                  <a href={buildPdfProxyUrl(article.pdfUrl) || article.pdfUrl} className="button-soft px-4 py-2" target="_blank" rel="noreferrer">
+                    <ExternalLink size={16} className="mr-2" />
+                    View PDF
+                  </a>
+                  <a href={buildPdfProxyUrl(article.pdfUrl, { download: true }) || article.pdfUrl} className="button-primary px-4 py-2" target="_blank" rel="noreferrer">
+                    <Download size={16} className="mr-2" />
+                    Download PDF
+                  </a>
+                </div>
               </div>
             </article>
           ))}

@@ -49,7 +49,7 @@ export default function SuperUserMediaPage({ variant = "submission" }) {
       showVideo: false,
       headingLabel: "PPT Upload",
       headingTitle: "Upload journal PPT records",
-      headingDescription: "Create PPT records with journal title, PPT title, author name, DOI, and the attached PPT file."
+      headingDescription: "Create PPT records with journal title, PPT title, author name, optional DOI, and the attached PPT file."
     },
     video: {
       showSubmission: false,

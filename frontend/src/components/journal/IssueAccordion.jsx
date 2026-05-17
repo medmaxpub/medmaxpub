@@ -36,25 +36,39 @@ export default function IssueAccordion({ archive }) {
                           const downloadPdfUrl = buildPdfProxyUrl(article.pdfUrl, { download: true });
 
                           return (
-                            <div
+                            <article
                               key={article.id}
-                              className="flex flex-col gap-3 rounded-2xl border border-brand-border bg-brand-surface p-4 lg:flex-row lg:items-center lg:justify-between"
+                              className="overflow-hidden rounded-3xl border border-cyan-500/60 bg-white shadow-sm"
                             >
-                              <div>
-                                <h5 className="font-semibold text-brand-ink">{article.title}</h5>
-                                <p className="mt-1 text-sm text-brand-slate">{article.authors.join(", ")}</p>
+                              <div className="flex items-center justify-between gap-4 bg-[linear-gradient(135deg,#0ea5b7_0%,#0891b2_100%)] px-5 py-3 text-white">
+                                <div className="flex min-w-0 items-center gap-2">
+                                  <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#f3c623] text-sm font-black lowercase text-brand-ink shadow-sm">
+                                    doi
+                                  </span>
+                                  <span className="min-w-0 truncate rounded-md bg-white/20 px-3 py-1 text-sm font-semibold text-white md:text-base">
+                                    {article.doiNumber || "NA"}
+                                  </span>
+                                </div>
+                                <p className="text-lg font-semibold italic">{article.articleType || "Article"}</p>
                               </div>
-                              <div className="flex flex-wrap gap-2">
-                                <a className="button-soft px-4 py-2" href={viewPdfUrl || article.pdfUrl} target="_blank" rel="noreferrer">
-                                  <ExternalLink size={16} className="mr-2" />
-                                  View PDF
-                                </a>
-                                <a className="button-primary px-4 py-2" href={downloadPdfUrl || article.pdfUrl} target="_blank" rel="noreferrer">
-                                  <Download size={16} className="mr-2" />
-                                  Download PDF
-                                </a>
+
+                              <div className="flex flex-col gap-3 p-4 lg:flex-row lg:items-center lg:justify-between">
+                                <div>
+                                  <h5 className="font-semibold text-brand-ink">{article.title}</h5>
+                                  <p className="mt-1 text-sm text-brand-slate">{article.authors.join(", ")}</p>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                  <a className="button-soft px-4 py-2" href={viewPdfUrl || article.pdfUrl} target="_blank" rel="noreferrer">
+                                    <ExternalLink size={16} className="mr-2" />
+                                    View PDF
+                                  </a>
+                                  <a className="button-primary px-4 py-2" href={downloadPdfUrl || article.pdfUrl} target="_blank" rel="noreferrer">
+                                    <Download size={16} className="mr-2" />
+                                    Download PDF
+                                  </a>
+                                </div>
                               </div>
-                            </div>
+                            </article>
                           );
                         })}
                       </div>

@@ -1,0 +1,225 @@
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - link "Medmax Publishers" [ref=e7] [cursor=pointer]:
+      - /url: /
+      - img "Medmax Publishers" [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - link "contact@medmaxpub.com" [ref=e11] [cursor=pointer]:
+          - /url: mailto:contact@medmaxpub.com
+          - img [ref=e12]
+          - text: contact@medmaxpub.com
+        - link "+91 7569-062951" [ref=e15] [cursor=pointer]:
+          - /url: tel:+917569062951
+          - img [ref=e16]
+          - text: +91 7569-062951
+      - generic [ref=e18]:
+        - img [ref=e19]
+        - textbox "Search journals" [ref=e22]
+        - button "Search" [ref=e23] [cursor=pointer]
+  - button "Open website menu" [ref=e26] [cursor=pointer]:
+    - img [ref=e27]
+  - main [ref=e28]:
+    - generic [ref=e29]:
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - img "Life Sciences" [ref=e33]
+          - img [ref=e35]
+          - img [ref=e37]
+        - generic [ref=e42]:
+          - generic [ref=e43]: Medmax Publishers
+          - heading "Open Access Journals for Clinical, Medical, Life Science, Pharma, and Technology Research" [level=1] [ref=e44]
+          - paragraph [ref=e45]: Discover peer-reviewed journals, public PPT archives, and video resources through a cleaner, publication-first experience designed for authors, readers, and institutions.
+          - generic [ref=e46]:
+            - link "View Journals" [ref=e47] [cursor=pointer]:
+              - /url: /journals
+            - link "Browse PPTs" [ref=e48] [cursor=pointer]:
+              - /url: /ppts
+            - link "Browse Videos" [ref=e49] [cursor=pointer]:
+              - /url: /videos
+          - generic [ref=e50]:
+            - button "Life Sciences" [ref=e51] [cursor=pointer]
+            - button "Clinical Research" [ref=e52] [cursor=pointer]
+            - button "Engineering & Technology" [ref=e53] [cursor=pointer]
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - generic [ref=e59]: About Medmax Publishers
+            - heading "A peer-reviewed open access platform built for global scientific knowledge sharing" [level=2] [ref=e60]
+            - paragraph [ref=e61]: The following profile appears directly below the homepage hero so visitors immediately understand the Medmax publishing mission.
+          - generic [ref=e62]:
+            - paragraph [ref=e63]: Medmax Publishers is a peer-reviewed, open access publisher covering a comprehensive range of topics in Clinical, Medicine, Life Sciences, Pharma, and Engineering & Technology. We support researchers, institutions, academic professionals, and emerging scholars in advancing healthcare, open science, and knowledge sharing for the benefit of humanity.
+            - generic [ref=e64]:
+              - paragraph [ref=e65]: Our vision is to build an optimized publishing platform and a meaningful scientific network for scholars and researchers around the world. Medmax Publishers works with qualified editorial and advisory members who support research development, publication quality, and long-term academic visibility.
+              - paragraph [ref=e66]: Medmax Journals follow a single-blind peer-review process, where each submitted manuscript is assigned to a relevant editor for editorial assessment and reviewer coordination. This helps maintain clarity, consistency, and scholarly publishing standards across every journal.
+              - paragraph [ref=e67]: We publish a wide range of manuscript types, including Original Research, Review Articles, Case Reports, Rapid Communications, Short Communications, Mini Reviews, Editorials, Letters to the Editor, Commentary, Perspectives, Case in Images, Clinical Images, and Research Highlights across medical, clinical, and engineering disciplines.
+              - paragraph [ref=e68]: All listed journals follow the open access model and are available to readers without subscription charges or access fees.
+        - generic [ref=e69]:
+          - generic [ref=e70]:
+            - paragraph [ref=e71]: Publishing Model
+            - paragraph [ref=e72]: Peer-reviewed open access journals
+          - generic [ref=e73]:
+            - paragraph [ref=e74]: Review Process
+            - paragraph [ref=e75]: Single-blind peer review with editor assignment
+          - generic [ref=e76]:
+            - paragraph [ref=e77]: Article Types
+            - paragraph [ref=e78]: Original Research, Reviews, Case Reports, Editorials, Commentary, and more
+          - generic [ref=e79]:
+            - paragraph [ref=e80]: Reader Access
+            - paragraph [ref=e81]: No subscription fees or access charges
+          - generic [ref=e82]:
+            - paragraph [ref=e83]: Coverage
+            - generic [ref=e84]:
+              - generic [ref=e85]: Clinical
+              - generic [ref=e86]: Medicine
+              - generic [ref=e87]: Life Sciences
+              - generic [ref=e88]: Pharma
+              - generic [ref=e89]: Engineering
+              - generic [ref=e90]: Technology
+      - generic [ref=e92]:
+        - generic [ref=e93]:
+          - generic [ref=e94]: Featured Journals
+          - heading "Open access journal profiles with direct public URLs" [level=2] [ref=e95]
+          - paragraph [ref=e96]: Each featured journal now highlights only the core Medmax profile fields used in the admin portal.
+        - generic [ref=e97]: No live journals have been published yet.
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - generic [ref=e101]: Indexing & Reach
+          - heading "Discoverability signals for scientific credibility" [level=2] [ref=e102]
+          - paragraph [ref=e103]: Indexing logos are displayed in a clean strip similar to publisher and conference trust sections.
+        - generic [ref=e105]:
+          - generic [ref=e106]: Google Scholar
+          - generic [ref=e107]: Crossref
+          - generic [ref=e108]: DOAJ
+          - generic [ref=e109]: PubMed
+          - generic [ref=e110]: Scilit
+          - generic [ref=e111]: OpenAlex
+          - generic [ref=e112]: Google Scholar
+          - generic [ref=e113]: Crossref
+          - generic [ref=e114]: DOAJ
+          - generic [ref=e115]: PubMed
+          - generic [ref=e116]: Scilit
+          - generic [ref=e117]: OpenAlex
+      - generic [ref=e122]:
+        - generic:
+          - generic:
+            - img "DNA visualization"
+        - generic [ref=e123]:
+          - heading "The Science Mandate" [level=2] [ref=e124]:
+            - generic [ref=e125]: The Science
+            - generic [ref=e126]: Mandate
+          - paragraph [ref=e128]: "Medmax Publishers was built on a simple conviction: scientific knowledge should remain visible, discoverable, and accessible to the global research community."
+          - paragraph [ref=e129]: Our journals span clinical medicine, life sciences, pharma, public health, and engineering, supported by rigorous peer review and open-access publishing workflows.
+          - generic [ref=e130]:
+            - generic [ref=e131]: Crossref DOI
+            - generic [ref=e132]: Google Scholar
+            - generic [ref=e133]: DOAJ Indexed
+            - generic [ref=e134]: Creative Commons
+            - generic [ref=e135]: Double Blind Review
+            - generic [ref=e136]: Research Archive
+          - generic [ref=e138]:
+            - generic [ref=e139]:
+              - img [ref=e141]
+              - generic [ref=e143]:
+                - paragraph [ref=e144]: 18+
+                - paragraph [ref=e145]: Active Journals
+            - generic [ref=e146]:
+              - img [ref=e148]
+              - generic [ref=e151]:
+                - paragraph [ref=e152]: 260+
+                - paragraph [ref=e153]: Publications
+            - generic [ref=e154]:
+              - img [ref=e156]
+              - generic [ref=e158]:
+                - paragraph [ref=e159]: 10+
+                - paragraph [ref=e160]: Years Publishing
+            - generic [ref=e161]:
+              - img [ref=e163]
+              - generic [ref=e167]:
+                - paragraph [ref=e168]: 7+
+                - paragraph [ref=e169]: Index Databases
+      - generic [ref=e171]:
+        - generic [ref=e172]:
+          - generic [ref=e173]: Testimonials
+          - heading "Trusted voices from the global research community" [level=2] [ref=e174]
+          - paragraph [ref=e175]: See how authors, editors, reviewers, and academic leaders describe their publishing experience with Medmax Publishers.
+        - generic [ref=e176]:
+          - article [ref=e177]:
+            - paragraph [ref=e178]: "\"The platform captures a polished, research-focused feel while making publishing and speaker workflows much easier to manage.\""
+            - generic [ref=e179]:
+              - paragraph [ref=e180]: Dr. Hannah Morris
+              - paragraph [ref=e181]: Conference Speaker
+          - article [ref=e182]:
+            - paragraph [ref=e183]: "\"Routing journals, conference assets, testimonials, and article metadata through one dashboard is a major operational improvement.\""
+            - generic [ref=e184]:
+              - paragraph [ref=e185]: Prof. Daniel Rivera
+              - paragraph [ref=e186]: Journal Editor
+          - article [ref=e187]:
+            - paragraph [ref=e188]: "\"The admin tools are practical and the public UI presents journals, media, and scientific content in a confident and trustworthy way.\""
+            - generic [ref=e189]:
+              - paragraph [ref=e190]: Mia Brooks
+              - paragraph [ref=e191]: Event Coordinator
+  - generic [ref=e193]:
+    - link "Chat on WhatsApp" [ref=e195] [cursor=pointer]:
+      - /url: https://wa.me/917569062951
+      - img [ref=e196]
+    - button "Open live chat support popup" [ref=e199] [cursor=pointer]:
+      - img [ref=e200]
+  - contentinfo [ref=e202]:
+    - generic [ref=e203]:
+      - generic [ref=e204]:
+        - link "Medmax Publishers" [ref=e205] [cursor=pointer]:
+          - /url: /
+          - img "Medmax Publishers" [ref=e206]
+        - paragraph [ref=e207]: Medmax Publishers is a peer-reviewed, open access publisher covering a comprehensive range of topics in Clinical, Medicine, Life Sciences, Pharma, and Engineering & Technology.
+      - generic [ref=e208]:
+        - heading "Quick Links" [level=3] [ref=e209]
+        - generic [ref=e210]:
+          - link "Home" [ref=e211] [cursor=pointer]:
+            - /url: /
+          - link "About" [ref=e212] [cursor=pointer]:
+            - /url: /about
+          - link "Journals" [ref=e213] [cursor=pointer]:
+            - /url: /journals
+          - link "PPTs" [ref=e214] [cursor=pointer]:
+            - /url: /ppts
+          - link "Videos" [ref=e215] [cursor=pointer]:
+            - /url: /videos
+          - link "Submit Manuscript" [ref=e216] [cursor=pointer]:
+            - /url: /submit-manuscript
+          - link "Membership" [ref=e217] [cursor=pointer]:
+            - /url: /membership
+          - link "Contact" [ref=e218] [cursor=pointer]:
+            - /url: /contact
+      - generic [ref=e219]:
+        - heading "Contact Info" [level=3] [ref=e220]
+        - generic [ref=e221]:
+          - generic [ref=e222]:
+            - img [ref=e223]
+            - generic [ref=e226]:
+              - generic [ref=e227]: Medmax Publishers LLC
+              - generic [ref=e228]: 2705 Greystone Drive
+              - generic [ref=e229]: Apt A
+              - generic [ref=e230]: Columbus, Ohio - 43220
+              - generic [ref=e231]: USA
+          - link "contact@medmaxpub.com" [ref=e232] [cursor=pointer]:
+            - /url: mailto:contact@medmaxpub.com
+            - img [ref=e233]
+            - text: contact@medmaxpub.com
+          - link "+91 7569-062951" [ref=e236] [cursor=pointer]:
+            - /url: tel:+917569062951
+            - img [ref=e237]
+            - text: +91 7569-062951
+          - generic [ref=e239]:
+            - img [ref=e241]
+            - img [ref=e244]
+            - img [ref=e247]
+    - generic [ref=e252]:
+      - generic [ref=e253]:
+        - link "Terms and Conditions" [ref=e254] [cursor=pointer]:
+          - /url: /terms-and-conditions
+        - link "Withdraw Policy" [ref=e255] [cursor=pointer]:
+          - /url: /withdraw-policy
+        - link "Privacy Policy" [ref=e256] [cursor=pointer]:
+          - /url: /privacy-policy
+      - paragraph [ref=e257]: © 2026 Copyrights Medmax Publishers. All Rights Reserved!

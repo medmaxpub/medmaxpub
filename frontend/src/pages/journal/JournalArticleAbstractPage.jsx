@@ -4,6 +4,7 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import JournalMenu from "../../components/journal/JournalMenu";
+import useAutoRefresh from "../../hooks/useAutoRefresh";
 import { mockJournals } from "../../data/mockData";
 import { buildPdfProxyUrl } from "../../utils/pdfProxy";
 import { buildJournalSectionPath, getJournalRouteSlug } from "../../utils/journalLinks";
@@ -84,6 +85,11 @@ export default function JournalArticleAbstractPage() {
   useEffect(() => {
     loadJournal();
   }, [loadJournal]);
+
+  useAutoRefresh(loadJournal, {
+    enabled: !useDevelopmentFallback,
+    intervalMs: 15000
+  });
 
   const article = useMemo(() => {
     if (location.state?.article && String(location.state.article.id) === String(articleId)) {

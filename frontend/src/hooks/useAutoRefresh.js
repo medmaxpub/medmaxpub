@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { DATA_REFRESH_EVENT } from "../utils/dataRefresh";
+import { DATA_REFRESH_EVENT, DATA_REFRESH_STORAGE_KEY } from "../utils/dataRefresh";
 
 export default function useAutoRefresh(refresh, options = {}) {
   const { enabled = true, intervalMs = 20000, minGapMs = 1000 } = options;
@@ -34,9 +34,15 @@ export default function useAutoRefresh(refresh, options = {}) {
       }
     };
     const handleDataChange = () => runRefresh();
+    const handleStorageChange = (event) => {
+      if (event.key === DATA_REFRESH_STORAGE_KEY) {
+        runRefresh();
+      }
+    };
 
     window.addEventListener("focus", handleFocus);
     window.addEventListener(DATA_REFRESH_EVENT, handleDataChange);
+    window.addEventListener("storage", handleStorageChange);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     const intervalId =
@@ -51,6 +57,7 @@ export default function useAutoRefresh(refresh, options = {}) {
     return () => {
       window.removeEventListener("focus", handleFocus);
       window.removeEventListener(DATA_REFRESH_EVENT, handleDataChange);
+      window.removeEventListener("storage", handleStorageChange);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
 
       if (intervalId) {

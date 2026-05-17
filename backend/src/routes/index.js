@@ -35,7 +35,7 @@ import { createVideo, getAdminVideos, getVideos } from "../controllers/videoCont
 import { createTestimonial, deleteTestimonial, getTestimonials, updateTestimonial } from "../controllers/testimonialController.js";
 import { createUser, deleteUser, getSuperUsers, getUsers, revealUserPassword, updateUser } from "../controllers/userController.js";
 import { protect } from "../middleware/auth.js";
-import { upload } from "../middleware/upload.js";
+import { pptUpload, upload } from "../middleware/upload.js";
 
 const router = express.Router();
 
@@ -112,7 +112,7 @@ router.delete("/user/editorial-board/:id", protect, deleteEditorialBoardMember);
 router.post(
   "/journals/:journalId/ppts",
   protect,
-  upload.fields([
+  pptUpload.fields([
     { name: "pptFile", maxCount: 1 },
     { name: "previewFile", maxCount: 1 }
   ]),
@@ -121,7 +121,7 @@ router.post(
 router.post(
   "/ppts/upload",
   protect,
-  upload.fields([
+  pptUpload.fields([
     { name: "pptFile", maxCount: 1 },
     { name: "previewFile", maxCount: 1 }
   ]),

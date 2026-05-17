@@ -174,13 +174,17 @@ async function buildJournalDetails(journal, req) {
   const serializePublicArticle = (article) => ({
     id: article._id,
     title: article.title,
+    articleType: article.articleType || "",
+    authorNames: article.authorNames || "",
     authors: article.authors || [],
     volume: article.volume ?? null,
     issueNumber: article.issueNumber ?? null,
     releaseMonth: article.releaseMonth || "",
     releaseYear: article.releaseYear ?? null,
     abstractText: article.abstractText || "",
+    publishedDate: article.publishedDate || null,
     doiNumber: article.doiNumber || "",
+    country: article.country || "",
     pdfUrl: article.pdfFile?.secure_url || null
   });
 

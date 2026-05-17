@@ -1,0 +1,1 @@
+- generic [ref=e2]: "{\"Status\":0,\"TC\":false,\"RD\":true,\"RA\":true,\"AD\":false,\"CD\":false,\"Question\":[{\"name\":\"medmaxpub.com.\",\"type\":1}],\"Answer\":[{\"name\":\"medmaxpub.com.\",\"type\":1,\"TTL\":300,\"data\":\"172.67.136.224\"},{\"name\":\"medmaxpub.com.\",\"type\":1,\"TTL\":300,\"data\":\"104.21.86.211\"}],\"Comment\":\"Response from 172.64.32.146.\"}"

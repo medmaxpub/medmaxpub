@@ -62,8 +62,9 @@ export default function DashboardMediaUploads({
 
     try {
       const payload = new FormData();
+      const mediaDescription = [pptForm.authorName, pptForm.doiNumber].filter(Boolean).join(" | ");
       payload.append("title", pptForm.title);
-      payload.append("description", `${pptForm.authorName} | ${pptForm.doiNumber}`);
+      payload.append("description", mediaDescription || pptForm.title);
       payload.append("authorName", pptForm.authorName);
       payload.append("doiNumber", pptForm.doiNumber);
       payload.append("pptFile", pptForm.pptFile);
@@ -170,12 +171,11 @@ export default function DashboardMediaUploads({
               />
             </div>
             <div>
-              <label className="form-label" data-required="true">DOI</label>
+              <label className="form-label">DOI</label>
               <input
                 value={pptForm.doiNumber}
                 onChange={(event) => setPptForm((current) => ({ ...current, doiNumber: event.target.value }))}
-                placeholder="Enter DOI"
-                required
+                placeholder="Enter DOI (optional)"
               />
             </div>
             <div>
@@ -186,6 +186,7 @@ export default function DashboardMediaUploads({
                 onChange={(event) => setPptForm((current) => ({ ...current, pptFile: event.target.files?.[0] || null }))}
                 required
               />
+              <p className="mt-2 text-xs text-brand-slate">DOI is optional. Maximum PPT upload size: 100 MB.</p>
             </div>
             <button type="submit" className="button-primary" disabled={isSavingPpt || !journalOptions.length}>
               {isSavingPpt ? "Uploading..." : "Upload PPT"}
