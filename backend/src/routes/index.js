@@ -36,6 +36,7 @@ import { createUser, deleteUser, getSuperUsers, getUsers, revealUserPassword, up
 import { protect } from "../middleware/auth.js";
 import { pptUpload, upload } from "../middleware/upload.js";
 import contactRoutes from "./contactRoutes.js";
+import s3Routes from "./s3Routes.js";
 
 const router = express.Router();
 
@@ -43,6 +44,7 @@ router.post("/auth/login", login);
 router.post("/auth/signup-admin", protect, signupAdmin);
 router.post("/auth/impersonate/:id", protect, impersonateUser);
 router.use("/contact", contactRoutes);
+router.use("/s3", s3Routes);
 router.post("/submissions", upload.array("files", 10), createManuscriptSubmission);
 router.get("/assets/pdf-proxy", proxyPdfAsset);
 router.get("/assets/file-proxy", proxyFileAsset);

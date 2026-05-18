@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
+import { buildCloudFrontFileUrl, deleteFromS3, hasS3Config, uploadBufferToS3 } from "../config/s3.js";
 import { AppError } from "./appError.js";
 import { deleteFromCloudinary, hasCloudinaryConfig, uploadToCloudinary } from "./cloudinaryService.js";
 
@@ -12,7 +13,7 @@ export const uploadsRoot = path.resolve(__dirname, "../../uploads");
 function normalizeStorageMode(value) {
   const mode = value?.trim().toLowerCase();
 
-  if (mode === "local" || mode === "cloudinary") {
+  if (mode === "local" || mode === "cloudinary" || mode === "s3") {
     return mode;
   }
 
@@ -53,11 +54,6 @@ function isConvertiblePresentationFile(file) {
     mimeType === "application/vnd.oasis.opendocument.presentation" ||
     hasRawPresentationExtension(file?.originalname)
   );
-}
-
-function isCloudinaryRawFileSizeLimitError(error) {
-  const message = String(error?.message || "");
-  return message.includes("File size too large") && message.includes("Maximum is 10485760");
 }
 
 function buildLocalFilename(file) {
@@ -103,6 +99,20 @@ function formatLocalAsset(relativePath, file, resourceType, req) {
   };
 }
 
+function formatS3Asset(key, url, file, resourceType) {
+  return {
+    storage: "s3",
+    public_id: key,
+    secure_url: url,
+    resource_type: resourceType === "auto" ? inferResourceType(file?.mimetype) : resourceType,
+    format: path.extname(file?.originalname || "").replace(".", "").toLowerCase() || null,
+    file_type: file?.mimetype || null,
+    original_filename: file?.originalname || null,
+    size: file?.size || null,
+    uploaded_at: new Date().toISOString()
+  };
+}
+
 function resolveLocalAssetPath(relativePath) {
   const normalizedRelativePath = relativePath.split("/").join(path.sep);
   const absolutePath = path.resolve(uploadsRoot, normalizedRelativePath);
@@ -135,6 +145,10 @@ export function getStorageMode() {
     return configuredMode;
   }
 
+  if (process.env.NODE_ENV === "production" && hasS3Config()) {
+    return "s3";
+  }
+
   if (process.env.NODE_ENV === "production" && hasCloudinaryConfig()) {
     return "cloudinary";
   }
@@ -164,12 +178,29 @@ async function writeAssetLocally(file, folder, resourceType, req) {
   return formatLocalAsset(relativePath, file, resourceType, req);
 }
 
+async function writeAssetToS3(file, folder, resourceType) {
+  const uploaded = await uploadBufferToS3({
+    buffer: file.buffer,
+    fileName: file.originalname || "file",
+    contentType: file.mimetype || "application/octet-stream",
+    folder
+  });
+
+  return formatS3Asset(uploaded.key, uploaded.url, file, resourceType);
+}
+
 export async function uploadAsset(file, folder, resourceType = "auto", req) {
   if (!file) {
     return null;
   }
 
-  if (getStorageMode() === "cloudinary") {
+  const storageMode = getStorageMode();
+
+  if (storageMode === "s3") {
+    return writeAssetToS3(file, folder, resourceType);
+  }
+
+  if (storageMode === "cloudinary") {
     try {
       return await uploadToCloudinary(file, folder, resourceType);
     } catch (error) {
@@ -192,7 +223,14 @@ export async function deleteAsset(asset, fallbackResourceType = "image") {
     return;
   }
 
-  const storage = asset.storage || (asset.secure_url?.includes("/uploads/") ? "local" : "cloudinary");
+  const storage =
+    asset.storage ||
+    (asset.secure_url?.includes("/uploads/") ? "local" : asset.secure_url?.includes("cloudfront.net") ? "s3" : "cloudinary");
+
+  if (storage === "s3") {
+    await deleteFromS3(asset.public_id);
+    return;
+  }
 
   if (storage === "cloudinary") {
     await deleteFromCloudinary(asset.public_id, asset.resource_type || fallbackResourceType);

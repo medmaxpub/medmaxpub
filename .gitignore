@@ -5,7 +5,14 @@ build/
 .idea/
 .vscode/
 *.log
+.env
+.env.*
 frontend/.env
+frontend/.env.*
 backend/.env
+backend/.env.*
+!.env.example
+!frontend/.env.example
+!backend/.env.example
+backend/uploads/
 backend/target/
-

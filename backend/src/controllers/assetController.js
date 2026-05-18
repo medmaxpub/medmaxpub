@@ -16,7 +16,7 @@ function getAllowedHosts(req) {
     // Ignore malformed host values.
   }
 
-  for (const candidate of [process.env.BACKEND_PUBLIC_URL, process.env.FRONTEND_URL, process.env.CLIENT_URL]) {
+  for (const candidate of [process.env.BACKEND_PUBLIC_URL, process.env.FRONTEND_URL, process.env.CLIENT_URL, process.env.CLOUDFRONT_URL]) {
     if (!candidate) {
       continue;
     }
@@ -41,7 +41,15 @@ function isAllowedAssetTarget(targetUrl, req) {
     }
 
     if (allowedHosts.has(parsed.hostname)) {
-      return parsed.pathname.includes("/upload") || parsed.pathname.includes("/uploads/");
+      return (
+        parsed.pathname.includes("/upload") ||
+        parsed.pathname.includes("/uploads/") ||
+        parsed.pathname.includes("/medmaxpub/") ||
+        parsed.pathname.includes("/ppt/") ||
+        parsed.pathname.includes("/pdf/") ||
+        parsed.pathname.includes("/images/") ||
+        parsed.pathname.includes("/videos/")
+      );
     }
 
     return false;

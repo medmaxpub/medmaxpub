@@ -196,8 +196,11 @@ export function normalizePptItem(item = {}) {
     zoom: "page-width",
     view: "FitH"
   });
-  const officeViewerUrl = buildOfficeViewerUrl(inlinePptUrl || pptUrl);
-  const googleViewerUrl = buildGoogleViewerUrl(inlinePptUrl || pptUrl);
+  // Prefer the direct HTTPS asset URL for Office/Google viewers.
+  // Local proxy URLs like http://localhost:5000/... are not embeddable there
+  // and would incorrectly force local preview back to the PDF version.
+  const officeViewerUrl = buildOfficeViewerUrl(pptUrl) || buildOfficeViewerUrl(inlinePptUrl);
+  const googleViewerUrl = buildGoogleViewerUrl(pptUrl) || buildGoogleViewerUrl(inlinePptUrl);
   const modalPreviewUrl = pdfViewerUrl;
   const browserPreviewUrl = officeViewerUrl || googleViewerUrl || pdfViewerUrl || null;
   const previewIssue = !pptUrl
