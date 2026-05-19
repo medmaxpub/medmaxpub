@@ -139,6 +139,36 @@ function buildConfirmationEmailText({ fullName, subject }) {
   ].join("\n");
 }
 
+function buildPasswordChangeOtpHtml({ fullName, otp }) {
+  const safeName = escapeHtml(fullName || "Admin");
+  const safeOtp = escapeHtml(otp);
+
+  return `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
+      <h2 style="margin: 0 0 16px;">Medmax Password Change OTP</h2>
+      <p style="margin: 0 0 12px;">Hello ${safeName},</p>
+      <p style="margin: 0 0 12px;">Use the following one-time password to confirm your admin password update:</p>
+      <div style="display: inline-block; padding: 12px 18px; border-radius: 12px; background: #f3f4f6; border: 1px solid #d1d5db; font-size: 24px; font-weight: 700; letter-spacing: 0.3em;">
+        ${safeOtp}
+      </div>
+      <p style="margin: 16px 0 0;">This OTP will expire in 10 minutes.</p>
+      <p style="margin: 8px 0 0;">If you did not request this change, please ignore this email.</p>
+    </div>
+  `;
+}
+
+function buildPasswordChangeOtpText({ fullName, otp }) {
+  return [
+    `Hello ${fullName || "Admin"},`,
+    "",
+    "Use the following one-time password to confirm your admin password update:",
+    otp,
+    "",
+    "This OTP will expire in 10 minutes.",
+    "If you did not request this change, please ignore this email."
+  ].join("\n");
+}
+
 export async function sendContactEmails({ fullName, email, subject, message, submittedAt }) {
   const resend = getResendClient();
   const { adminEmails, fromEmail } = validateEmailConfig();
@@ -173,5 +203,34 @@ export async function sendContactEmails({ fullName, email, subject, message, sub
     };
   } catch (error) {
     throw new AppError(error?.message || "Failed to send confirmation email.", 502);
+  }
+}
+
+export async function sendPasswordChangeOtpEmail({ fullName, email, otp }) {
+  const resend = getResendClient();
+  const fromEmail = getFromEmail();
+
+  if (!fromEmail) {
+    throw new AppError("FROM_EMAIL is not configured on the server.", 503);
+  }
+
+  if (!FROM_EMAIL_PATTERN.test(fromEmail)) {
+    throw new AppError("FROM_EMAIL must use the format email@example.com or Name <email@example.com>.", 503);
+  }
+
+  try {
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: [email],
+      subject: "Medmax Publishers Password Change OTP",
+      html: buildPasswordChangeOtpHtml({ fullName, otp }),
+      text: buildPasswordChangeOtpText({ fullName, otp })
+    });
+
+    return {
+      emailId: result?.data?.id || null
+    };
+  } catch (error) {
+    throw new AppError(error?.message || "Failed to send password change OTP email.", 502);
   }
 }

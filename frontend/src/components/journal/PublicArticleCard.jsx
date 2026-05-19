@@ -64,22 +64,32 @@ export default function PublicArticleCard({ article, journalRoute, articleKey })
           <Link
             to={buildJournalArticleAbstractPath(journalRoute, article.id)}
             state={{ article }}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-brand-border bg-brand-elevated text-brand-ink transition hover:border-brand-teal hover:bg-brand-sky"
+            className="group inline-flex items-center gap-3 rounded-2xl border border-sky-200 bg-[linear-gradient(135deg,#f8fdff_0%,#e6f7fb_100%)] px-4 py-3 text-brand-ink shadow-sm transition hover:-translate-y-0.5 hover:border-cyan-400 hover:shadow-md"
             aria-label={`Open abstract for ${article.title || "article"}`}
             title="Open abstract"
           >
-            <ScrollText size={18} />
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-cyan-700 shadow-sm ring-1 ring-cyan-100 transition group-hover:bg-cyan-50">
+              <ScrollText size={18} />
+            </span>
+            <span className="text-left">
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-700">Abstract</span>
+            </span>
           </Link>
           {article.pdfUrl ? (
             <a
               href={buildPdfProxyUrl(article.pdfUrl) || article.pdfUrl}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-brand-border bg-brand-elevated text-brand-ink transition hover:border-brand-teal hover:bg-brand-sky"
+              className="group inline-flex items-center gap-3 rounded-2xl border border-rose-200 bg-[linear-gradient(135deg,#fff8f8_0%,#ffe9e9_100%)] px-4 py-3 text-brand-ink shadow-sm transition hover:-translate-y-0.5 hover:border-rose-400 hover:shadow-md"
               target="_blank"
               rel="noreferrer"
               aria-label={`Open PDF for ${article.title || "article"}`}
               title="Open PDF in new tab"
             >
-              <FileText size={18} />
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-rose-600 shadow-sm ring-1 ring-rose-100 transition group-hover:bg-rose-50">
+                <FileText size={18} />
+              </span>
+              <span className="text-left">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-rose-600">PDF</span>
+              </span>
             </a>
           ) : null}
         </div>

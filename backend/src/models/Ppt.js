@@ -27,6 +27,8 @@ const pptSchema = new mongoose.Schema(
     description: { type: String, required: true },
     authorName: { type: String, default: "" },
     doiNumber: { type: String, default: "" },
+    coverImage: assetSchema,
+    coverImageUrl: String,
     file: assetSchema,
     previewFile: assetSchema,
     pptFileName: String,

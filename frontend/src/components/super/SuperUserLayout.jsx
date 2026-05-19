@@ -1,5 +1,6 @@
-import { BarChart3, BookOpenText, FileVideo, LayoutGrid, LogOut, MessageSquareQuote, Presentation, Send, Users } from "lucide-react";
-import { NavLink, Outlet } from "react-router-dom";
+import { BarChart3, BookOpenText, FileVideo, LayoutGrid, LogOut, MessageSquareQuote, Presentation, Send, Settings, Users } from "lucide-react";
+import { useCallback, useEffect, useRef } from "react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { medmaxTransparentLogo } from "../../assets/branding";
 import { useAuth } from "../../context/AuthContext";
 
@@ -11,14 +12,55 @@ const navItems = [
   { label: "PPT Upload", to: "/superuser/ppt-upload", icon: Presentation },
   { label: "Video Upload", to: "/superuser/video-upload", icon: FileVideo },
   { label: "Homepage Stats", to: "/superuser/site-stats", icon: BarChart3 },
-  { label: "Testimonials", to: "/superuser/testimonials", icon: MessageSquareQuote }
+  { label: "Testimonials", to: "/superuser/testimonials", icon: MessageSquareQuote },
+  { label: "Admin Settings", to: "/superuser/settings", icon: Settings }
 ];
 
 export default function SuperUserLayout() {
   const { logout, user } = useAuth();
+  const navigate = useNavigate();
+  const idleTimerRef = useRef(null);
   const isAdmin = user?.role === "admin";
   const portalLabel = isAdmin ? "Admin Portal" : "Super User Portal";
   const dashboardTitle = isAdmin ? "Admin Dashboard" : "Super User Dashboard";
+
+  const performLogout = useCallback(() => {
+    logout();
+    navigate("/login", { replace: true });
+  }, [logout, navigate]);
+
+  useEffect(() => {
+    if (!user) {
+      return undefined;
+    }
+
+    const resetIdleTimer = () => {
+      if (idleTimerRef.current) {
+        window.clearTimeout(idleTimerRef.current);
+      }
+
+      // Auto logout only after 30 minutes of inactivity.
+      idleTimerRef.current = window.setTimeout(performLogout, 30 * 60 * 1000);
+    };
+
+    const activityEvents = ["mousemove", "mousedown", "keydown", "scroll", "touchstart", "focus"];
+
+    activityEvents.forEach((eventName) => {
+      window.addEventListener(eventName, resetIdleTimer, { passive: true });
+    });
+
+    resetIdleTimer();
+
+    return () => {
+      if (idleTimerRef.current) {
+        window.clearTimeout(idleTimerRef.current);
+      }
+
+      activityEvents.forEach((eventName) => {
+        window.removeEventListener(eventName, resetIdleTimer);
+      });
+    };
+  }, [performLogout, user]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -54,7 +96,7 @@ export default function SuperUserLayout() {
             ))}
           </nav>
 
-          <button type="button" onClick={logout} className="button-secondary mt-8 w-full text-brand-ink">
+          <button type="button" onClick={performLogout} className="button-secondary mt-8 w-full text-brand-ink">
             <LogOut size={16} className="mr-2" />
             Logout
           </button>

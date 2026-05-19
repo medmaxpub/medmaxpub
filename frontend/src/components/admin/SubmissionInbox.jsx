@@ -1,4 +1,27 @@
-import { ExternalLink, FileText, Mail, MapPin } from "lucide-react";
+import { ExternalLink, FileText, Mail } from "lucide-react";
+
+function formatDateTime(value) {
+  if (!value) {
+    return "NA";
+  }
+
+  try {
+    return new Date(value).toLocaleString();
+  } catch {
+    return "NA";
+  }
+}
+
+function SubmissionCell({ label, children, className = "" }) {
+  return (
+    <td className={`align-top px-4 py-4 text-sm text-brand-slate ${className}`}>
+      <div className="space-y-2">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-teal md:hidden">{label}</p>
+        {children}
+      </div>
+    </td>
+  );
+}
 
 export default function SubmissionInbox({ submissions = [], isLoading = false, emptyMessage = "No manuscript submissions yet." }) {
   if (isLoading) {
@@ -18,67 +41,107 @@ export default function SubmissionInbox({ submissions = [], isLoading = false, e
   }
 
   return (
-    <div className="grid gap-6">
-      {submissions.map((item) => (
-        <article key={item.id} className="rounded-3xl border border-brand-border bg-brand-surface p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Online Submission</p>
-              <h2 className="mt-2 font-display text-2xl font-semibold text-brand-ink">{item.manuscriptTitle}</h2>
-              <p className="mt-2 text-sm text-brand-slate">
-                {item.journalTitle || "Journal unavailable"} | {item.articleType || "Article"}
-              </p>
-            </div>
-            <p className="text-sm text-brand-slate">{new Date(item.createdAt).toLocaleString()}</p>
-          </div>
+    <div className="card-panel overflow-hidden">
+      <div className="border-b border-brand-border bg-brand-elevated px-5 py-5 sm:px-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-brand-teal">Online Submission</p>
+        <h2 className="mt-2 font-display text-2xl font-semibold text-brand-ink">Submission Inbox</h2>
+        <p className="mt-2 text-sm leading-7 text-brand-slate">Review incoming manuscript submissions in a row-wise table with all core author and article details.</p>
+      </div>
 
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <div className="rounded-2xl border border-brand-border bg-brand-elevated p-4 text-sm text-brand-slate">
-              <p className="font-semibold text-brand-ink">{item.name}</p>
-              <a href={`mailto:${item.email}`} className="mt-3 flex items-center gap-2 transition hover:text-brand-ink">
-                <Mail size={16} className="text-brand-gold" />
-                {item.email}
-              </a>
-              <p className="mt-3 flex items-start gap-2">
-                <MapPin size={16} className="mt-0.5 shrink-0 text-brand-gold" />
-                <span>{item.postalAddress}</span>
-              </p>
-              <p className="mt-3">
-                <span className="font-semibold text-brand-ink">Country:</span> {item.country}
-              </p>
-            </div>
+      <div className="overflow-x-auto">
+        <table className="min-w-[1400px] w-full border-separate border-spacing-0">
+          <thead>
+            <tr className="bg-white">
+              <th className="border-b border-brand-border px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">Name</th>
+              <th className="border-b border-brand-border px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">Email ID</th>
+              <th className="border-b border-brand-border px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">Address</th>
+              <th className="border-b border-brand-border px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">Country</th>
+              <th className="border-b border-brand-border px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">Journal</th>
+              <th className="border-b border-brand-border px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">Article Type</th>
+              <th className="border-b border-brand-border px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">Article Title</th>
+              <th className="border-b border-brand-border px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">Abstract</th>
+              <th className="border-b border-brand-border px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">Attachment</th>
+            </tr>
+          </thead>
 
-            <div className="rounded-2xl border border-brand-border bg-brand-elevated p-4 text-sm text-brand-slate">
-              <p className="font-semibold text-brand-ink">Abstract</p>
-              <p className="mt-3 whitespace-pre-line leading-7">{item.abstract}</p>
-            </div>
-          </div>
+          <tbody>
+            {submissions.map((item, index) => (
+              <tr key={item.id} className={index % 2 === 0 ? "bg-white" : "bg-brand-sky/35"}>
+                <SubmissionCell label="Name" className="min-w-[180px]">
+                  <div>
+                    <p className="font-semibold text-brand-ink">{item.name || "NA"}</p>
+                    <p className="mt-1 text-xs text-brand-slate">Submitted {formatDateTime(item.createdAt)}</p>
+                  </div>
+                </SubmissionCell>
 
-          <div className="mt-5 rounded-2xl border border-brand-border bg-white p-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Attached Files</p>
-            <div className="mt-4 flex flex-wrap gap-3">
-              {(item.files || []).map((file) => (
-                <a
-                  key={file.id}
-                  href={file.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="button-secondary px-4 py-2"
-                >
-                  <FileText size={16} className="mr-2" />
-                  {file.name}
-                </a>
-              ))}
-              {item.journalUrl ? (
-                <a href={`/journals/${item.journalUrl}/home`} className="button-soft px-4 py-2">
-                  <ExternalLink size={16} className="mr-2" />
-                  Open Journal
-                </a>
-              ) : null}
-            </div>
-          </div>
-        </article>
-      ))}
+                <SubmissionCell label="Email ID" className="min-w-[220px]">
+                  {item.email ? (
+                    <a href={`mailto:${item.email}`} className="inline-flex items-center gap-2 transition hover:text-brand-ink">
+                      <Mail size={15} className="text-brand-gold" />
+                      <span className="break-all">{item.email}</span>
+                    </a>
+                  ) : (
+                    <span>NA</span>
+                  )}
+                </SubmissionCell>
+
+                <SubmissionCell label="Address" className="min-w-[220px]">
+                  <p className="whitespace-pre-line leading-6">{item.postalAddress || "NA"}</p>
+                </SubmissionCell>
+
+                <SubmissionCell label="Country" className="min-w-[140px]">
+                  <p>{item.country || "NA"}</p>
+                </SubmissionCell>
+
+                <SubmissionCell label="Journal" className="min-w-[220px]">
+                  <div className="space-y-2">
+                    <p className="font-semibold text-brand-ink">{item.journalTitle || "Journal unavailable"}</p>
+                    {item.journalUrl ? (
+                      <a href={`/journals/${item.journalUrl}/home`} className="inline-flex items-center gap-2 text-sm font-medium text-brand-navy transition hover:text-brand-ink">
+                        <ExternalLink size={14} />
+                        Open Journal
+                      </a>
+                    ) : null}
+                  </div>
+                </SubmissionCell>
+
+                <SubmissionCell label="Article Type" className="min-w-[170px]">
+                  <p>{item.articleType || "NA"}</p>
+                </SubmissionCell>
+
+                <SubmissionCell label="Article Title" className="min-w-[240px]">
+                  <p className="font-medium text-brand-ink">{item.manuscriptTitle || "NA"}</p>
+                </SubmissionCell>
+
+                <SubmissionCell label="Abstract" className="min-w-[320px]">
+                  <p className="max-w-[320px] whitespace-pre-line leading-6 text-brand-slate">{item.abstract || "NA"}</p>
+                </SubmissionCell>
+
+                <SubmissionCell label="Attachment" className="min-w-[220px]">
+                  <div className="flex flex-col gap-2">
+                    {(item.files || []).length ? (
+                      item.files.map((file) => (
+                        <a
+                          key={file.id}
+                          href={file.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-2 rounded-xl border border-brand-border bg-brand-elevated px-3 py-2 font-medium text-brand-ink transition hover:bg-white"
+                        >
+                          <FileText size={15} className="text-brand-crimson" />
+                          <span className="truncate">{file.name}</span>
+                        </a>
+                      ))
+                    ) : (
+                      <span>NA</span>
+                    )}
+                  </div>
+                </SubmissionCell>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

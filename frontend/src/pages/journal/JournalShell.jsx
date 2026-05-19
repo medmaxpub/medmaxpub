@@ -103,6 +103,7 @@ export default function JournalShell() {
   const journalVideos = (journal.videos || []).map(normalizeVideoItem);
   const journalRoute = journal.publicJournalUrl || journal.journalUrl;
   const homeContent = journal.homeContent || journal.aboutJournal;
+  const showJournalHero = section === "home" || section === "about" || section === "aim-scope";
   const aimScopeContent =
     journal.aimScope ||
     `This journal publishes peer-reviewed work in ${journal.journalDomainName || "its listed specialist fields"} with a focus on practical, scholarly, and translational value.`;
@@ -336,48 +337,50 @@ export default function JournalShell() {
           <div className="border-b border-brand-border px-5 py-5 sm:px-8 sm:py-6">
             <JournalMenu journalUrl={journal.publicJournalUrl || journal.journalUrl} />
           </div>
-          <div className="grid gap-6 px-5 py-5 sm:px-8 sm:py-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-8">
-            <div className="flex min-h-[368px] items-center justify-center">
-              {journal.coverImage ? (
-                <img
-                  src={journal.coverImage}
-                  alt={`${journal.managingJournalName} cover`}
-                  className="h-full min-h-[368px] w-full rounded-3xl object-contain"
-                />
-              ) : (
-                <div className="flex h-full min-h-[368px] w-full items-center justify-center rounded-3xl bg-brand-surface p-4 text-center text-sm font-semibold text-brand-slate">
-                  Journal Cover
-                </div>
-              )}
+          {showJournalHero ? (
+            <div className="grid gap-6 px-5 py-5 sm:px-8 sm:py-8 lg:grid-cols-[0.48fr_1.52fr] lg:gap-8">
+              <div className="flex min-h-[184px] items-center justify-center">
+                {journal.coverImage ? (
+                  <img
+                    src={journal.coverImage}
+                    alt={`${journal.managingJournalName} cover`}
+                    className="h-full min-h-[184px] w-full rounded-3xl object-contain"
+                  />
+                ) : (
+                  <div className="flex h-full min-h-[184px] w-full items-center justify-center rounded-3xl bg-brand-surface p-4 text-center text-sm font-semibold text-brand-slate">
+                    Journal Cover
+                  </div>
+                )}
+              </div>
+              <div className="rounded-3xl border border-brand-border bg-brand-surface p-6">
+                <p className="text-xs uppercase tracking-[0.18em] text-brand-gold">Managing Journal Name</p>
+                <h1 className="mt-3 font-display text-3xl font-semibold text-brand-ink sm:text-4xl">{journal.managingJournalName}</h1>
+                <p className="mt-4 text-sm text-brand-slate">Managed by {journal.firstName} {journal.lastName}</p>
+                {journal.issn ? <p className="mt-2 text-sm font-medium uppercase tracking-[0.16em] text-brand-gold">{journal.issn}</p> : null}
+                {journal.pdfFiles?.length ? (
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    {journal.pdfFiles.map((item) => (
+                      <a
+                        key={item.id}
+                        href={buildPdfProxyUrl(item.fileUrl) || item.fileUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="button-secondary inline-flex px-4 py-2"
+                      >
+                        <FileText size={16} className="mr-2" />
+                        View PDF
+                      </a>
+                    ))}
+                  </div>
+                ) : journal.pdfFileUrl ? (
+                  <a href={buildPdfProxyUrl(journal.pdfFileUrl) || journal.pdfFileUrl} target="_blank" rel="noreferrer" className="button-secondary mt-5 inline-flex px-4 py-2">
+                    <FileText size={16} className="mr-2" />
+                    View PDF
+                  </a>
+                ) : null}
+              </div>
             </div>
-            <div className="rounded-3xl border border-brand-border bg-brand-surface p-6">
-              <p className="text-xs uppercase tracking-[0.18em] text-brand-gold">Managing Journal Name</p>
-              <h1 className="mt-3 font-display text-3xl font-semibold text-brand-ink sm:text-4xl">{journal.managingJournalName}</h1>
-              <p className="mt-4 text-sm text-brand-slate">Managed by {journal.firstName} {journal.lastName}</p>
-              {journal.issn ? <p className="mt-2 text-sm font-medium uppercase tracking-[0.16em] text-brand-gold">{journal.issn}</p> : null}
-              {journal.pdfFiles?.length ? (
-                <div className="mt-5 flex flex-wrap gap-3">
-                  {journal.pdfFiles.map((item) => (
-                    <a
-                      key={item.id}
-                      href={buildPdfProxyUrl(item.fileUrl) || item.fileUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="button-secondary inline-flex px-4 py-2"
-                    >
-                      <FileText size={16} className="mr-2" />
-                      View PDF
-                    </a>
-                  ))}
-                </div>
-              ) : journal.pdfFileUrl ? (
-                <a href={buildPdfProxyUrl(journal.pdfFileUrl) || journal.pdfFileUrl} target="_blank" rel="noreferrer" className="button-secondary mt-5 inline-flex px-4 py-2">
-                  <FileText size={16} className="mr-2" />
-                  View PDF
-                </a>
-              ) : null}
-            </div>
-          </div>
+          ) : null}
         </div>
 
         <div className="mt-8 card-panel p-5 sm:p-8">

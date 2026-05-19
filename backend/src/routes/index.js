@@ -1,6 +1,12 @@
 import express from "express";
 import { proxyFileAsset, proxyPdfAsset } from "../controllers/assetController.js";
-import { impersonateUser, login, signupAdmin } from "../controllers/authController.js";
+import {
+  confirmPasswordChange,
+  impersonateUser,
+  login,
+  requestPasswordChangeOtp,
+  signupAdmin
+} from "../controllers/authController.js";
 import {
   createArticle,
   deleteArticle,
@@ -29,7 +35,7 @@ import {
 } from "../controllers/journalController.js";
 import { createIssue } from "../controllers/issueController.js";
 import { getAdminSiteStats, getSiteStats, updateAdminSiteStats } from "../controllers/siteStatsController.js";
-import { deletePpt, getAdminPpts, getPptById, getPpts, regeneratePptPreview, uploadPpt } from "../controllers/pptController.js";
+import { deletePpt, getAdminPpts, getPptById, getPpts, regeneratePptPreview, updatePpt, uploadPpt } from "../controllers/pptController.js";
 import { createVideo, getAdminVideos, getVideos } from "../controllers/videoController.js";
 import { createTestimonial, deleteTestimonial, getTestimonials, updateTestimonial } from "../controllers/testimonialController.js";
 import { createUser, deleteUser, getSuperUsers, getUsers, revealUserPassword, updateUser } from "../controllers/userController.js";
@@ -43,6 +49,8 @@ const router = express.Router();
 router.post("/auth/login", login);
 router.post("/auth/signup-admin", protect, signupAdmin);
 router.post("/auth/impersonate/:id", protect, impersonateUser);
+router.post("/auth/settings/password-otp/request", protect, requestPasswordChangeOtp);
+router.post("/auth/settings/password-otp/confirm", protect, confirmPasswordChange);
 router.use("/contact", contactRoutes);
 router.use("/s3", s3Routes);
 router.post("/submissions", upload.array("files", 10), createManuscriptSubmission);
@@ -115,6 +123,7 @@ router.post(
   "/journals/:journalId/ppts",
   protect,
   pptUpload.fields([
+    { name: "coverImage", maxCount: 1 },
     { name: "pptFile", maxCount: 1 },
     { name: "previewFile", maxCount: 1 }
   ]),
@@ -124,6 +133,7 @@ router.post(
   "/ppts/upload",
   protect,
   pptUpload.fields([
+    { name: "coverImage", maxCount: 1 },
     { name: "pptFile", maxCount: 1 },
     { name: "previewFile", maxCount: 1 }
   ]),
@@ -131,6 +141,16 @@ router.post(
 );
 router.get("/ppts", getPpts);
 router.get("/ppts/:id", getPptById);
+router.put(
+  "/ppts/:id",
+  protect,
+  pptUpload.fields([
+    { name: "coverImage", maxCount: 1 },
+    { name: "pptFile", maxCount: 1 },
+    { name: "previewFile", maxCount: 1 }
+  ]),
+  updatePpt
+);
 router.post("/ppts/:id/regenerate-preview", protect, regeneratePptPreview);
 router.delete("/ppts/:id", protect, deletePpt);
 

@@ -23,6 +23,7 @@ const VideosPage = lazy(() => import("./pages/public/VideosPage"));
 const SuperUserDashboardPage = lazy(() => import("./pages/super/SuperUserDashboardPage"));
 const SuperUserJournalsPage = lazy(() => import("./pages/super/SuperUserJournalsPage"));
 const SuperUserMediaPage = lazy(() => import("./pages/super/SuperUserMediaPage"));
+const SuperUserSettingsPage = lazy(() => import("./pages/super/SuperUserSettingsPage"));
 const SuperUserSiteStatsPage = lazy(() => import("./pages/super/SuperUserSiteStatsPage"));
 const SuperUserTestimonialsPage = lazy(() => import("./pages/super/SuperUserTestimonialsPage"));
 const SuperUserUsersPage = lazy(() => import("./pages/super/SuperUserUsersPage"));
@@ -108,6 +109,7 @@ export default function App() {
             <Route path="video-upload" element={<SuperUserMediaPage variant="video" />} />
             <Route path="site-stats" element={<SuperUserSiteStatsPage />} />
             <Route path="testimonials" element={<SuperUserTestimonialsPage />} />
+            <Route path="settings" element={<SuperUserSettingsPage />} />
           </Route>
         </Route>
       </Routes>

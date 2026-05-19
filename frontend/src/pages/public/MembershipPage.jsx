@@ -36,18 +36,20 @@ export default function MembershipPage() {
           <div className="mt-8 rounded-3xl border border-brand-border bg-white p-6 sm:p-8">
             <div className="space-y-5 text-brand-slate">
               <p className="leading-8">
-                <span className="font-semibold text-brand-ink">Medmax Publishers</span> is a peer-reviewed, open access
-                publishing platform covering Clinical, Medicine, Life Sciences, Pharma, and Engineering & Technology
-                domains.
+                Medmax Publishers is a peer-reviewed, open-access publishing platform dedicated to advancing research
+                across Clinical Sciences, Medicine, Life Sciences, Pharma, Engineering, and Technology disciplines.
+                The platform supports global researchers, academicians, and institutions by providing accessible and
+                high-quality scholarly publishing services.
               </p>
               <p className="leading-8">
-                Medmax offers membership plans that allow authors and institutions to publish
-                <span className="font-semibold text-brand-ink"> unlimited articles for the selected membership period</span>
-                {" "}without paying separate article charges for every submission.
+                Medmax offers flexible membership plans that enable authors and institutions to publish unlimited
+                articles during the selected membership period without incurring separate article processing charges for
+                each submission. This model promotes cost-effective and continuous research dissemination.
               </p>
               <p className="leading-8">
-                Upon membership approval, the member profile can be associated with publication activity across the
-                Medmax platform to improve professional visibility and continuity.
+                Following membership approval, member profiles can be integrated with publication activities across the
+                Medmax platform, helping enhance professional visibility, academic recognition, and long-term research
+                continuity.
               </p>
             </div>
 

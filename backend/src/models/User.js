@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import mongoose from "mongoose";
 import { encryptPassword } from "../utils/passwordVault.js";
 
@@ -48,7 +49,13 @@ const userSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "Journal"
       }
-    ]
+    ],
+    passwordChangeOtpHash: {
+      type: String,
+      default: ""
+    },
+    passwordChangeOtpExpiresAt: Date,
+    passwordChangeOtpRequestedAt: Date
   },
   {
     timestamps: true
@@ -71,6 +78,31 @@ userSchema.index(
 
 userSchema.methods.comparePassword = function comparePassword(password) {
   return bcrypt.compare(password, this.password);
+};
+
+userSchema.methods.setPasswordChangeOtp = function setPasswordChangeOtp(otp) {
+  this.passwordChangeOtpHash = crypto.createHash("sha256").update(String(otp || "")).digest("hex");
+  this.passwordChangeOtpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+  this.passwordChangeOtpRequestedAt = new Date();
+};
+
+userSchema.methods.clearPasswordChangeOtp = function clearPasswordChangeOtp() {
+  this.passwordChangeOtpHash = "";
+  this.passwordChangeOtpExpiresAt = undefined;
+  this.passwordChangeOtpRequestedAt = undefined;
+};
+
+userSchema.methods.matchesPasswordChangeOtp = function matchesPasswordChangeOtp(otp) {
+  if (!otp || !this.passwordChangeOtpHash || !this.passwordChangeOtpExpiresAt) {
+    return false;
+  }
+
+  if (this.passwordChangeOtpExpiresAt.getTime() < Date.now()) {
+    return false;
+  }
+
+  const candidateHash = crypto.createHash("sha256").update(String(otp || "")).digest("hex");
+  return candidateHash === this.passwordChangeOtpHash;
 };
 
 userSchema.pre("save", async function hashPassword(next) {

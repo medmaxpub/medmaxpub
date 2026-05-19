@@ -1,6 +1,6 @@
 import Journal from "../models/Journal.js";
 import Ppt from "../models/Ppt.js";
-import { createPptRecord, ensurePptPreviewAsset, serializePpt } from "../services/pptService.js";
+import { createPptRecord, ensurePptPreviewAsset, resolvePptCoverAsset, serializePpt, updatePptRecord } from "../services/pptService.js";
 import { buildAccessibleJournalFilter, ensureJournalAccess } from "../utils/accessControl.js";
 import { deleteAsset } from "../utils/assetStorage.js";
 import { AppError } from "../utils/appError.js";
@@ -25,6 +25,7 @@ export const uploadPpt = asyncHandler(async (req, res) => {
     doiNumber: req.body.doiNumber,
     pptUpload: req.files?.pptFile?.[0],
     previewUpload: req.files?.previewFile?.[0],
+    coverImageUpload: req.files?.coverImage?.[0],
     req
   });
 
@@ -99,9 +100,52 @@ export const deletePpt = asyncHandler(async (req, res) => {
   }
 
   await ensureJournalAccess(req.user, ppt.journal?._id || ppt.journal);
+  await deleteAsset(resolvePptCoverAsset(ppt), "image");
   await deleteAsset(ppt.file || ppt.pptFile, "raw");
   await deleteAsset(ppt.previewFile || ppt.pdfPreviewFile, "image");
   await ppt.deleteOne();
 
   res.status(204).send();
+});
+
+export const updatePpt = asyncHandler(async (req, res) => {
+  const ppt = await Ppt.findById(req.params.id).populate("journal", "managingJournalName journalUrl journalDomainName");
+
+  if (!ppt) {
+    throw new AppError("PPT not found", 404);
+  }
+
+  if (isSampleJournalRecord(ppt.journal)) {
+    throw new AppError("PPT not found", 404);
+  }
+
+  const requestedJournalId = req.body.journalId || ppt.journal?._id || ppt.journal;
+  const journal = await Journal.findById(requestedJournalId);
+
+  if (!journal) {
+    throw new AppError("Journal not found", 404);
+  }
+
+  await ensureJournalAccess(req.user, requestedJournalId);
+
+  await updatePptRecord({
+    ppt,
+    journalId: journal._id,
+    title: req.body.title,
+    description: req.body.description,
+    authorName: req.body.authorName,
+    doiNumber: req.body.doiNumber,
+    pptUpload: req.files?.pptFile?.[0],
+    previewUpload: req.files?.previewFile?.[0],
+    coverImageUpload: req.files?.coverImage?.[0],
+    req,
+    deleteAsset
+  });
+
+  const populatedPpt = await Ppt.findById(ppt._id).populate("journal", "managingJournalName journalUrl journalDomainName").lean();
+  res.set("Cache-Control", "no-store");
+  res.json({
+    ...serializePpt(populatedPpt),
+    message: "PPT updated successfully."
+  });
 });

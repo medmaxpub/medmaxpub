@@ -135,88 +135,99 @@ export default function PptsPage() {
           <div className="mt-10 space-y-6">
             {filteredItems.map((ppt) => (
               <article key={ppt.id} className="card-panel overflow-hidden">
-                <div className="grid lg:grid-cols-[280px_1fr]">
-                  <div className="flex min-h-64 items-center justify-center bg-brand-elevated px-8 text-center">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Related Journal</p>
-                      <h3 className="mt-3 font-display text-2xl font-semibold text-brand-ink">
-                        {ppt.journalInfo?.title || ppt.journalTitle || "Journal details unavailable"}
-                      </h3>
-                      {ppt.journalInfo?.domainName ? <p className="mt-2 text-sm text-brand-slate">{ppt.journalInfo.domainName}</p> : null}
+                <div className="p-5 sm:p-7">
+                  <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
+                    <div className="overflow-hidden rounded-3xl border border-brand-border bg-brand-elevated">
+                      {ppt.coverImageUrl ? (
+                        <img
+                          src={ppt.coverImageUrl}
+                          alt={ppt.title}
+                          className="h-full min-h-64 w-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="flex min-h-64 items-center justify-center px-6 text-center">
+                          <div>
+                            <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">PPT Cover</p>
+                            <p className="mt-3 text-sm text-brand-slate">Cover image unavailable</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-3 text-sm">
+                            <span className="eyebrow mb-0">PPT Record</span>
+                          </div>
+                          <h2 className="mt-4 font-display text-3xl font-semibold text-brand-ink">{ppt.title}</h2>
+                          <p className="mt-3 text-lg text-brand-slate">{ppt.description}</p>
+                        </div>
+                        <p className="text-sm text-brand-slate">Uploaded {new Date(ppt.uploadedDate).toLocaleDateString()}</p>
+                      </div>
+
+                      <div className="mt-5 flex flex-wrap items-center gap-3">
+                        {ppt.browserPreviewUrl ? (
+                          <a
+                            href={ppt.browserPreviewUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="button-soft px-4 py-2"
+                            onMouseEnter={() => warmPreviewUrl(ppt.previewUrl || ppt.browserPreviewUrl)}
+                            onFocus={() => warmPreviewUrl(ppt.previewUrl || ppt.browserPreviewUrl)}
+                          >
+                            <ExternalLink size={16} className="mr-2" />
+                            Open Preview
+                          </a>
+                        ) : null}
+                        {ppt.downloadUrl ? (
+                          <a href={ppt.downloadUrl} target="_blank" rel="noreferrer" download className="button-primary px-4 py-2">
+                            <Download size={16} className="mr-2" />
+                            Download PPT
+                          </a>
+                        ) : null}
+                        {ppt.journalInfo?.journalUrl ? (
+                          <Link
+                            to={buildJournalSectionPath(ppt.journalInfo.publicJournalUrl || ppt.journalInfo.journalUrl, "home")}
+                            className="button-secondary px-4 py-2"
+                          >
+                            Open Journal
+                          </Link>
+                        ) : null}
+                      </div>
+                      {ppt.previewIssue ? <p className="mt-3 text-sm text-rose-500">{ppt.previewIssue}</p> : null}
                     </div>
                   </div>
-                  <div className="p-5 sm:p-7">
-                    <div className="flex flex-wrap items-center gap-3 text-sm">
-                      <span className="eyebrow mb-0">PPT Record</span>
-                      <p className="text-brand-slate">Uploaded {new Date(ppt.uploadedDate).toLocaleDateString()}</p>
-                    </div>
-                    <h2 className="mt-4 font-display text-3xl font-semibold text-brand-ink">{ppt.title}</h2>
-                    <p className="mt-4 leading-7 text-brand-slate">{ppt.description}</p>
 
-                    <div className="mt-6 grid gap-5 xl:grid-cols-[1fr_0.95fr]">
-                      <div className="rounded-3xl border border-brand-border bg-brand-elevated p-5">
-                        <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Actions</p>
-                        <div className="mt-4 flex flex-wrap gap-3">
-                          {ppt.browserPreviewUrl ? (
-                            <a
-                              href={ppt.browserPreviewUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="button-soft px-4 py-2"
-                              onMouseEnter={() => warmPreviewUrl(ppt.previewUrl || ppt.browserPreviewUrl)}
-                              onFocus={() => warmPreviewUrl(ppt.previewUrl || ppt.browserPreviewUrl)}
-                            >
-                              <ExternalLink size={16} className="mr-2" />
-                              Open Preview
-                            </a>
-                          ) : null}
-                          {ppt.downloadUrl ? (
-                            <a href={ppt.downloadUrl} target="_blank" rel="noreferrer" download className="button-primary px-4 py-2">
-                              <Download size={16} className="mr-2" />
-                              Download PPT
-                            </a>
-                          ) : null}
-                          {ppt.journalInfo?.journalUrl ? (
-                            <Link
-                              to={buildJournalSectionPath(ppt.journalInfo.publicJournalUrl || ppt.journalInfo.journalUrl, "home")}
-                              className="button-secondary px-4 py-2"
-                            >
-                              Open Journal
-                            </Link>
-                          ) : null}
-                        </div>
-                        {ppt.previewIssue ? <p className="mt-3 text-sm text-rose-500">{ppt.previewIssue}</p> : null}
-                      </div>
-
-                      <div className="rounded-3xl border border-brand-border bg-brand-surface p-5">
-                        <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Related Journal</p>
-                        <h3 className="mt-3 font-display text-2xl font-semibold text-brand-ink">
-                          {ppt.journalInfo?.title || ppt.journalTitle || "Journal details unavailable"}
-                        </h3>
-                        {ppt.journalInfo?.domainName ? <p className="mt-2 text-sm text-brand-slate">{ppt.journalInfo.domainName}</p> : null}
-                        {ppt.journalInfo?.editorName ? <p className="mt-1 text-sm text-brand-slate">Managed by {ppt.journalInfo.editorName}</p> : null}
-                        {ppt.journalInfo?.overview ? (
-                          <>
-                            <p className="mt-4 text-xs uppercase tracking-[0.18em] text-brand-teal">Abstract / Overview</p>
-                            <p className="mt-2 text-sm leading-7 text-brand-slate">{ppt.journalInfo.overview}</p>
-                          </>
-                        ) : null}
-                        {ppt.journalInfo?.featuredAuthors?.length ? (
-                          <p className="mt-4 text-sm text-brand-slate">
-                            <span className="font-semibold text-brand-ink">Authors:</span> {ppt.journalInfo.featuredAuthors.join(", ")}
-                          </p>
-                        ) : null}
-                        {ppt.journalInfo?.featuredArticleTitle ? (
-                          <p className="mt-2 text-sm text-brand-slate">
-                            <span className="font-semibold text-brand-ink">Current article:</span> {ppt.journalInfo.featuredArticleTitle}
-                          </p>
-                        ) : null}
-                        {ppt.journalInfo?.currentIssueLabel ? (
-                          <p className="mt-2 text-sm text-brand-slate">
-                            <span className="font-semibold text-brand-ink">Current issue:</span> {ppt.journalInfo.currentIssueLabel}
-                          </p>
-                        ) : null}
-                      </div>
+                  <div className="mt-6 rounded-3xl border border-brand-border bg-brand-surface p-5">
+                    <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">Related Journal</p>
+                    <h3 className="mt-3 font-display text-2xl font-semibold text-brand-ink">
+                      {ppt.journalInfo?.title || ppt.journalTitle || "Journal details unavailable"}
+                    </h3>
+                    {ppt.journalInfo?.editorName ? <p className="mt-2 text-sm text-brand-slate">Managed by {ppt.journalInfo.editorName}</p> : null}
+                    {ppt.journalInfo?.overview ? (
+                      <>
+                        <p className="mt-4 text-xs uppercase tracking-[0.18em] text-brand-teal">Abstract / Overview</p>
+                        <p className="mt-2 text-sm leading-7 text-brand-slate">{ppt.journalInfo.overview}</p>
+                      </>
+                    ) : null}
+                    <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-brand-slate">
+                      {ppt.journalInfo?.featuredAuthors?.length ? (
+                        <p>
+                          <span className="font-semibold text-brand-ink">Authors:</span> {ppt.journalInfo.featuredAuthors.join(", ")}
+                        </p>
+                      ) : null}
+                      {ppt.journalInfo?.featuredArticleTitle ? (
+                        <p>
+                          <span className="font-semibold text-brand-ink">Current article:</span> {ppt.journalInfo.featuredArticleTitle}
+                        </p>
+                      ) : null}
+                      {ppt.journalInfo?.currentIssueLabel ? (
+                        <p>
+                          <span className="font-semibold text-brand-ink">Current issue:</span> {ppt.journalInfo.currentIssueLabel}
+                        </p>
+                      ) : null}
                     </div>
                   </div>
                 </div>

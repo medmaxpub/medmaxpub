@@ -1,9 +1,10 @@
 import Journal from "../models/Journal.js";
 import User from "../models/User.js";
-import { ensureSuperAdmin, normalizeRole } from "../utils/accessControl.js";
+import { ensureElevatedAccess, ensureSuperAdmin, normalizeRole } from "../utils/accessControl.js";
 import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { signToken } from "../utils/jwt.js";
+import { sendPasswordChangeOtpEmail } from "../utils/resendService.js";
 
 async function buildOwnedJournalIds(userId) {
   const ownedJournals = await Journal.find({ owner: userId }).select("_id").lean();
@@ -104,4 +105,101 @@ export const impersonateUser = asyncHandler(async (req, res) => {
       }
     })
   );
+});
+
+function normalizePassword(value) {
+  return String(value || "");
+}
+
+function normalizeOtp(value) {
+  return String(value || "")
+    .replace(/\D/g, "")
+    .slice(0, 6);
+}
+
+function buildOtpCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function getPasswordChangeOtpRecipient(user) {
+  const configuredRecipient =
+    process.env.CONTACT_TO_EMAIL?.trim() || process.env.ADMIN_EMAIL?.trim() || "";
+
+  if (configuredRecipient) {
+    return configuredRecipient;
+  }
+
+  return String(user?.email || "").trim();
+}
+
+export const requestPasswordChangeOtp = asyncHandler(async (req, res) => {
+  ensureElevatedAccess(req.user);
+
+  const currentPassword = normalizePassword(req.body.currentPassword);
+  const nextPassword = normalizePassword(req.body.newPassword);
+  const otpRecipient = getPasswordChangeOtpRecipient(req.user);
+
+  if (!currentPassword || !nextPassword) {
+    throw new AppError("Current password and new password are required.", 400);
+  }
+
+  if (!(await req.user.comparePassword(currentPassword))) {
+    throw new AppError("Current password is incorrect.", 400);
+  }
+
+  if (nextPassword.length < 8) {
+    throw new AppError("New password must be at least 8 characters long.", 400);
+  }
+
+  if (!otpRecipient) {
+    throw new AppError("Admin OTP email is missing. Please configure CONTACT_TO_EMAIL or ADMIN_EMAIL on the server.", 400);
+  }
+
+  const otp = buildOtpCode();
+  req.user.setPasswordChangeOtp(otp);
+  await req.user.save();
+
+  await sendPasswordChangeOtpEmail({
+    fullName: req.user.name || [req.user.firstName, req.user.lastName].filter(Boolean).join(" ").trim(),
+    email: otpRecipient,
+    otp
+  });
+
+  res.json({
+    success: true,
+    message: `OTP sent to ${otpRecipient}. It will expire in 10 minutes.`
+  });
+});
+
+export const confirmPasswordChange = asyncHandler(async (req, res) => {
+  ensureElevatedAccess(req.user);
+
+  const currentPassword = normalizePassword(req.body.currentPassword);
+  const nextPassword = normalizePassword(req.body.newPassword);
+  const otp = normalizeOtp(req.body.otp);
+
+  if (!currentPassword || !nextPassword || !otp) {
+    throw new AppError("Current password, new password, and OTP are required.", 400);
+  }
+
+  if (!(await req.user.comparePassword(currentPassword))) {
+    throw new AppError("Current password is incorrect.", 400);
+  }
+
+  if (nextPassword.length < 8) {
+    throw new AppError("New password must be at least 8 characters long.", 400);
+  }
+
+  if (!req.user.matchesPasswordChangeOtp(otp)) {
+    throw new AppError("Invalid or expired OTP.", 400);
+  }
+
+  req.user.password = nextPassword;
+  req.user.clearPasswordChangeOtp();
+  await req.user.save();
+
+  res.json({
+    success: true,
+    message: "Password updated successfully."
+  });
 });

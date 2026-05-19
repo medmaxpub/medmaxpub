@@ -178,8 +178,10 @@ export function warmPreviewUrl(url) {
 }
 
 export function normalizePptItem(item = {}) {
+  const coverImageAsset = item.coverImage || null;
   const pptAsset = item.file || item.pptFile || null;
   const previewAsset = item.previewFile || item.pdfPreviewFile || null;
+  const coverImageUrl = normalizeAssetUrl(item.coverImageUrl || coverImageAsset?.secure_url, coverImageAsset);
   const pptUrl = normalizeAssetUrl(item.pptUrl || item.fileUrl || pptAsset?.secure_url, pptAsset);
   const inlinePptUrl = buildAssetProxyUrl(pptUrl);
   const proxiedPptUrl = buildAssetProxyUrl(pptUrl, { download: true });
@@ -213,6 +215,8 @@ export function normalizePptItem(item = {}) {
     ...item,
     id: item.id || item._id,
     uploadedDate: item.uploadedDate || item.createdAt,
+    coverImage: coverImageAsset,
+    coverImageUrl,
     file: pptAsset,
     previewFile: previewAsset,
     pptUrl,

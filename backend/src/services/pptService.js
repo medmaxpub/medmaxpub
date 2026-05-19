@@ -72,6 +72,10 @@ export function resolvePptFileAsset(ppt) {
   return ppt?.file || ppt?.pptFile || ppt?._doc?.file || ppt?._doc?.pptFile || null;
 }
 
+export function resolvePptCoverAsset(ppt) {
+  return ppt?.coverImage || ppt?._doc?.coverImage || null;
+}
+
 export function resolvePptPreviewAsset(ppt) {
   return ppt?.previewFile || ppt?.pdfPreviewFile || ppt?._doc?.previewFile || ppt?._doc?.pdfPreviewFile || null;
 }
@@ -88,13 +92,34 @@ function logPptPreview(event, payload) {
   console.info(`[ppt-preview] ${event}`, payload);
 }
 
-export async function createPptRecord({ journalId, title, description, authorName, doiNumber, pptUpload, previewUpload, req }) {
+function buildPptDescription({ description, authorName, doiNumber, fallbackTitle }) {
+  const explicitDescription = String(description || "").trim();
+
+  if (explicitDescription) {
+    return explicitDescription;
+  }
+
+  const derivedDescription = [authorName, doiNumber].filter(Boolean).join(" | ").trim();
+  return derivedDescription || String(fallbackTitle || "").trim();
+}
+
+export async function createPptRecord({ journalId, title, description, authorName, doiNumber, pptUpload, previewUpload, coverImageUpload, req }) {
   if (!pptUpload) {
     throw new AppError("PPT or PPTX file is required", 400);
   }
 
+  if (!coverImageUpload) {
+    throw new AppError("PPT cover image is required", 400);
+  }
+
+  const coverImageAsset = await uploadAsset(coverImageUpload, "medmaxpub/ppt-covers", "image", req);
   const pptAsset = await uploadAsset(pptUpload, "medmaxpub/ppts", "raw", req);
   const normalizedPptUrl = normalizeStoredAssetUrl(pptAsset?.secure_url, pptAsset);
+  const normalizedCoverImageUrl = normalizeStoredAssetUrl(coverImageAsset?.secure_url, coverImageAsset);
+
+  if (!coverImageAsset?.public_id || !normalizedCoverImageUrl) {
+    throw new AppError("PPT cover image upload failed. Please try uploading the image again.", 502);
+  }
 
   if (!pptAsset?.public_id || !normalizedPptUrl) {
     throw new AppError("PPT upload failed to produce a valid file URL. Please try uploading the file again.", 502);
@@ -109,9 +134,11 @@ export async function createPptRecord({ journalId, title, description, authorNam
   const pptRecord = await Ppt.create({
     journal: journalId,
     title,
-    description,
+    description: buildPptDescription({ description, authorName, doiNumber, fallbackTitle: title }),
     authorName,
     doiNumber,
+    coverImage: coverImageAsset,
+    coverImageUrl: normalizedCoverImageUrl,
     file: pptAsset,
     previewFile: previewAsset,
     pptFileName: pptUpload.originalname || "",
@@ -146,6 +173,86 @@ export async function createPptRecord({ journalId, title, description, authorNam
   }
 
   return pptRecord;
+}
+
+export async function updatePptRecord({
+  ppt,
+  journalId,
+  title,
+  description,
+  authorName,
+  doiNumber,
+  pptUpload,
+  previewUpload,
+  coverImageUpload,
+  req,
+  deleteAsset
+}) {
+  const nextCoverImageAsset = coverImageUpload ? await uploadAsset(coverImageUpload, "medmaxpub/ppt-covers", "image", req) : null;
+  const nextPptAsset = pptUpload ? await uploadAsset(pptUpload, "medmaxpub/ppts", "raw", req) : null;
+  const nextPreviewAsset = previewUpload ? await uploadAsset(previewUpload, "medmaxpub/ppts-previews", "image", req) : null;
+
+  if (coverImageUpload && (!nextCoverImageAsset?.public_id || !normalizeStoredAssetUrl(nextCoverImageAsset?.secure_url, nextCoverImageAsset))) {
+    throw new AppError("PPT cover image upload failed. Please try uploading the image again.", 502);
+  }
+
+  if (pptUpload && (!nextPptAsset?.public_id || !normalizeStoredAssetUrl(nextPptAsset?.secure_url, nextPptAsset))) {
+    throw new AppError("PPT upload failed to produce a valid file URL. Please try uploading the file again.", 502);
+  }
+
+  if (nextCoverImageAsset) {
+    await deleteAsset(resolvePptCoverAsset(ppt), "image");
+    ppt.coverImage = nextCoverImageAsset;
+    ppt.coverImageUrl = normalizeStoredAssetUrl(nextCoverImageAsset.secure_url, nextCoverImageAsset);
+  }
+
+  if (nextPptAsset) {
+    await deleteAsset(resolvePptFileAsset(ppt), "raw");
+    ppt.file = nextPptAsset;
+    ppt.pptFile = undefined;
+    ppt.pptFileName = pptUpload?.originalname || "";
+    ppt.pptUrl = normalizeStoredAssetUrl(nextPptAsset.secure_url, nextPptAsset);
+    ppt.pptPublicId = nextPptAsset.public_id || null;
+
+    const generatedPreview =
+      nextPreviewAsset ||
+      (await generatePreviewAssetFromUpload(pptUpload, req)) ||
+      (await generatePreviewAssetFromStoredFile(nextPptAsset, req));
+
+    await deleteAsset(resolvePptPreviewAsset(ppt), "image");
+    ppt.previewFile = generatedPreview;
+    ppt.pdfPreviewFile = undefined;
+    ppt.previewPdfUrl = normalizeStoredAssetUrl(generatedPreview?.secure_url, generatedPreview);
+    ppt.previewPublicId = generatedPreview?.public_id || null;
+    ppt.previewStatus = generatedPreview ? "ready" : "failed";
+    ppt.previewError = generatedPreview ? "" : "Preview PDF generation failed";
+    ppt.previewRequestedAt = new Date();
+    ppt.previewReadyAt = generatedPreview ? new Date() : null;
+  } else if (nextPreviewAsset) {
+    await deleteAsset(resolvePptPreviewAsset(ppt), "image");
+    ppt.previewFile = nextPreviewAsset;
+    ppt.pdfPreviewFile = undefined;
+    ppt.previewPdfUrl = normalizeStoredAssetUrl(nextPreviewAsset.secure_url, nextPreviewAsset);
+    ppt.previewPublicId = nextPreviewAsset.public_id || null;
+    ppt.previewStatus = "ready";
+    ppt.previewError = "";
+    ppt.previewRequestedAt = new Date();
+    ppt.previewReadyAt = new Date();
+  }
+
+  ppt.journal = journalId;
+  ppt.title = title;
+  ppt.authorName = authorName || "";
+  ppt.doiNumber = doiNumber || "";
+  ppt.description = buildPptDescription({
+    description,
+    authorName: authorName || "",
+    doiNumber: doiNumber || "",
+    fallbackTitle: title
+  });
+
+  await ppt.save();
+  return ppt;
 }
 
 export async function ensurePptPreviewAsset(ppt, req, options = {}) {
@@ -198,8 +305,10 @@ export async function ensurePptPreviewAsset(ppt, req, options = {}) {
 
 export function serializePpt(ppt) {
   const pptAsset = resolvePptFileAsset(ppt);
+  const coverImageAsset = resolvePptCoverAsset(ppt);
   const previewAsset = resolvePptPreviewAsset(ppt);
   const pptUrl = normalizeStoredAssetUrl(ppt?.pptUrl || pptAsset?.secure_url, pptAsset);
+  const coverImageUrl = normalizeStoredAssetUrl(ppt?.coverImageUrl || coverImageAsset?.secure_url, coverImageAsset);
   const previewPdfUrl = normalizeStoredAssetUrl(ppt?.previewPdfUrl || previewAsset?.secure_url, previewAsset);
 
   return {
@@ -212,6 +321,7 @@ export function serializePpt(ppt) {
     createdAt: ppt.createdAt || null,
     updatedAt: ppt.updatedAt || null,
     journal: ppt.journal || null,
+    coverImageUrl,
     pptFileUrl: pptUrl,
     originalPptUrl: pptUrl,
     pptFileName: ppt?.pptFileName || pptAsset?.original_filename || "",
@@ -221,6 +331,7 @@ export function serializePpt(ppt) {
     previewPublicId: ppt?.previewPublicId || previewAsset?.public_id || null,
     previewStatus: determinePreviewStatus(ppt, previewAsset),
     previewError: ppt?.previewError || "",
+    coverImage: coverImageAsset,
     file: pptAsset,
     previewFile: previewAsset,
     fileUrl: pptUrl,
