@@ -1,0 +1,21 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Deploy Backend') {
+            steps {
+                sshagent(['ec2-key']) {
+                    sh """
+                    ssh -o StrictHostKeyChecking=no ubuntu@13.232.139.221 '
+                        cd /home/ubuntu/medmaxpub/backend &&
+                        git pull origin main &&
+                        npm install &&
+                        pm2 restart backend &&
+                        pm2 save
+                    '
+                    """
+                }
+            }
+        }
+    }
+}
