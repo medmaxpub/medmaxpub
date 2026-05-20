@@ -358,8 +358,8 @@ export default function DashboardMediaUploads({
               </div>
 
               {pptItems.length ? (
-                <div className="overflow-x-auto">
-                  <table className="min-w-[1100px] w-full text-left text-sm">
+                <div className="responsive-table-shell">
+                  <table className="responsive-table responsive-table-wide text-left">
                     <thead className="bg-brand-elevated text-brand-ink">
                       <tr className="border-b border-brand-border">
                         <th className="px-4 py-4 font-semibold">S.No</th>

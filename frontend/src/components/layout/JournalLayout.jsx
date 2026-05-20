@@ -5,7 +5,7 @@ import JournalNavbar from "./JournalNavbar";
 
 export default function JournalLayout() {
   return (
-    <div className="min-h-screen bg-brand-mist">
+    <div className="min-h-screen overflow-x-clip bg-brand-mist">
       <JournalNavbar />
       <main>
         <Outlet />

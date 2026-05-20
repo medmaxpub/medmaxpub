@@ -28,9 +28,9 @@ export default function UserLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen overflow-x-clip bg-white">
       <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
-        <aside className="border-r border-brand-border bg-white px-6 py-8">
+        <aside className="border-r border-brand-border bg-white px-4 py-6 sm:px-6 sm:py-8">
           <div className="inline-flex rounded-[1.15rem] border border-brand-border bg-brand-elevated px-4 py-3 shadow-panel">
             <img src={medmaxTransparentLogo} alt="Medmax Publishers" className="h-12 w-auto" />
           </div>
@@ -85,7 +85,7 @@ export default function UserLayout() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-brand-navy">Publishing Workspace</p>
-                <h1 className="mt-2 font-display text-3xl font-semibold text-brand-ink sm:text-4xl">Journal Dashboard</h1>
+                <h1 className="mt-2 font-display text-2xl font-semibold text-brand-ink sm:text-4xl">Journal Dashboard</h1>
               </div>
             </div>
           </header>

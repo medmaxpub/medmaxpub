@@ -53,7 +53,10 @@ export default function JournalPdfUploadModal({ open, journalId, journalName, on
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 px-4 py-6">
       <div className="flex min-h-full items-start justify-center">
-        <form onSubmit={handleSubmit} className="card-panel relative my-2 w-full max-w-2xl p-6 sm:p-7">
+        <form
+          onSubmit={handleSubmit}
+          className="card-panel relative my-2 max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto p-5 sm:p-7"
+        >
           <button
             type="button"
             className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-brand-border bg-white text-brand-slate hover:border-brand-crimson hover:text-brand-crimson"
@@ -65,7 +68,7 @@ export default function JournalPdfUploadModal({ open, journalId, journalName, on
 
           <div className="pr-12">
             <span className="eyebrow">Journal PDFs</span>
-            <h2 className="font-display text-3xl font-semibold text-brand-ink">Add PDFs to journal</h2>
+            <h2 className="font-display text-2xl font-semibold text-brand-ink sm:text-3xl">Add PDFs to journal</h2>
             <p className="mt-3 text-brand-slate">
               Upload one or more PDFs for <span className="font-semibold text-brand-ink">{journalName || "the selected journal"}</span>.
             </p>
@@ -83,9 +86,9 @@ export default function JournalPdfUploadModal({ open, journalId, journalName, on
             {files.length ? (
               <div className="mt-4 space-y-2">
                 {files.map((file) => (
-                  <div key={`${file.name}-${file.size}`} className="flex items-center gap-3 rounded-2xl border border-brand-border bg-white px-4 py-3 text-sm text-brand-slate">
+                  <div key={`${file.name}-${file.size}`} className="flex min-w-0 items-center gap-3 rounded-2xl border border-brand-border bg-white px-4 py-3 text-sm text-brand-slate">
                     <FileText size={16} className="text-brand-crimson" />
-                    <span className="truncate">{file.name}</span>
+                    <span className="min-w-0 truncate">{file.name}</span>
                   </div>
                 ))}
               </div>

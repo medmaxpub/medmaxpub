@@ -9,7 +9,7 @@ export default function TopHeader({ searchTerm, setSearchTerm, onSearch }) {
       <div className="container-shell flex flex-col gap-4 py-3 sm:py-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex justify-start">
           <Link to="/" className="inline-flex items-center">
-            <img src={medmaxTransparentLogo} alt="Medmax Publishers" className="h-16 w-auto sm:h-20 lg:h-24" />
+            <img src={medmaxTransparentLogo} alt="Medmax Publishers" className="h-14 w-auto sm:h-20 lg:h-24" />
           </Link>
         </div>
 
@@ -30,16 +30,16 @@ export default function TopHeader({ searchTerm, setSearchTerm, onSearch }) {
 
           <form
             onSubmit={onSearch}
-            className="flex w-full max-w-[22rem] items-center gap-3 rounded-full border border-slate-200 bg-white px-3 py-2 shadow-[0_18px_40px_rgba(15,23,42,0.08)]"
+            className="flex w-full max-w-[22rem] items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 shadow-[0_18px_40px_rgba(15,23,42,0.08)]"
           >
             <Search size={18} className="shrink-0 text-slate-500" />
             <input
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder="Search journals"
-              className="!border-none !bg-transparent !p-0 !text-sm !text-slate-800 !shadow-none placeholder:!text-slate-400 focus:!ring-0"
+              className="min-w-0 flex-1 !border-none !bg-transparent !p-0 !text-sm !text-slate-800 !shadow-none placeholder:!text-slate-400 focus:!ring-0"
             />
-            <button className="button-primary min-h-10 shrink-0 px-4 py-2" type="submit">
+            <button className="button-primary min-h-10 shrink-0 px-3 py-2 sm:px-4" type="submit">
               Search
             </button>
           </form>

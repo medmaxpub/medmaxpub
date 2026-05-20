@@ -12,7 +12,10 @@ export default function ArticlePreviewModal({ article, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-navy/80 p-4" onClick={onClose}>
-      <div className="card-panel relative w-full max-w-5xl p-6 sm:p-8" onClick={(event) => event.stopPropagation()}>
+      <div
+        className="card-panel relative max-h-[calc(100vh-2rem)] w-full max-w-5xl overflow-y-auto p-5 sm:p-8"
+        onClick={(event) => event.stopPropagation()}
+      >
         <button
           type="button"
           className="absolute right-5 top-5 rounded-full border border-brand-border bg-brand-elevated p-3 text-brand-ink hover:bg-brand-sky"
@@ -22,8 +25,8 @@ export default function ArticlePreviewModal({ article, onClose }) {
         </button>
 
         <p className="eyebrow">Article Preview</p>
-        <h2 className="font-display text-3xl font-semibold text-brand-ink">{stripHtml(article.title)}</h2>
-        <p className="mt-3 text-sm uppercase tracking-[0.18em] text-brand-slate">
+        <h2 className="pr-12 font-display text-2xl font-semibold text-brand-ink sm:text-3xl">{stripHtml(article.title)}</h2>
+        <p className="mt-3 text-xs uppercase tracking-[0.16em] text-brand-slate sm:text-sm sm:tracking-[0.18em]">
           {article.status.replaceAll("_", " ")} | Vol. {article.volume}, Issue {article.issueNumber}
         </p>
 

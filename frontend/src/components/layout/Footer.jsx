@@ -65,7 +65,7 @@ export default function Footer() {
 
       <div className="border-t border-white/15 bg-[#173b87]">
         <div className="container-shell flex flex-col items-center gap-3 py-4 text-center text-sm text-white">
-          <div className="flex items-center justify-center gap-5 whitespace-nowrap font-medium">
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-medium">
             <Link to="/terms-and-conditions" className="transition hover:text-brand-gold">
               Terms and Conditions
             </Link>

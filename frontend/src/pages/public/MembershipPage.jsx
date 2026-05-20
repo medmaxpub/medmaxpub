@@ -62,8 +62,8 @@ export default function MembershipPage() {
             </div>
 
             <div className="mt-10 overflow-hidden rounded-3xl border border-brand-border">
-              <div className="overflow-x-auto">
-                <table className="min-w-full border-collapse bg-white">
+              <div className="responsive-table-shell">
+                <table className="responsive-table responsive-table-compact border-collapse bg-white">
                   <thead>
                     <tr className="bg-brand-sky text-left text-brand-ink">
                       <th className="px-5 py-4 text-sm font-semibold uppercase tracking-[0.12em]">Membership Type</th>

@@ -65,7 +65,7 @@ export default function JournalEditorModal({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 px-4 py-6">
       <div className="flex min-h-full items-start justify-center">
-        <form onSubmit={onSubmit} className="card-panel relative my-2 w-full max-w-4xl max-h-[calc(100vh-2rem)] overflow-y-auto p-6 sm:p-7" autoComplete="off">
+        <form onSubmit={onSubmit} className="card-panel relative my-2 w-full max-w-4xl max-h-[calc(100vh-2rem)] overflow-y-auto p-5 sm:p-7" autoComplete="off">
           {shouldGuardCredentials ? (
             <>
               <input

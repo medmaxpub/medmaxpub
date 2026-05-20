@@ -2,13 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html,
 body {
   overflow-x: hidden;
+  width: 100%;
+}
+
+#root {
+  min-height: 100%;
+  width: 100%;
 }
 
 body {
   @apply bg-white font-sans text-brand-ink;
+  text-wrap: pretty;
+}
+
+main,
+section,
+article,
+aside,
+header,
+footer {
+  min-width: 0;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img,
+picture,
+video {
+  height: auto;
+}
+
+iframe {
+  max-width: 100%;
+}
+
+textarea {
+  resize: vertical;
+}
+
+:where(h1, h2, h3, h4, h5, h6, p, a, li, td, th, label, dd, dt) {
+  overflow-wrap: anywhere;
+}
+
+:where(button, input, select, textarea) {
+  max-width: 100%;
 }
 
 a {
@@ -48,7 +101,7 @@ button {
 }
 
 .section-shell {
-  @apply py-10 sm:py-12 lg:py-16;
+  @apply py-8 sm:py-12 lg:py-16;
 }
 
 .card-panel {
@@ -56,19 +109,19 @@ button {
 }
 
 .button-primary {
-  @apply inline-flex min-h-11 items-center justify-center rounded-full bg-brand-crimson px-5 py-3 text-center text-sm font-semibold text-white hover:bg-red-700;
+  @apply inline-flex min-h-11 max-w-full items-center justify-center rounded-full bg-brand-crimson px-5 py-3 text-center text-sm font-semibold text-white hover:bg-red-700;
 }
 
 .button-secondary {
-  @apply inline-flex min-h-11 items-center justify-center rounded-full border border-brand-navy/25 bg-white px-5 py-3 text-center text-sm font-semibold text-brand-ink hover:border-brand-navy hover:bg-blue-50;
+  @apply inline-flex min-h-11 max-w-full items-center justify-center rounded-full border border-brand-navy/25 bg-white px-5 py-3 text-center text-sm font-semibold text-brand-ink hover:border-brand-navy hover:bg-blue-50;
 }
 
 .button-soft {
-  @apply inline-flex min-h-11 items-center justify-center rounded-full border border-brand-border bg-white px-5 py-3 text-center text-sm font-semibold text-brand-ink hover:border-brand-teal hover:bg-brand-sky;
+  @apply inline-flex min-h-11 max-w-full items-center justify-center rounded-full border border-brand-border bg-white px-5 py-3 text-center text-sm font-semibold text-brand-ink hover:border-brand-teal hover:bg-brand-sky;
 }
 
 .website-nav-link {
-  @apply inline-flex min-h-10 items-center justify-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-center text-sm font-semibold text-white shadow-lg backdrop-blur-sm transition duration-300 hover:-translate-y-0.5 hover:border-brand-gold hover:bg-brand-gold hover:text-brand-mist sm:px-5;
+  @apply inline-flex min-h-10 max-w-full items-center justify-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-center text-sm font-semibold text-white shadow-lg backdrop-blur-sm transition duration-300 hover:-translate-y-0.5 hover:border-brand-gold hover:bg-brand-gold hover:text-brand-mist sm:px-5;
 }
 
 .website-nav-link-active {
@@ -91,6 +144,10 @@ button {
   @apply mb-4 leading-7 text-brand-slate;
 }
 
+.rich-copy {
+  overflow-wrap: anywhere;
+}
+
 .rich-copy ol,
 .rich-copy ul {
   @apply mb-4 list-disc space-y-2 pl-5 text-brand-slate;
@@ -102,11 +159,16 @@ button {
 
 .rich-copy table {
   @apply my-4 w-full border-collapse;
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .rich-copy th,
 .rich-copy td {
   @apply border border-brand-border px-3 py-2 align-top text-brand-slate;
+  word-break: break-word;
 }
 
 .rich-copy blockquote {
@@ -249,6 +311,115 @@ button {
 
 .journal-card-link {
   @apply block h-full rounded-3xl transition duration-300 hover:-translate-y-1 hover:border-brand-teal hover:shadow-[0_24px_54px_rgba(15,23,42,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal focus-visible:ring-offset-4 focus-visible:ring-offset-white;
+}
+
+.responsive-table-shell {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.responsive-table {
+  width: 100%;
+  min-width: 40rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.responsive-table-compact {
+  min-width: 34rem;
+}
+
+.responsive-table-wide {
+  min-width: 68rem;
+}
+
+.responsive-table :is(th, td) {
+  padding: 1rem;
+  vertical-align: top;
+  white-space: normal;
+  word-break: break-word;
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 0.95rem;
+  }
+
+  input,
+  select,
+  textarea {
+    @apply px-3 py-2.5 text-[13px];
+  }
+
+  .card-panel {
+    @apply rounded-[1.5rem];
+  }
+
+  .button-primary,
+  .button-secondary,
+  .button-soft,
+  .website-nav-link,
+  .journal-nav-link {
+    @apply min-h-10 px-4 py-2.5 text-xs;
+  }
+
+  .eyebrow {
+    @apply text-[10px] tracking-[0.18em];
+  }
+
+  .rich-copy p,
+  .rich-copy li,
+  .rich-copy td,
+  .rich-copy th {
+    line-height: 1.6;
+  }
+
+  .rich-editor-toolbar {
+    @apply gap-1.5 p-2;
+  }
+
+  .rich-editor-toolbar-group {
+    @apply gap-1.5;
+  }
+
+  .rich-editor-button,
+  .rich-editor-select,
+  .rich-editor-color {
+    @apply min-h-8 px-2.5 py-2 text-[11px];
+  }
+
+  .rich-editor-meta,
+  .rich-editor-surface,
+  .rich-editor-source,
+  .rich-editor-preview {
+    @apply px-3 text-[13px];
+  }
+
+  .rich-editor-shell-maximized {
+    inset: 0.5rem;
+  }
+
+  .responsive-table {
+    min-width: 32rem;
+    font-size: 0.8125rem;
+    line-height: 1.35;
+  }
+
+  .responsive-table-compact {
+    min-width: 30rem;
+  }
+
+  .responsive-table-wide {
+    min-width: 60rem;
+  }
+
+  .responsive-table :is(th, td) {
+    padding: 0.75rem;
+  }
 }
 
 @keyframes hero-marquee-scroll {

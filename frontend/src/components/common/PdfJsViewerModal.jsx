@@ -340,13 +340,13 @@ export default function PdfJsViewerModal({
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-sm" onClick={onClose}>
         <div
-          className="relative flex h-[80vh] w-full max-w-5xl flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white shadow-[0_30px_120px_rgba(15,23,42,0.58)]"
+          className="relative flex h-[88vh] w-full max-w-5xl flex-col overflow-hidden rounded-[1.5rem] border border-white/10 bg-white shadow-[0_30px_120px_rgba(15,23,42,0.58)] sm:rounded-[2rem]"
           onClick={(event) => event.stopPropagation()}
         >
-          <div className="flex items-start justify-between gap-4 border-b border-brand-border px-6 py-5">
-            <div>
+          <div className="flex items-start justify-between gap-4 border-b border-brand-border px-4 py-4 sm:px-6 sm:py-5">
+            <div className="min-w-0 pr-2">
               <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">{label}</p>
-              <h2 className="mt-2 font-display text-3xl font-semibold text-brand-ink">{title}</h2>
+              <h2 className="mt-2 font-display text-2xl font-semibold text-brand-ink sm:text-3xl">{title}</h2>
               {subtitle ? <p className="mt-2 text-sm text-brand-slate">{subtitle}</p> : null}
             </div>
             <button
@@ -385,15 +385,15 @@ export default function PdfJsViewerModal({
       <div
         ref={viewerShellRef}
         className={`relative flex w-full flex-col overflow-hidden border border-white/10 bg-white shadow-[0_30px_120px_rgba(15,23,42,0.58)] ${
-          presentationMode ? "h-[100vh] max-w-[100vw] rounded-none border-0 bg-slate-950 shadow-none" : "h-[88vh] max-w-7xl rounded-[2rem]"
+          presentationMode ? "h-[100vh] max-w-[100vw] rounded-none border-0 bg-slate-950 shadow-none" : "h-[92vh] max-w-7xl rounded-[1.5rem] sm:rounded-[2rem]"
         }`}
         onClick={(event) => event.stopPropagation()}
       >
         {!presentationMode ? (
-          <div className="flex items-start justify-between gap-4 border-b border-brand-border px-6 py-5">
-            <div>
+          <div className="flex items-start justify-between gap-4 border-b border-brand-border px-4 py-4 sm:px-6 sm:py-5">
+            <div className="min-w-0 pr-2">
               <p className="text-sm uppercase tracking-[0.18em] text-brand-teal">{label}</p>
-              <h2 className="mt-2 font-display text-3xl font-semibold text-brand-ink">{title}</h2>
+              <h2 className="mt-2 font-display text-2xl font-semibold text-brand-ink sm:text-3xl">{title}</h2>
               {subtitle ? <p className="mt-2 text-sm text-brand-slate">{subtitle}</p> : null}
             </div>
             <button
@@ -409,7 +409,7 @@ export default function PdfJsViewerModal({
 
         <div className={`flex h-full flex-col ${presentationMode ? "group/presentation" : ""}`}>
           {!presentationMode ? (
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-brand-border bg-white px-6 py-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-brand-border bg-white px-4 py-3 sm:px-6 sm:py-4">
               <div className="flex flex-wrap items-center gap-2">
                 {!basicViewer ? (
                   Object.entries(viewModes).map(([key, mode]) => (
@@ -456,7 +456,7 @@ export default function PdfJsViewerModal({
                   <button type="button" className="rounded-full p-1 hover:bg-white" onClick={() => setPageNumber((current) => Math.max(current - 1, 1))} disabled={pageNumber <= 1}>
                     <ChevronLeft size={16} />
                   </button>
-                  <span className="mx-2 min-w-20 text-center">
+                  <span className="mx-2 min-w-0 text-center sm:min-w-20">
                     {pageCount ? `${pageNumber} / ${pageCount}` : "0 / 0"}
                   </span>
                   <button type="button" className="rounded-full p-1 hover:bg-white" onClick={() => setPageNumber((current) => Math.min(current + 1, pageCount || current))} disabled={pageNumber >= pageCount}>
@@ -534,7 +534,7 @@ export default function PdfJsViewerModal({
             </div>
           )}
 
-          <div className={`relative flex flex-1 bg-slate-950 ${presentationMode ? "p-0" : "p-4 sm:p-5"}`}>
+          <div className={`relative flex flex-1 bg-slate-950 ${presentationMode ? "p-0" : "p-3 sm:p-5"}`}>
             {outlineOpen && !presentationMode && !basicViewer ? (
               <aside className="mr-4 hidden w-72 shrink-0 overflow-y-auto rounded-[1.5rem] border border-white/10 bg-white/95 p-4 lg:block">
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-brand-teal">Outline</p>
@@ -564,7 +564,7 @@ export default function PdfJsViewerModal({
                 presentationMode ? "overflow-hidden rounded-none border-0" : basicViewer ? "overflow-auto" : "overflow-hidden"
               }`}
             >
-              <div className={`flex min-h-full p-4 ${basicViewer ? "items-start justify-center" : "items-center justify-center"}`}>
+              <div className={`flex min-h-full p-3 sm:p-4 ${basicViewer ? "items-start justify-center" : "items-center justify-center"}`}>
                 {isLoading ? (
                   <div className="text-center text-white">
                     <LoaderCircle size={28} className="mx-auto animate-spin" />
@@ -604,7 +604,7 @@ export default function PdfJsViewerModal({
           </div>
 
           {!presentationMode && !basicViewer ? (
-            <div className="flex items-center gap-2 border-t border-brand-border bg-brand-elevated px-6 py-3 text-sm text-brand-slate">
+            <div className="flex items-center gap-2 border-t border-brand-border bg-brand-elevated px-4 py-3 text-sm text-brand-slate sm:px-6">
               <FileText size={16} className="text-brand-teal" />
               PDF.js viewer with page navigation, zoom modes, outline, fullscreen, and responsive rendering.
             </div>

@@ -210,8 +210,8 @@ export default function UserArticlesWorkspace({ status, title, description }) {
         </div>
 
         <div className="mt-6 overflow-hidden rounded-3xl border border-brand-border bg-brand-surface">
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
+          <div className="responsive-table-shell">
+            <table className="responsive-table text-left">
               <thead className="bg-brand-elevated text-brand-ink">
                 <tr className="border-b border-brand-border">
                   <th className="px-4 py-4 font-semibold">Title</th>

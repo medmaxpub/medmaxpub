@@ -15,7 +15,7 @@ export default function WebsiteLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-brand-mist">
+    <div className="min-h-screen overflow-x-clip bg-brand-mist">
       <TopHeader searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={handleSearch} />
       <WebsiteNavbar />
       <main>
