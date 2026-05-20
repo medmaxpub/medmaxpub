@@ -98,12 +98,21 @@ export function buildGoogleViewerUrl(url) {
   return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
 }
 
-export function buildOfficeViewerUrl(url) {
+export function buildOfficeViewerUrl(url, options = {}) {
   if (!canUseGoogleViewer(url)) {
     return null;
   }
 
-  return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`;
+  const { mode = "embed", startOnSlideShow = false } = options;
+  const viewerPath = mode === "page" ? "view.aspx" : "embed.aspx";
+  const viewerUrl = new URL(`https://view.officeapps.live.com/op/${viewerPath}`);
+  viewerUrl.searchParams.set("src", url);
+
+  if (startOnSlideShow) {
+    viewerUrl.searchParams.set("wdStartOnSlideShow", "1");
+  }
+
+  return viewerUrl.toString();
 }
 
 export function buildPdfViewerUrl(url, options = {}) {
@@ -135,6 +144,11 @@ export function buildPdfViewerUrl(url, options = {}) {
 
 const warmedPreviewUrls = new Set();
 const warmedOrigins = new Set();
+
+export function buildPptViewPath(item = {}) {
+  const id = item?.id || item?._id;
+  return id ? `/ppts/${id}/view` : "/ppts";
+}
 
 export function warmPreviewUrl(url) {
   if (typeof window === "undefined" || !isEmbeddableUrl(url)) {
@@ -202,9 +216,11 @@ export function normalizePptItem(item = {}) {
   // Local proxy URLs like http://localhost:5000/... are not embeddable there
   // and would incorrectly force local preview back to the PDF version.
   const officeViewerUrl = buildOfficeViewerUrl(pptUrl) || buildOfficeViewerUrl(inlinePptUrl);
+  const officeViewerPageUrl =
+    buildOfficeViewerUrl(pptUrl, { mode: "page" }) || buildOfficeViewerUrl(inlinePptUrl, { mode: "page" });
   const googleViewerUrl = buildGoogleViewerUrl(pptUrl) || buildGoogleViewerUrl(inlinePptUrl);
   const modalPreviewUrl = pdfViewerUrl;
-  const browserPreviewUrl = officeViewerUrl || googleViewerUrl || pdfViewerUrl || null;
+  const browserPreviewUrl = officeViewerPageUrl || officeViewerUrl || googleViewerUrl || pdfViewerUrl || null;
   const previewIssue = !pptUrl
     ? "The PPT file URL is missing or invalid."
     : !browserPreviewUrl
@@ -230,6 +246,7 @@ export function normalizePptItem(item = {}) {
     browserPreviewUrl,
     googleViewerUrl,
     officeViewerUrl,
+    officeViewerPageUrl,
     modalPreviewUrl,
     previewIssue,
     downloadUrl: pptUrl ? proxiedPptUrl || pptUrl : null,

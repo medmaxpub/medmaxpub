@@ -8,7 +8,7 @@ import IssueAccordion from "../../components/journal/IssueAccordion";
 import PublicArticleCard from "../../components/journal/PublicArticleCard";
 import useAutoRefresh from "../../hooks/useAutoRefresh";
 import { mockJournals } from "../../data/mockData";
-import { normalizePptItem, warmPreviewUrl } from "../../utils/pptPreview";
+import { buildPptViewPath, normalizePptItem, warmPreviewUrl } from "../../utils/pptPreview";
 import { buildPdfProxyUrl } from "../../utils/pdfProxy";
 import { normalizeVideoItem } from "../../utils/videoPlayer";
 import { buildJournalSectionPath, getJournalRouteSlug } from "../../utils/journalLinks";
@@ -165,18 +165,16 @@ export default function JournalShell() {
                 const normalized = normalizePptItem(ppt);
 
                 return (
-                  <a
+                  <Link
                     key={ppt.id}
-                    href={normalized.browserPreviewUrl || normalized.previewUrl || normalized.previewPdfUrl || normalized.pptFileUrl}
-                    target="_blank"
-                    rel="noreferrer"
+                    to={buildPptViewPath(normalized)}
                     className="button-soft px-4 py-2"
-                    onMouseEnter={() => warmPreviewUrl(normalized.previewUrl)}
-                    onFocus={() => warmPreviewUrl(normalized.previewUrl)}
+                    onMouseEnter={() => warmPreviewUrl(normalized.officeViewerPageUrl || normalized.previewUrl)}
+                    onFocus={() => warmPreviewUrl(normalized.officeViewerPageUrl || normalized.previewUrl)}
                   >
                     <FileText size={16} className="mr-2" />
                     {ppt.title}
-                  </a>
+                  </Link>
                 );
               })}
             </div>

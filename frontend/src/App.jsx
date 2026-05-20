@@ -17,6 +17,7 @@ const HomePage = lazy(() => import("./pages/public/HomePage"));
 const JournalsPage = lazy(() => import("./pages/public/JournalsPage"));
 const MembershipPage = lazy(() => import("./pages/public/MembershipPage"));
 const PolicyPage = lazy(() => import("./pages/public/PolicyPage"));
+const PptViewerPage = lazy(() => import("./pages/public/PptViewerPage"));
 const PptsPage = lazy(() => import("./pages/public/PptsPage"));
 const SubmitManuscriptPage = lazy(() => import("./pages/public/SubmitManuscriptPage"));
 const VideosPage = lazy(() => import("./pages/public/VideosPage"));
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/home" element={<Navigate to="/" replace />} />
           <Route path="/ppts" element={<PptsPage />} />
+          <Route path="/ppts/:pptId/view" element={<PptViewerPage />} />
           <Route path="/videos" element={<VideosPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/submit-manuscript" element={<SubmitManuscriptPage />} />

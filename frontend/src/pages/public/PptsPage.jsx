@@ -1,11 +1,12 @@
 import { ExternalLink, Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockJournals, mockPpts } from "../../data/mockData";
 import { buildJournalArchiveInfo, getAssetJournalUrl } from "../../utils/journalArchive";
-import { normalizePptItem, warmPreviewUrl } from "../../utils/pptPreview";
+import { buildPptViewPath, normalizePptItem, warmPreviewUrl } from "../../utils/pptPreview";
 
 export default function PptsPage() {
   const [items, setItems] = useState([]);
@@ -115,14 +116,12 @@ export default function PptsPage() {
         ) : filteredItems.length ? (
           <div className="mt-10 space-y-6">
             {filteredItems.map((ppt) => (
-              <a
+              <Link
                 key={ppt.id}
-                href={ppt.browserPreviewUrl || ppt.downloadUrl || "#"}
-                target={ppt.browserPreviewUrl || ppt.downloadUrl ? "_blank" : undefined}
-                rel={ppt.browserPreviewUrl || ppt.downloadUrl ? "noreferrer" : undefined}
+                to={buildPptViewPath(ppt)}
                 className="card-panel block overflow-hidden transition hover:-translate-y-0.5 hover:border-brand-navy/20 hover:shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
-                onMouseEnter={() => warmPreviewUrl(ppt.previewUrl || ppt.browserPreviewUrl)}
-                onFocus={() => warmPreviewUrl(ppt.previewUrl || ppt.browserPreviewUrl)}
+                onMouseEnter={() => warmPreviewUrl(ppt.officeViewerPageUrl || ppt.previewUrl || ppt.browserPreviewUrl)}
+                onFocus={() => warmPreviewUrl(ppt.officeViewerPageUrl || ppt.previewUrl || ppt.browserPreviewUrl)}
               >
                 <div className="grid gap-5 p-5 sm:grid-cols-[250px_1fr] sm:p-6">
                   <div className="overflow-hidden rounded-3xl border border-brand-border bg-brand-elevated">
@@ -153,13 +152,13 @@ export default function PptsPage() {
                     {(ppt.browserPreviewUrl || ppt.downloadUrl) ? (
                       <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-brand-slate">
                         <ExternalLink size={15} className="text-brand-crimson" />
-                        Open PPT
+                        Open PPT Page
                       </div>
                     ) : null}
                     {ppt.previewIssue ? <p className="mt-3 text-sm text-rose-500">{ppt.previewIssue}</p> : null}
                   </div>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         ) : (
