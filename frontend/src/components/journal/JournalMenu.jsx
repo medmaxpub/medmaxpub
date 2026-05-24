@@ -12,17 +12,17 @@ const items = [
   { label: "Archive", slug: "archive" }
 ];
 
-export default function JournalMenu({ journalUrl }) {
+export default function JournalMenu({ journalUrl, className = "", linkClassName = "" }) {
+  const wrapperClassName = ["flex flex-wrap gap-2", className].filter(Boolean).join(" ");
+
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={wrapperClassName}>
       {items.map((item) => (
         <NavLink
           key={item.slug}
           to={buildJournalSectionPath(journalUrl, item.slug)}
           className={({ isActive }) =>
-            `journal-nav-link ${
-              isActive ? "journal-nav-link-active" : ""
-            }`
+            ["journal-nav-link", isActive ? "journal-nav-link-active" : "", linkClassName].filter(Boolean).join(" ")
           }
         >
           {item.label}

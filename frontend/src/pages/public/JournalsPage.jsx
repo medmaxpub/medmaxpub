@@ -41,41 +41,42 @@ export default function JournalsPage() {
   };
 
   return (
-    <div className="section-shell">
+    <div className="section-shell pt-2 sm:pt-4 lg:pt-5">
       <div className="container-shell">
         <SectionHeader
           label="Journals"
           title="Journal listing with clean search and profile summaries"
           description="Browse the journal directory using the reduced Medmax journal profile fields and direct public journal URLs."
+          className="max-w-none"
+          titleClassName="xl:whitespace-nowrap"
+          descriptionClassName="max-w-none lg:whitespace-nowrap"
         />
 
-        <div className="mt-8 card-panel p-4 sm:p-6">
-          <div className="grid gap-4">
-            <form onSubmit={handleSearch} className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Search size={18} className="hidden text-brand-slate sm:block" />
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search journals" />
-              <button type="submit" className="button-primary shrink-0 px-4 py-3">
-                Search
-              </button>
-            </form>
-          </div>
+        <div className="mt-6 card-panel p-4 sm:mt-7 sm:p-6">
+          <form onSubmit={handleSearch} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Search size={18} className="hidden text-brand-slate sm:block" />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search journals" />
+            <button type="submit" className="button-primary shrink-0 px-4 py-3">
+              Search
+            </button>
+          </form>
         </div>
 
         {isLoading ? (
-          <div className="mt-10">
+          <div className="mt-8">
             <EmptyState
               title="Loading journals"
               description="The journal directory is being prepared."
             />
           </div>
         ) : filtered.length ? (
-          <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-7 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {filtered.map((journal) => (
               <JournalCard key={journal.id} journal={journal} />
             ))}
           </div>
         ) : (
-          <div className="mt-10">
+          <div className="mt-8">
             {query.trim() ? (
               <EmptyState
                 title="No journals matched this search"

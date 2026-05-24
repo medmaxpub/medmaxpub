@@ -1,6 +1,7 @@
 import { Menu, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
+import { scrollWindowToTop } from "../../utils/scrollPosition";
 
 const websiteNavItems = [
   { label: "Home", to: "/" },
@@ -38,7 +39,12 @@ export default function WebsiteNavbar() {
       <div className="container-shell flex items-center justify-between py-2">
         <nav className="hidden flex-wrap items-center gap-2 lg:flex">
           {activeItems.map((item) => (
-            <NavLink key={item.to} to={item.to} className={`website-nav-link ${item.active ? "website-nav-link-active" : ""}`}>
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={`website-nav-link ${item.active ? "website-nav-link-active" : ""}`}
+              onClick={scrollWindowToTop}
+            >
               {item.label}
             </NavLink>
           ))}
@@ -62,6 +68,7 @@ export default function WebsiteNavbar() {
                 key={item.to}
                 to={item.to}
                 className={`website-nav-link justify-center ${item.active ? "website-nav-link-active" : ""}`}
+                onClick={scrollWindowToTop}
               >
                 {item.label}
               </NavLink>

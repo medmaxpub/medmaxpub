@@ -1,9 +1,8 @@
-import { FileText, PlayCircle } from "lucide-react";
+import { ExternalLink, FileText, PlayCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
-import JournalMenu from "../../components/journal/JournalMenu";
 import IssueAccordion from "../../components/journal/IssueAccordion";
 import PublicArticleCard from "../../components/journal/PublicArticleCard";
 import useAutoRefresh from "../../hooks/useAutoRefresh";
@@ -247,7 +246,7 @@ export default function JournalShell() {
       }
 
       return (
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-5 lg:grid-cols-3">
           {editorialBoard.map((member) => (
             <article key={member.id} className="rounded-3xl border border-brand-border bg-brand-surface p-5">
               <div className="flex gap-4">
@@ -329,12 +328,9 @@ export default function JournalShell() {
   };
 
   return (
-    <div className="section-shell">
+    <div className="section-shell pt-0 sm:pt-0 lg:pt-0">
       <div className="container-shell">
         <div className="card-panel overflow-hidden">
-          <div className="border-b border-brand-border px-5 py-5 sm:px-8 sm:py-6">
-            <JournalMenu journalUrl={journal.publicJournalUrl || journal.journalUrl} />
-          </div>
           {showJournalHero ? (
             <div className="grid gap-6 px-5 py-5 sm:px-8 sm:py-8 lg:grid-cols-[0.48fr_1.52fr] lg:gap-8">
               <div className="flex min-h-[184px] items-center justify-center">
@@ -353,8 +349,7 @@ export default function JournalShell() {
               <div className="rounded-3xl border border-brand-border bg-brand-surface p-6">
                 <p className="text-xs uppercase tracking-[0.18em] text-brand-gold">Managing Journal Name</p>
                 <h1 className="mt-3 font-display text-3xl font-semibold text-brand-ink sm:text-4xl">{journal.managingJournalName}</h1>
-                <p className="mt-4 text-sm text-brand-slate">Managed by {journal.firstName} {journal.lastName}</p>
-                {journal.issn ? <p className="mt-2 text-sm font-medium uppercase tracking-[0.16em] text-brand-gold">{journal.issn}</p> : null}
+                {journal.issn ? <p className="mt-4 text-sm font-medium uppercase tracking-[0.16em] text-brand-gold">ISSN: {journal.issn}</p> : null}
                 {journal.pdfFiles?.length ? (
                   <div className="mt-5 flex flex-wrap gap-3">
                     {journal.pdfFiles.map((item) => (
@@ -381,7 +376,7 @@ export default function JournalShell() {
           ) : null}
         </div>
 
-        <div className="mt-8 card-panel p-5 sm:p-8">
+        <div className="mt-5 card-panel p-5 sm:mt-6 sm:p-8">
           <span className="eyebrow">{sectionTitles[section] || "Journal"}</span>
           {section !== "article-in-press" ? (
             <h2 className="font-display text-2xl font-semibold text-brand-ink sm:text-3xl">{sectionTitles[section] || "Journal Section"}</h2>

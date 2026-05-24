@@ -136,10 +136,6 @@ export default function PptViewerPage() {
                   <dt className="font-semibold text-brand-ink">DOI</dt>
                   <dd className="mt-1 break-words">{ppt.doiNumber || "Not available"}</dd>
                 </div>
-                <div>
-                  <dt className="font-semibold text-brand-ink">Description</dt>
-                  <dd className="mt-1 break-words leading-7">{ppt.description || "Not available"}</dd>
-                </div>
               </dl>
             </div>
 

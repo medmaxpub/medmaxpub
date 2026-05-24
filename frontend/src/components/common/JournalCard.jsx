@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { buildJournalSectionPath } from "../../utils/journalLinks";
+import { scrollWindowToTop } from "../../utils/scrollPosition";
 
 function getJournalCoverImage(journal) {
   if (journal.coverImage) {
@@ -11,7 +12,12 @@ function getJournalCoverImage(journal) {
 
 export default function JournalCard({ journal }) {
   return (
-    <Link key={journal.id} to={buildJournalSectionPath(journal.publicJournalUrl || journal.journalUrl, "home")} className="journal-card-link">
+    <Link
+      key={journal.id}
+      to={buildJournalSectionPath(journal.publicJournalUrl || journal.journalUrl, "home")}
+      className="journal-card-link"
+      onClick={scrollWindowToTop}
+    >
       <article className="card-panel h-full overflow-hidden p-0">
         <div className="aspect-[4/5] overflow-hidden bg-brand-sky">
           <img
@@ -29,7 +35,7 @@ export default function JournalCard({ journal }) {
           </h3>
           {journal.issn ? (
             <p className="mt-3 text-sm font-medium uppercase tracking-[0.18em] text-brand-gold">
-              {journal.issn}
+              ISSN: {journal.issn}
             </p>
           ) : null}
         </div>
