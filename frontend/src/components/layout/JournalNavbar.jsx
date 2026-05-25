@@ -22,6 +22,7 @@ export default function JournalNavbar() {
   const { journalUrl, section } = useParams();
   const backTo = location.pathname === "/journals" ? "/" : "/journals";
   const showJournalLinks = Boolean(journalUrl && section);
+  const showMobileBackOnly = !showJournalLinks;
   const activeItems = useMemo(
     () => [{ label: "Back", to: backTo, active: location.pathname.startsWith("/journals") }],
     [backTo, location.pathname]
@@ -52,17 +53,26 @@ export default function JournalNavbar() {
           ))}
         </nav>
 
-        <button
-          type="button"
-          className="inline-flex rounded-2xl border border-brand-border bg-brand-surface p-3 text-brand-ink lg:hidden"
-          onClick={() => setOpen((current) => !current)}
-          aria-label={open ? "Close journal menu" : "Open journal menu"}
-        >
-          {open ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        {showMobileBackOnly ? (
+          <NavLink
+            to={backTo}
+            className="journal-nav-link ml-auto lg:hidden"
+          >
+            Back
+          </NavLink>
+        ) : (
+          <button
+            type="button"
+            className="ml-auto inline-flex rounded-2xl border border-brand-border bg-brand-surface p-3 text-brand-ink lg:hidden"
+            onClick={() => setOpen((current) => !current)}
+            aria-label={open ? "Close journal menu" : "Open journal menu"}
+          >
+            {open ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        )}
       </div>
 
-      {open ? (
+      {open && showJournalLinks ? (
         <div className="container-shell pb-4 lg:hidden">
           <div className="flex flex-col gap-3">
             {activeItems.map((item) => (
