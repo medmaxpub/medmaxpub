@@ -1,4 +1,4 @@
-import { ExternalLink, FileText, Mail } from "lucide-react";
+import { Download, ExternalLink, Mail } from "lucide-react";
 
 function formatDateTime(value) {
   if (!value) {
@@ -60,21 +60,21 @@ export default function SubmissionInbox({ submissions = [], isLoading = false, e
               <th className="border-b border-brand-border px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">Article Type</th>
               <th className="border-b border-brand-border px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">Article Title</th>
               <th className="border-b border-brand-border px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">Abstract</th>
-              <th className="border-b border-brand-border px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">Attachment</th>
+              <th className="border-b border-brand-border px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">Files</th>
             </tr>
           </thead>
 
           <tbody>
             {submissions.map((item, index) => (
               <tr key={item.id} className={index % 2 === 0 ? "bg-white" : "bg-brand-sky/35"}>
-                <SubmissionCell label="Name" className="min-w-[180px]">
+                <SubmissionCell label="Name" className="min-w-[150px]">
                   <div>
                     <p className="font-semibold text-brand-ink">{item.name || "NA"}</p>
                     <p className="mt-1 text-xs text-brand-slate">Submitted {formatDateTime(item.createdAt)}</p>
                   </div>
                 </SubmissionCell>
 
-                <SubmissionCell label="Email ID" className="min-w-[220px]">
+                <SubmissionCell label="Email ID" className="min-w-[190px]">
                   {item.email ? (
                     <a href={`mailto:${item.email}`} className="inline-flex items-center gap-2 transition hover:text-brand-ink">
                       <Mail size={15} className="text-brand-gold" />
@@ -85,15 +85,15 @@ export default function SubmissionInbox({ submissions = [], isLoading = false, e
                   )}
                 </SubmissionCell>
 
-                <SubmissionCell label="Address" className="min-w-[220px]">
+                <SubmissionCell label="Address" className="min-w-[180px]">
                   <p className="whitespace-pre-line leading-6">{item.postalAddress || "NA"}</p>
                 </SubmissionCell>
 
-                <SubmissionCell label="Country" className="min-w-[140px]">
+                <SubmissionCell label="Country" className="min-w-[110px]">
                   <p>{item.country || "NA"}</p>
                 </SubmissionCell>
 
-                <SubmissionCell label="Journal" className="min-w-[220px]">
+                <SubmissionCell label="Journal" className="min-w-[190px]">
                   <div className="space-y-2">
                     <p className="font-semibold text-brand-ink">{item.journalTitle || "Journal unavailable"}</p>
                     {item.journalUrl ? (
@@ -105,19 +105,19 @@ export default function SubmissionInbox({ submissions = [], isLoading = false, e
                   </div>
                 </SubmissionCell>
 
-                <SubmissionCell label="Article Type" className="min-w-[170px]">
+                <SubmissionCell label="Article Type" className="min-w-[140px]">
                   <p>{item.articleType || "NA"}</p>
                 </SubmissionCell>
 
-                <SubmissionCell label="Article Title" className="min-w-[240px]">
+                <SubmissionCell label="Article Title" className="min-w-[180px]">
                   <p className="font-medium text-brand-ink">{item.manuscriptTitle || "NA"}</p>
                 </SubmissionCell>
 
-                <SubmissionCell label="Abstract" className="min-w-[320px]">
-                  <p className="max-w-[320px] whitespace-pre-line leading-6 text-brand-slate">{item.abstract || "NA"}</p>
+                <SubmissionCell label="Abstract" className="min-w-[220px]">
+                  <p className="max-w-[220px] whitespace-pre-line leading-6 text-brand-slate">{item.abstract || "NA"}</p>
                 </SubmissionCell>
 
-                <SubmissionCell label="Attachment" className="min-w-[220px]">
+                <SubmissionCell label="Files" className="min-w-[120px]">
                   <div className="flex flex-col gap-2">
                     {(item.files || []).length ? (
                       item.files.map((file) => (
@@ -126,10 +126,12 @@ export default function SubmissionInbox({ submissions = [], isLoading = false, e
                           href={file.url}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex min-w-0 items-center gap-2 rounded-xl border border-brand-border bg-brand-elevated px-3 py-2 font-medium text-brand-ink transition hover:bg-white"
+                          download
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-brand-border bg-white text-brand-crimson transition hover:border-brand-teal hover:bg-brand-sky"
+                          aria-label={`Download ${file.name || "attachment"}`}
+                          title="Download attachment"
                         >
-                          <FileText size={15} className="text-brand-crimson" />
-                          <span className="min-w-0 truncate">{file.name}</span>
+                          <Download size={18} strokeWidth={2.4} className="shrink-0" />
                         </a>
                       ))
                     ) : (
