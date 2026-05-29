@@ -6,10 +6,10 @@ import JournalNavbar from "./JournalNavbar";
 
 export default function JournalLayout() {
   return (
-    <div className="min-h-screen overflow-x-clip bg-brand-mist">
+    <div className="flex min-h-screen flex-col overflow-x-clip bg-brand-mist">
       <ScrollToTopOnNavigate />
       <JournalNavbar />
-      <main>
+      <main className="flex-1">
         <StableOutlet />
       </main>
       <FloatingContactActions />

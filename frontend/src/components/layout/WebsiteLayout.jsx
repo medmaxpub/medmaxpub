@@ -19,11 +19,11 @@ export default function WebsiteLayout() {
   };
 
   return (
-    <div className="min-h-screen overflow-x-clip bg-brand-mist">
+    <div className="flex min-h-screen flex-col overflow-x-clip bg-brand-mist">
       <ScrollToTopOnNavigate />
       <TopHeader searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={handleSearch} />
       <WebsiteNavbar />
-      <main>
+      <main className="flex-1">
         <StableOutlet />
       </main>
       <FloatingContactActions />

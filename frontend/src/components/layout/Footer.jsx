@@ -77,6 +77,17 @@ export default function Footer() {
             </Link>
           </div>
           <p className="font-semibold">&copy; 2026 Copyrights Medmax Publishers. All Rights Reserved!</p>
+          <p className="text-xs text-blue-100">
+            Designed and developed by{" "}
+            <a
+              href="https://launchmyportfolio.com"
+              target="_blank"
+              rel="noreferrer"
+              className="font-semibold text-white transition hover:text-brand-gold"
+            >
+              launchmyportfolio.com
+            </a>
+          </p>
         </div>
       </div>
     </footer>

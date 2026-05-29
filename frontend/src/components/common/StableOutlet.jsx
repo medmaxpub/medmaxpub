@@ -26,7 +26,7 @@ export default function StableOutlet() {
   }, [displayedKey, outlet, routeKey]);
 
   return (
-    <div className={`page-transition ${visible ? "page-transition-ready" : ""}`}>
+    <div className={`page-transition min-h-full ${visible ? "page-transition-ready" : ""}`}>
       {displayedOutlet}
     </div>
   );
