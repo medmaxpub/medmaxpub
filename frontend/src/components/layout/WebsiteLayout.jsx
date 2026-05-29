@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ScrollToTopOnNavigate from "../common/ScrollToTopOnNavigate";
+import StableOutlet from "../common/StableOutlet";
 import { scrollWindowToTop } from "../../utils/scrollPosition";
 import Footer from "./Footer";
 import FloatingContactActions from "./FloatingContactActions";
@@ -23,7 +24,7 @@ export default function WebsiteLayout() {
       <TopHeader searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={handleSearch} />
       <WebsiteNavbar />
       <main>
-        <Outlet />
+        <StableOutlet />
       </main>
       <FloatingContactActions />
       <Footer />

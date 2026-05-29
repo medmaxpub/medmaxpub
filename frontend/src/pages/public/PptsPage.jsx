@@ -109,11 +109,7 @@ export default function PptsPage() {
           </div>
         </div>
 
-        {isLoading ? (
-          <div className="mt-10">
-            <EmptyState title="Loading PPT archive" description="Public presentation records are being prepared." />
-          </div>
-        ) : filteredItems.length ? (
+        {isLoading ? null : filteredItems.length ? (
           <div className="mt-10 space-y-6">
             {filteredItems.map((ppt) => (
               <Link

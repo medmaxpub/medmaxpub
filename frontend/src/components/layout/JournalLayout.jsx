@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import StableOutlet from "../common/StableOutlet";
 import ScrollToTopOnNavigate from "../common/ScrollToTopOnNavigate";
 import Footer from "./Footer";
 import FloatingContactActions from "./FloatingContactActions";
@@ -10,7 +10,7 @@ export default function JournalLayout() {
       <ScrollToTopOnNavigate />
       <JournalNavbar />
       <main>
-        <Outlet />
+        <StableOutlet />
       </main>
       <FloatingContactActions />
       <Footer />

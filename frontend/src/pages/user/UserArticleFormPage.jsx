@@ -2,7 +2,6 @@ import { ArrowLeft } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import api from "../../api/client";
-import RouteLoadingScreen from "../../components/common/RouteLoadingScreen";
 import RichTextEditor from "../../components/user/RichTextEditor";
 import {
   accessTypeOptions,
@@ -142,7 +141,7 @@ export default function UserArticleFormPage({
   };
 
   if (journalLoading || loadingArticle) {
-    return <RouteLoadingScreen label="Loading article form" />;
+    return null;
   }
 
   return (

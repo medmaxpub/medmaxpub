@@ -3,7 +3,6 @@ import {
   ChevronRight,
   FileText,
   ListTree,
-  LoaderCircle,
   Maximize2,
   Minimize2,
   MonitorPlay,
@@ -565,11 +564,7 @@ export default function PdfJsViewerModal({
               }`}
             >
               <div className={`flex min-h-full p-3 sm:p-4 ${basicViewer ? "items-start justify-center" : "items-center justify-center"}`}>
-                {isLoading ? (
-                  <div className="text-white" role="status" aria-label="Loading preview">
-                    <LoaderCircle size={28} className="animate-spin" />
-                  </div>
-                ) : error ? (
+                {isLoading ? null : error ? (
                   <div className="max-w-xl text-center text-white">
                     <h3 className="font-display text-2xl font-semibold">Preview unavailable</h3>
                     <p className="mt-4 leading-7 text-slate-300">{error}</p>

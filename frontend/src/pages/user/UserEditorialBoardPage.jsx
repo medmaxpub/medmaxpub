@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
-import RouteLoadingScreen from "../../components/common/RouteLoadingScreen";
 import SectionHeader from "../../components/common/SectionHeader";
 import useManagedJournal from "../../hooks/useManagedJournal";
 
@@ -48,7 +47,7 @@ export default function UserEditorialBoardPage() {
   };
 
   if (journalLoading) {
-    return <RouteLoadingScreen label="Loading journal workspace" />;
+    return null;
   }
 
   return (

@@ -73,13 +73,7 @@ export default function JournalArchiveIssuePage() {
   const archiveIssue = useMemo(() => resolveArchiveIssue(journal, year, volume, issueNumber), [journal, year, volume, issueNumber]);
 
   if (isLoading) {
-    return (
-      <div className="section-shell">
-        <div className="container-shell">
-          <EmptyState title="Loading archive issue" description="The selected archive issue is being prepared." />
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (!journal) {

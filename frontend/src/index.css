@@ -68,6 +68,15 @@ a {
   @apply transition-colors duration-200;
 }
 
+.page-transition {
+  opacity: 0.985;
+  transition: opacity 180ms ease;
+}
+
+.page-transition-ready {
+  opacity: 1;
+}
+
 input,
 select,
 textarea {

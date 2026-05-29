@@ -1,5 +1,6 @@
 import { Archive, BookOpenCheck, FileClock, LayoutGrid, LogOut, Users } from "lucide-react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import StableOutlet from "../common/StableOutlet";
 import { medmaxTransparentLogo } from "../../assets/branding";
 import { useAuth } from "../../context/AuthContext";
 
@@ -90,7 +91,7 @@ export default function UserLayout() {
             </div>
           </header>
 
-          <Outlet />
+          <StableOutlet />
         </div>
       </div>
     </div>

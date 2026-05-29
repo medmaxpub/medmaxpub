@@ -1,4 +1,4 @@
-import { LoaderCircle, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
 import api from "../../api/client";
 import SectionHeader from "../../components/common/SectionHeader";
@@ -159,7 +159,6 @@ export default function ContactPage() {
 
             <div className="mt-6">
               <button type="submit" className="button-primary inline-flex items-center gap-2 px-5 py-3" disabled={isSubmitting}>
-                {isSubmitting ? <LoaderCircle size={18} className="animate-spin" /> : null}
                 {isSubmitting ? "Sending..." : "Submit"}
               </button>
             </div>

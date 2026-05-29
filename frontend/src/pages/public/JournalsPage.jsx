@@ -62,14 +62,7 @@ export default function JournalsPage() {
           </form>
         </div>
 
-        {isLoading ? (
-          <div className="mt-8">
-            <EmptyState
-              title="Loading journals"
-              description="The journal directory is being prepared."
-            />
-          </div>
-        ) : filtered.length ? (
+        {isLoading ? null : filtered.length ? (
           <div className="mt-7 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {filtered.map((journal) => (
               <JournalCard key={journal.id} journal={journal} />

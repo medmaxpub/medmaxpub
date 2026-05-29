@@ -80,13 +80,7 @@ export default function JournalShell() {
   });
 
   if (isLoading) {
-    return (
-      <div className="section-shell">
-        <div className="container-shell">
-          <EmptyState title="Loading journal" description="The selected journal page is being prepared." />
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (!journal) {

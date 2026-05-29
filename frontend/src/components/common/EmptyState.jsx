@@ -2,11 +2,7 @@ export default function EmptyState({ title, description }) {
   const isLoadingState = /^loading\b/i.test(String(title || ""));
 
   if (isLoadingState) {
-    return (
-      <div className="flex min-h-40 items-center justify-center px-6 py-10" role="status" aria-label={title}>
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-brand-navy/15 border-t-brand-crimson" />
-      </div>
-    );
+    return null;
   }
 
   return (

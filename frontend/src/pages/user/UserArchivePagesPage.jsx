@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
-import RouteLoadingScreen from "../../components/common/RouteLoadingScreen";
 import SectionHeader from "../../components/common/SectionHeader";
 import JournalPdfUploadModal from "../../components/user/JournalPdfUploadModal";
 import UserJournalSelector from "../../components/user/UserJournalSelector";
@@ -92,7 +91,7 @@ export default function UserArchivePagesPage() {
   const groupedArchive = useMemo(() => groupArchiveArticles(articles), [articles]);
 
   if (journalLoading) {
-    return <RouteLoadingScreen label="Loading journal workspace" />;
+    return null;
   }
 
   if (!journal?.id) {

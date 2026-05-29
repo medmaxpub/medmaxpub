@@ -1,51 +1,47 @@
-import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import RouteLoadingScreen from "./components/common/RouteLoadingScreen";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import SeoManager from "./components/common/SeoManager";
 import JournalLayout from "./components/layout/JournalLayout";
 import SuperUserLayout from "./components/super/SuperUserLayout";
 import UserLayout from "./components/user/UserLayout";
 import WebsiteLayout from "./components/layout/WebsiteLayout";
-
-const JournalShell = lazy(() => import("./pages/journal/JournalShell"));
-const JournalArticleAbstractPage = lazy(() => import("./pages/journal/JournalArticleAbstractPage"));
-const JournalArchiveIssuePage = lazy(() => import("./pages/journal/JournalArchiveIssuePage"));
-const AdminLoginPage = lazy(() => import("./pages/public/AdminLoginPage"));
-const AboutPage = lazy(() => import("./pages/public/AboutPage"));
-const ContactPage = lazy(() => import("./pages/public/ContactPage"));
-const HomePage = lazy(() => import("./pages/public/HomePage"));
-const JournalsPage = lazy(() => import("./pages/public/JournalsPage"));
-const MembershipPage = lazy(() => import("./pages/public/MembershipPage"));
-const PolicyPage = lazy(() => import("./pages/public/PolicyPage"));
-const PptViewerPage = lazy(() => import("./pages/public/PptViewerPage"));
-const PptsPage = lazy(() => import("./pages/public/PptsPage"));
-const SubmitManuscriptPage = lazy(() => import("./pages/public/SubmitManuscriptPage"));
-const VideosPage = lazy(() => import("./pages/public/VideosPage"));
-const SuperUserDashboardPage = lazy(() => import("./pages/super/SuperUserDashboardPage"));
-const SuperUserJournalsPage = lazy(() => import("./pages/super/SuperUserJournalsPage"));
-const SuperUserMediaPage = lazy(() => import("./pages/super/SuperUserMediaPage"));
-const SuperUserSettingsPage = lazy(() => import("./pages/super/SuperUserSettingsPage"));
-const SuperUserSiteStatsPage = lazy(() => import("./pages/super/SuperUserSiteStatsPage"));
-const SuperUserTestimonialsPage = lazy(() => import("./pages/super/SuperUserTestimonialsPage"));
-const SuperUserUsersPage = lazy(() => import("./pages/super/SuperUserUsersPage"));
-const UserArchivePagesPage = lazy(() => import("./pages/user/UserArchivePagesPage"));
-const UserArchiveFormPage = lazy(() => import("./pages/user/UserArchiveFormPage"));
-const UserArchiveIssuePage = lazy(() => import("./pages/user/UserArchiveIssuePage"));
-const UserArticlesInPressFormPage = lazy(() => import("./pages/user/UserArticlesInPressFormPage"));
-const UserArticlesInPressPage = lazy(() => import("./pages/user/UserArticlesInPressPage"));
-const UserCurrentIssuePage = lazy(() => import("./pages/user/UserCurrentIssuePage"));
-const UserCurrentIssueFormPage = lazy(() => import("./pages/user/UserCurrentIssueFormPage"));
-const UserEditorialBoardFormPage = lazy(() => import("./pages/user/UserEditorialBoardFormPage"));
-const UserEditorialBoardPage = lazy(() => import("./pages/user/UserEditorialBoardPage"));
-const UserWelcomePage = lazy(() => import("./pages/user/UserWelcomePage"));
+import JournalShell from "./pages/journal/JournalShell";
+import JournalArticleAbstractPage from "./pages/journal/JournalArticleAbstractPage";
+import JournalArchiveIssuePage from "./pages/journal/JournalArchiveIssuePage";
+import AdminLoginPage from "./pages/public/AdminLoginPage";
+import AboutPage from "./pages/public/AboutPage";
+import ContactPage from "./pages/public/ContactPage";
+import HomePage from "./pages/public/HomePage";
+import JournalsPage from "./pages/public/JournalsPage";
+import MembershipPage from "./pages/public/MembershipPage";
+import PolicyPage from "./pages/public/PolicyPage";
+import PptViewerPage from "./pages/public/PptViewerPage";
+import PptsPage from "./pages/public/PptsPage";
+import SubmitManuscriptPage from "./pages/public/SubmitManuscriptPage";
+import VideosPage from "./pages/public/VideosPage";
+import SuperUserDashboardPage from "./pages/super/SuperUserDashboardPage";
+import SuperUserJournalsPage from "./pages/super/SuperUserJournalsPage";
+import SuperUserMediaPage from "./pages/super/SuperUserMediaPage";
+import SuperUserSettingsPage from "./pages/super/SuperUserSettingsPage";
+import SuperUserSiteStatsPage from "./pages/super/SuperUserSiteStatsPage";
+import SuperUserTestimonialsPage from "./pages/super/SuperUserTestimonialsPage";
+import SuperUserUsersPage from "./pages/super/SuperUserUsersPage";
+import UserArchivePagesPage from "./pages/user/UserArchivePagesPage";
+import UserArchiveFormPage from "./pages/user/UserArchiveFormPage";
+import UserArchiveIssuePage from "./pages/user/UserArchiveIssuePage";
+import UserArticlesInPressFormPage from "./pages/user/UserArticlesInPressFormPage";
+import UserArticlesInPressPage from "./pages/user/UserArticlesInPressPage";
+import UserCurrentIssuePage from "./pages/user/UserCurrentIssuePage";
+import UserCurrentIssueFormPage from "./pages/user/UserCurrentIssueFormPage";
+import UserEditorialBoardFormPage from "./pages/user/UserEditorialBoardFormPage";
+import UserEditorialBoardPage from "./pages/user/UserEditorialBoardPage";
+import UserWelcomePage from "./pages/user/UserWelcomePage";
 
 export default function App() {
   return (
     <>
       <SeoManager />
-      <Suspense fallback={<RouteLoadingScreen />}>
-        <Routes>
+      <Routes>
         <Route element={<WebsiteLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/home" element={<Navigate to="/" replace />} />
@@ -117,8 +113,7 @@ export default function App() {
             <Route path="settings" element={<SuperUserSettingsPage />} />
           </Route>
         </Route>
-        </Routes>
-      </Suspense>
+      </Routes>
     </>
   );
 }

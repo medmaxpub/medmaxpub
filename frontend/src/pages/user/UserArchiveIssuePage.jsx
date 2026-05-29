@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
-import RouteLoadingScreen from "../../components/common/RouteLoadingScreen";
 import SectionHeader from "../../components/common/SectionHeader";
 import ArticlePreviewModal from "../../components/user/ArticlePreviewModal";
 import ArticleWorkflowActions from "../../components/user/ArticleWorkflowActions";
@@ -92,7 +91,7 @@ export default function UserArchiveIssuePage() {
   };
 
   if (journalLoading) {
-    return <RouteLoadingScreen label="Loading journal workspace" />;
+    return null;
   }
 
   if (!journal?.id) {

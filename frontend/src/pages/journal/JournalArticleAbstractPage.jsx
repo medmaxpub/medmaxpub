@@ -121,13 +121,7 @@ export default function JournalArticleAbstractPage() {
   }, [articleId, journal, location.state]);
 
   if (isLoading) {
-    return (
-      <div className="section-shell">
-        <div className="container-shell">
-          <EmptyState title="Loading article" description="The selected article page is being prepared." />
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (!journal) {

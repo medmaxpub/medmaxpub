@@ -1,5 +1,4 @@
 import { Download, ExternalLink, Mail } from "lucide-react";
-import RouteLoadingScreen from "../common/RouteLoadingScreen";
 
 function formatDateTime(value) {
   if (!value) {
@@ -26,7 +25,7 @@ function SubmissionCell({ label, children, className = "" }) {
 
 export default function SubmissionInbox({ submissions = [], isLoading = false, emptyMessage = "No manuscript submissions yet." }) {
   if (isLoading) {
-    return <RouteLoadingScreen label="Loading manuscript submissions" />;
+    return null;
   }
 
   if (!submissions.length) {

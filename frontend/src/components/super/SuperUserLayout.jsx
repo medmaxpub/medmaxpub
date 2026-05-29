@@ -1,6 +1,7 @@
 import { BarChart3, BookOpenText, FileVideo, LayoutGrid, LogOut, MessageSquareQuote, Presentation, Send, Settings, Users } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import StableOutlet from "../common/StableOutlet";
 import { medmaxTransparentLogo } from "../../assets/branding";
 import { useAuth } from "../../context/AuthContext";
 
@@ -111,7 +112,7 @@ export default function SuperUserLayout() {
               </div>
             </div>
           </header>
-          <Outlet />
+          <StableOutlet />
         </div>
       </div>
     </div>

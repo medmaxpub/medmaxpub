@@ -38,13 +38,7 @@ export default function PptViewerPage() {
   }, [ppt]);
 
   if (isLoading) {
-    return (
-      <div className="section-shell">
-        <div className="container-shell">
-          <EmptyState title="Loading PPT viewer" description="The presentation page is being prepared." />
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (!ppt) {

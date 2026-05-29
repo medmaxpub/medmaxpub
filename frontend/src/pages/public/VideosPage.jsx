@@ -128,11 +128,7 @@ export default function VideosPage() {
           </div>
         </div>
 
-        {isLoading ? (
-          <div className="mt-10">
-            <EmptyState title="Loading video archive" description="Public video records are being prepared." />
-          </div>
-        ) : filteredItems.length ? (
+        {isLoading ? null : filteredItems.length ? (
           <div className="mt-10 space-y-6">
             {filteredItems.map((video) => (
               <article key={video.id} className="card-panel overflow-hidden">
