@@ -58,6 +58,19 @@ const api = axios.create({
   baseURL: buildApiBaseUrl()
 });
 
+const getCache = new Map();
+const pendingGets = new Map();
+
+function buildCacheKey(url, config = {}) {
+  const params = config.params ? JSON.stringify(config.params, Object.keys(config.params).sort()) : "";
+  return `${url}?${params}`;
+}
+
+function clearGetCache() {
+  getCache.clear();
+  pendingGets.clear();
+}
+
 if (typeof window !== "undefined") {
   console.info("[api-client] base-url", {
     runtime: isLocalRuntime() ? "local" : "production",
@@ -87,6 +100,7 @@ api.interceptors.response.use(
     const method = response.config?.method?.toLowerCase();
 
     if (["post", "put", "patch", "delete"].includes(method || "")) {
+      clearGetCache();
       notifyDataChanged({
         method,
         url: response.config?.url || ""
@@ -112,6 +126,32 @@ export async function withFallback(request, fallbackValue) {
   } catch (error) {
     return typeof fallbackValue === "function" ? fallbackValue(error) : fallbackValue;
   }
+}
+
+export async function cachedGet(url, config = {}, options = {}) {
+  const ttlMs = options.ttlMs ?? 30000;
+  const key = buildCacheKey(url, config);
+  const cached = getCache.get(key);
+
+  if (cached && Date.now() - cached.createdAt < ttlMs) {
+    return cached.response;
+  }
+
+  if (pendingGets.has(key)) {
+    return pendingGets.get(key);
+  }
+
+  const request = api.get(url, config).then((response) => {
+    getCache.set(key, {
+      createdAt: Date.now(),
+      response
+    });
+    pendingGets.delete(key);
+    return response;
+  });
+
+  pendingGets.set(key, request);
+  return request;
 }
 
 export default api;

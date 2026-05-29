@@ -50,7 +50,11 @@ function normalizeOptionalDate(value) {
 }
 
 function stripHtml(value) {
-  return String(value || "").replace(/<[^>]*>/g, " ");
+  return String(value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export function deriveArticleStatus(article) {
@@ -87,7 +91,7 @@ function buildArticlePayload(body = {}) {
     releaseYear: normalizeOptionalNumber(body.releaseYear),
     specialIssueTitle: normalizeText(body.specialIssueTitle),
     articleType: normalizeText(body.articleType),
-    title: normalizeText(body.title),
+    title: normalizeText(stripHtml(body.title)),
     authorNames: normalizeText(body.authorNames),
     correspondingAuthorEmail: normalizeText(body.correspondingAuthorEmail).toLowerCase(),
     citeAs: normalizeText(body.citeAs),
@@ -212,8 +216,8 @@ function serializeArticle(article) {
     releaseYear: article.releaseYear ?? issue?.year ?? null,
     specialIssueTitle: article.specialIssueTitle || "",
     articleType: article.articleType || "",
-    title: article.title || "",
-    authorNames: article.authorNames || article.authors?.join(", ") || "",
+    title: stripHtml(article.title) || "",
+    authorNames: stripHtml(article.authorNames || article.authors?.join(", ")) || "",
     authors: article.authors || [],
     correspondingAuthorEmail: article.correspondingAuthorEmail || "",
     citeAs: article.citeAs || "",

@@ -44,7 +44,7 @@ const pptSchema = new mongoose.Schema(
     previewError: String,
     previewRequestedAt: Date,
     previewReadyAt: Date,
-    // Legacy Spring Boot fields kept for production compatibility with older records.
+    // Legacy fields kept for production compatibility with older records.
     pptFile: assetSchema,
     pdfPreviewFile: assetSchema,
     uploadedDate: Date

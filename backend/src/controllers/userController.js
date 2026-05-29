@@ -102,6 +102,32 @@ function applySuperUserFilters(items, query) {
   };
 }
 
+function parseSuperUserQuery(query) {
+  const orderBy = ["id", "name", "date"].includes(String(query.orderBy || "").toLowerCase())
+    ? String(query.orderBy).toLowerCase()
+    : "date";
+  const direction = String(query.direction || query.sort || "").toLowerCase() === "asc" ? "asc" : "desc";
+  const page = Math.max(Number.parseInt(query.page, 10) || 1, 1);
+  const pageSize = Math.min(Math.max(Number.parseInt(query.pageSize, 10) || 10, 1), 100);
+  const search = String(query.search || query.q || "").trim().toLowerCase();
+
+  return { orderBy, direction, page, pageSize, search };
+}
+
+function buildUserSort(orderBy, direction) {
+  const sortDirection = direction === "asc" ? 1 : -1;
+
+  if (orderBy === "name") {
+    return { firstName: sortDirection, lastName: sortDirection, userName: sortDirection };
+  }
+
+  if (orderBy === "id") {
+    return { _id: sortDirection };
+  }
+
+  return { createdAt: sortDirection };
+}
+
 async function loadUsersWithJournals(filter = {}) {
   const users = await User.find(filter).sort({ createdAt: -1 }).lean();
   const journals = await Journal.find({ owner: { $in: users.map((user) => user._id) } }).sort({ createdAt: -1 }).lean();
@@ -117,6 +143,43 @@ async function loadUsersWithJournals(filter = {}) {
   return users.map((user) => serializeUser(user, journalsByOwner.get(user._id.toString()) || []));
 }
 
+async function loadPaginatedUsersWithJournals(filter = {}, query = {}) {
+  const parsedQuery = parseSuperUserQuery(query);
+  const total = await User.countDocuments(filter);
+  const totalPages = Math.max(Math.ceil(total / parsedQuery.pageSize), 1);
+  const currentPage = Math.min(parsedQuery.page, totalPages);
+  const skip = (currentPage - 1) * parsedQuery.pageSize;
+  const users = await User.find(filter)
+    .sort(buildUserSort(parsedQuery.orderBy, parsedQuery.direction))
+    .skip(skip)
+    .limit(parsedQuery.pageSize)
+    .lean();
+  const journals = users.length
+    ? await Journal.find({ owner: { $in: users.map((user) => user._id) } }).sort({ createdAt: -1 }).lean()
+    : [];
+
+  const journalsByOwner = new Map();
+  journals.forEach((journal) => {
+    const key = journal.owner.toString();
+    const list = journalsByOwner.get(key) || [];
+    list.push(journal);
+    journalsByOwner.set(key, list);
+  });
+
+  return {
+    items: users.map((user) => serializeUser(user, journalsByOwner.get(user._id.toString()) || [])),
+    meta: {
+      total,
+      page: currentPage,
+      pageSize: parsedQuery.pageSize,
+      totalPages,
+      orderBy: parsedQuery.orderBy,
+      direction: parsedQuery.direction,
+      search: parsedQuery.search
+    }
+  };
+}
+
 export const getUsers = asyncHandler(async (req, res) => {
   if (hasElevatedAccess(req.user)) {
     res.json(await loadUsersWithJournals({ role: { $nin: ["admin", "super_admin", "super_user"] } }));
@@ -129,7 +192,15 @@ export const getUsers = asyncHandler(async (req, res) => {
 export const getSuperUsers = asyncHandler(async (req, res) => {
   ensureSuperAdmin(req.user);
 
-  const items = await loadUsersWithJournals({ role: { $nin: ["admin", "super_admin", "super_user"] } });
+  const filter = { role: { $nin: ["admin", "super_admin", "super_user"] } };
+  const parsedQuery = parseSuperUserQuery(req.query);
+
+  if (!parsedQuery.search) {
+    res.json(await loadPaginatedUsersWithJournals(filter, req.query));
+    return;
+  }
+
+  const items = await loadUsersWithJournals(filter);
   res.json(applySuperUserFilters(items, req.query));
 });
 

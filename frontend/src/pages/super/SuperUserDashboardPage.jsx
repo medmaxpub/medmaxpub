@@ -13,15 +13,20 @@ export default function SuperUserDashboardPage() {
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
   const loadStats = useCallback(() => {
-    return Promise.all([
-      withFallback(() => api.get("/super/users", { params: { page: 1, pageSize: 1 } }), getSuperUserUsersFallback()),
-      withFallback(() => api.get("/admin/journals"), useDevelopmentFallback ? getSuperUserJournalsFallback() : []),
-      withFallback(() => api.get("/testimonials"), useDevelopmentFallback ? getSuperUserTestimonialsFallback() : [])
-    ]).then(([usersData, journalsData, testimonialsData]) => {
+    return withFallback(
+      () => api.get("/admin/dashboard-stats"),
+      useDevelopmentFallback
+        ? {
+            users: getSuperUserUsersFallback().items?.length || 0,
+            journals: getSuperUserJournalsFallback().length || 0,
+            testimonials: getSuperUserTestimonialsFallback().length || 0
+          }
+        : { users: 0, journals: 0, testimonials: 0 }
+    ).then((data) => {
       setStats({
-        users: usersData?.meta?.total || usersData?.items?.length || 0,
-        journals: journalsData.length || 0,
-        testimonials: testimonialsData.length || 0
+        users: data.users || 0,
+        journals: data.journals || 0,
+        testimonials: data.testimonials || 0
       });
     });
   }, [useDevelopmentFallback]);
@@ -30,7 +35,7 @@ export default function SuperUserDashboardPage() {
     loadStats();
   }, [loadStats]);
 
-  useAutoRefresh(loadStats, { intervalMs: 15000 });
+  useAutoRefresh(loadStats, { intervalMs: 60000 });
 
   return (
     <div className="space-y-8 px-4 py-8 sm:px-6 lg:px-8">

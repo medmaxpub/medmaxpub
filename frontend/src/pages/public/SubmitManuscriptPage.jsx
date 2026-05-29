@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
+import api, { cachedGet, shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockJournals } from "../../data/mockData";
 
@@ -36,7 +36,7 @@ export default function SubmitManuscriptPage() {
   const useDevelopmentFallback = shouldUseDevelopmentFallback();
 
   const loadJournals = useCallback(() => {
-    return withFallback(() => api.get("/journals"), useDevelopmentFallback ? mockJournals : []).then((data) => {
+    return withFallback(() => cachedGet("/journals"), useDevelopmentFallback ? mockJournals : []).then((data) => {
       setJournals(Array.isArray(data) ? data : []);
     });
   }, [useDevelopmentFallback]);

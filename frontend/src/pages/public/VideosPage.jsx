@@ -1,7 +1,7 @@
 import { PlayCircle, Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
+import { cachedGet, shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import SectionHeader from "../../components/common/SectionHeader";
 import { mockJournals, mockVideos } from "../../data/mockData";
@@ -35,8 +35,8 @@ export default function VideosPage() {
     }
 
     const [journalSummaries, videoRecords] = await Promise.all([
-      withFallback(() => api.get("/journals"), []),
-      withFallback(() => api.get("/videos"), [])
+      withFallback(() => cachedGet("/journals"), []),
+      withFallback(() => cachedGet("/videos"), [])
     ]);
 
     const journalLookup = new Map(

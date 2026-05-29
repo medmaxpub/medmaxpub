@@ -17,6 +17,7 @@ import {
   updateArticleStatus
 } from "../controllers/articleController.js";
 import { createManuscriptSubmission, getAdminManuscriptSubmissions } from "../controllers/manuscriptSubmissionController.js";
+import { getAdminDashboardStats } from "../controllers/dashboardController.js";
 import {
   createEditorialBoardMember,
   deleteEditorialBoardMember,
@@ -58,6 +59,7 @@ router.get("/assets/pdf-proxy", proxyPdfAsset);
 router.get("/assets/file-proxy", proxyFileAsset);
 
 router.get("/admin/journals", protect, getAdminJournals);
+router.get("/admin/dashboard-stats", protect, getAdminDashboardStats);
 router.get("/admin/site-stats", protect, getAdminSiteStats);
 router.put("/admin/site-stats", protect, updateAdminSiteStats);
 router.get("/admin/submissions", protect, getAdminManuscriptSubmissions);

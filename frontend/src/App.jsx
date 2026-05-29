@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import RouteLoadingScreen from "./components/common/RouteLoadingScreen";
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import SeoManager from "./components/common/SeoManager";
 import JournalLayout from "./components/layout/JournalLayout";
 import SuperUserLayout from "./components/super/SuperUserLayout";
 import UserLayout from "./components/user/UserLayout";
@@ -41,8 +42,10 @@ const UserWelcomePage = lazy(() => import("./pages/user/UserWelcomePage"));
 
 export default function App() {
   return (
-    <Suspense fallback={<RouteLoadingScreen />}>
-      <Routes>
+    <>
+      <SeoManager />
+      <Suspense fallback={<RouteLoadingScreen />}>
+        <Routes>
         <Route element={<WebsiteLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/home" element={<Navigate to="/" replace />} />
@@ -114,7 +117,8 @@ export default function App() {
             <Route path="settings" element={<SuperUserSettingsPage />} />
           </Route>
         </Route>
-      </Routes>
-    </Suspense>
+        </Routes>
+      </Suspense>
+    </>
   );
 }

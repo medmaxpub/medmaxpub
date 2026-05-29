@@ -1,7 +1,7 @@
 import { ArrowLeft, FileText } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
-import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
+import { cachedGet, shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import JournalMenu from "../../components/journal/JournalMenu";
 import useAutoRefresh from "../../hooks/useAutoRefresh";
@@ -29,14 +29,22 @@ function formatPublishedDate(value) {
 
 function resolveAuthorText(article) {
   if (article?.authorNames) {
-    return article.authorNames;
+    return stripHtml(article.authorNames);
   }
 
   if (Array.isArray(article?.authors) && article.authors.length) {
-    return article.authors.join(", ");
+    return stripHtml(article.authors.join(", "));
   }
 
   return "NA";
+}
+
+function stripHtml(value) {
+  return String(value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function findArticleInJournal(journal, articleId) {
@@ -80,7 +88,7 @@ export default function JournalArticleAbstractPage() {
     }
 
     const data = await withFallback(
-      () => api.get(`/journals/${journalUrl}`),
+      () => cachedGet(`/journals/${journalUrl}`, {}, { ttlMs: 15000 }),
       useDevelopmentFallback
         ? mockJournals.find((item) => getJournalRouteSlug(item.publicJournalUrl || item.journalUrl) === journalUrl)
         : null
@@ -143,6 +151,7 @@ export default function JournalArticleAbstractPage() {
   }
 
   const pdfUrl = article.pdfUrl ? buildPdfProxyUrl(article.pdfUrl) || article.pdfUrl : "";
+  const articleTitle = stripHtml(article.title) || "Untitled article";
 
   return (
     <div className="section-shell">
@@ -168,7 +177,7 @@ export default function JournalArticleAbstractPage() {
 
             <div className="mt-8 rounded-3xl border border-brand-border bg-brand-surface p-6 sm:p-8">
               <p className="text-xs uppercase tracking-[0.18em] text-brand-teal">{article.articleType || "Article"}</p>
-              <h1 className="mt-3 font-display text-3xl font-semibold text-brand-ink sm:text-4xl">{article.title || "Untitled article"}</h1>
+              <h1 className="mt-3 font-display text-3xl font-semibold text-brand-ink sm:text-4xl">{articleTitle}</h1>
 
               <div className="mt-5 grid gap-4 text-sm text-brand-slate md:grid-cols-2">
                 <p><span className="font-semibold text-brand-ink">Author:</span> {resolveAuthorText(article)}</p>

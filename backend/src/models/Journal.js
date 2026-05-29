@@ -56,6 +56,9 @@ journalSchema.pre("validate", function (next) {
   next();
 });
 
+journalSchema.index({ createdAt: -1 });
+journalSchema.index({ owner: 1, createdAt: -1 });
+
 const Journal = mongoose.model("Journal", journalSchema);
 
 export default Journal;

@@ -2,6 +2,7 @@ import { ArrowLeft, Save } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../api/client";
+import RouteLoadingScreen from "../../components/common/RouteLoadingScreen";
 import SectionHeader from "../../components/common/SectionHeader";
 import RichTextEditor from "../../components/user/RichTextEditor";
 import { initialEditorialBoardForm, mapEditorialBoardMemberToForm, stripHtml } from "../../components/user/userPortalShared";
@@ -95,7 +96,7 @@ export default function UserEditorialBoardFormPage() {
   };
 
   if (journalLoading || loadingMember) {
-    return <div className="container-shell py-10 text-sm text-brand-slate">Loading editorial board form...</div>;
+    return <RouteLoadingScreen label="Loading editorial board form" />;
   }
 
   return (

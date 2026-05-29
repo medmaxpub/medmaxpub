@@ -19,17 +19,27 @@ function formatPublishedDate(value) {
 
 function resolveAuthorText(article) {
   if (article?.authorNames) {
-    return article.authorNames;
+    return stripHtml(article.authorNames);
   }
 
   if (Array.isArray(article?.authors) && article.authors.length) {
-    return article.authors.join(", ");
+    return stripHtml(article.authors.join(", "));
   }
 
   return "NA";
 }
 
+function stripHtml(value) {
+  return String(value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export default function PublicArticleCard({ article, journalRoute, articleKey }) {
+  const articleTitle = stripHtml(article.title) || "Untitled article";
+
   return (
     <article key={articleKey || article.id} className="overflow-hidden rounded-3xl border border-cyan-500/60 bg-white shadow-sm">
       <div className="flex items-center justify-between gap-4 bg-[linear-gradient(135deg,#0ea5b7_0%,#0891b2_100%)] px-5 py-1 text-white">
@@ -47,7 +57,7 @@ export default function PublicArticleCard({ article, journalRoute, articleKey })
       <div className="space-y-5 p-5">
         <div className="text-sm text-brand-slate">
           <span className="font-semibold text-brand-ink">Title:</span>{" "}
-          <span className="text-base font-medium text-brand-ink">{article.title || "Untitled article"}</span>
+          <span className="text-base font-medium text-brand-ink">{articleTitle}</span>
         </div>
 
         <div className="text-sm text-brand-slate">
@@ -65,7 +75,7 @@ export default function PublicArticleCard({ article, journalRoute, articleKey })
             to={buildJournalArticleAbstractPath(journalRoute, article.id)}
             state={{ article }}
             className="group inline-flex items-center gap-3 rounded-2xl border border-sky-200 bg-[linear-gradient(135deg,#f8fdff_0%,#e6f7fb_100%)] px-4 py-3 text-brand-ink shadow-sm transition hover:-translate-y-0.5 hover:border-cyan-400 hover:shadow-md"
-            aria-label={`Open abstract for ${article.title || "article"}`}
+            aria-label={`Open abstract for ${articleTitle}`}
             title="Open abstract"
           >
             <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-cyan-700 shadow-sm ring-1 ring-cyan-100 transition group-hover:bg-cyan-50">
@@ -81,7 +91,7 @@ export default function PublicArticleCard({ article, journalRoute, articleKey })
               className="group inline-flex items-center gap-3 rounded-2xl border border-rose-200 bg-[linear-gradient(135deg,#fff8f8_0%,#ffe9e9_100%)] px-4 py-3 text-brand-ink shadow-sm transition hover:-translate-y-0.5 hover:border-rose-400 hover:shadow-md"
               target="_blank"
               rel="noreferrer"
-              aria-label={`Open PDF for ${article.title || "article"}`}
+              aria-label={`Open PDF for ${articleTitle}`}
               title="Open PDF in new tab"
             >
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-rose-600 shadow-sm ring-1 ring-rose-100 transition group-hover:bg-rose-50">

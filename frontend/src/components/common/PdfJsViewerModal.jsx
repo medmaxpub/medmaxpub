@@ -566,9 +566,8 @@ export default function PdfJsViewerModal({
             >
               <div className={`flex min-h-full p-3 sm:p-4 ${basicViewer ? "items-start justify-center" : "items-center justify-center"}`}>
                 {isLoading ? (
-                  <div className="text-center text-white">
-                    <LoaderCircle size={28} className="mx-auto animate-spin" />
-                    <p className="mt-4 text-sm text-slate-300">Loading preview...</p>
+                  <div className="text-white" role="status" aria-label="Loading preview">
+                    <LoaderCircle size={28} className="animate-spin" />
                   </div>
                 ) : error ? (
                   <div className="max-w-xl text-center text-white">

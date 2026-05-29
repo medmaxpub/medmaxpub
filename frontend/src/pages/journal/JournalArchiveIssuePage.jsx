@@ -1,7 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
+import { cachedGet, shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import JournalMenu from "../../components/journal/JournalMenu";
 import PublicArticleCard from "../../components/journal/PublicArticleCard";
@@ -46,7 +46,7 @@ export default function JournalArchiveIssuePage() {
     }
 
     const data = await withFallback(
-      () => api.get(`/journals/${journalUrl}`),
+      () => cachedGet(`/journals/${journalUrl}`, {}, { ttlMs: 15000 }),
       useDevelopmentFallback
         ? mockJournals.find((item) => getJournalRouteSlug(item.publicJournalUrl || item.journalUrl) === journalUrl)
         : null

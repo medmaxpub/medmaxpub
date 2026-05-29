@@ -18,6 +18,14 @@ function normalizeText(value) {
   return String(value || "").trim();
 }
 
+function stripHtml(value) {
+  return String(value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function safeDecode(value) {
   try {
     return decodeURIComponent(value);
@@ -110,6 +118,36 @@ function validateJournalPayload(payload, options = {}) {
   }
 }
 
+const JOURNAL_PUBLIC_LIST_SELECT =
+  "owner firstName lastName managingJournalName journalDomainName slug journalUrl issn aboutJournal coverImage createdAt";
+
+const JOURNAL_ADMIN_LIST_SELECT =
+  "owner firstName lastName managingJournalName journalDomainName slug journalUrl issn aboutJournal aimScope journalInstructions coverImage pdfFile createdAt updatedAt";
+
+const JOURNAL_DETAIL_SELECT =
+  "owner firstName lastName managingJournalName journalDomainName slug journalUrl issn aboutJournal aimScope journalInstructions coverImage pdfFile createdAt updatedAt";
+
+function serializeJournalListItem(journal) {
+  return {
+    id: journal._id,
+    ownerUserId: journal.owner?._id || journal.owner,
+    ownerName:
+      journal.owner && typeof journal.owner === "object"
+        ? [journal.owner.firstName, journal.owner.lastName].filter(Boolean).join(" ").trim()
+        : [journal.firstName, journal.lastName].filter(Boolean).join(" ").trim(),
+    firstName: normalizeText(journal.firstName),
+    lastName: normalizeText(journal.lastName),
+    slug: normalizeText(journal.slug),
+    publicJournalUrl: normalizeJournalUrl(journal.slug || journal.journalUrl || journal.managingJournalName),
+    managingJournalName: normalizeText(journal.managingJournalName),
+    journalDomainName: normalizeText(journal.journalDomainName),
+    journalUrl: normalizeText(journal.journalUrl),
+    issn: normalizeText(journal.issn),
+    aboutJournal: normalizeText(journal.aboutJournal),
+    coverImage: normalizeStoredAssetUrl(journal.coverImage?.secure_url || "", journal.coverImage)
+  };
+}
+
 function serializeJournalSummary(journal) {
   const legacyPdfFiles =
     journal.pdfFile && !(journal.pdfFiles || []).length
@@ -160,23 +198,32 @@ function serializeJournalSummary(journal) {
   };
 }
 
-async function buildJournalDetails(journal, req) {
-  const issues = await Issue.find({ journal: journal._id }).sort({ year: -1, volume: -1, issue: -1 }).lean();
-  const ppts = await Ppt.find({ journal: journal._id }).sort({ createdAt: -1 });
-  const pdfFiles = await JournalPdf.find({ journal: journal._id }).sort({ createdAt: -1 }).lean();
-  const videos = await Video.find({ journal: journal._id }).sort({ createdAt: -1 }).lean();
-  const editorialBoard = await EditorialBoardMember.find({ journal: journal._id }).sort({ createdAt: -1 }).lean();
+async function buildJournalDetails(journal) {
+  const [issues, ppts, pdfFiles, videos, editorialBoard] = await Promise.all([
+    Issue.find({ journal: journal._id }).select("volume issue month year isCurrent").sort({ year: -1, volume: -1, issue: -1 }).lean(),
+    Ppt.find({ journal: journal._id }).sort({ createdAt: -1 }).lean(),
+    JournalPdf.find({ journal: journal._id }).select("title file createdAt").sort({ createdAt: -1 }).lean(),
+    Video.find({ journal: journal._id }).select("title description youtubeUrl videoFile thumbnail createdAt").sort({ createdAt: -1 }).lean(),
+    EditorialBoardMember.find({ journal: journal._id })
+      .select("editorType name designation department country editorDescription editorBiography profileUrl profileImage createdAt")
+      .sort({ createdAt: -1 })
+      .lean()
+  ]);
   const issueIds = issues.map((item) => item._id);
   const articles = await Article.find({
     $or: [{ journal: journal._id }, issueIds.length ? { issue: { $in: issueIds } } : null].filter(Boolean)
-  }).lean();
+  })
+    .select(
+      "journal issue title articleType authorNames authors volume issueNumber releaseMonth releaseYear abstractText publishedDate doiNumber country pdfFile status inPress"
+    )
+    .lean();
 
   const serializePublicArticle = (article) => ({
     id: article._id,
-    title: article.title,
+    title: stripHtml(article.title),
     articleType: article.articleType || "",
-    authorNames: article.authorNames || "",
-    authors: article.authors || [],
+    authorNames: stripHtml(article.authorNames || ""),
+    authors: (article.authors || []).map(stripHtml).filter(Boolean),
     volume: article.volume ?? null,
     issueNumber: article.issueNumber ?? null,
     releaseMonth: article.releaseMonth || "",
@@ -286,7 +333,7 @@ async function buildJournalDetails(journal, req) {
       fileUrl: normalizeStoredAssetUrl(item.file?.secure_url || "", item.file),
       uploadedAt: item.createdAt || item.file?.uploaded_at || ""
     })),
-    ppts: ppts.map((ppt) => serializePpt(ppt.toObject())),
+    ppts: ppts.map((ppt) => serializePpt(ppt)),
     videos: videos.map((video) => ({
       id: video._id,
       title: video.title,
@@ -379,13 +426,23 @@ async function upsertLinkedOwner(req, payload, existingJournal = null) {
 }
 
 export const getJournals = asyncHandler(async (req, res) => {
-  const journals = await Journal.find().populate("owner", "firstName lastName userName").sort({ createdAt: -1 }).lean();
-  res.json(filterSampleJournals(journals).map(serializeJournalSummary));
+  const journals = await Journal.find()
+    .select(JOURNAL_PUBLIC_LIST_SELECT)
+    .populate("owner", "firstName lastName userName")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  res.json(filterSampleJournals(journals).map(serializeJournalListItem));
 });
 
 export const getAdminJournals = asyncHandler(async (req, res) => {
   const filter = hasElevatedAccess(req.user) ? {} : { owner: req.user._id };
-  const journals = await Journal.find(filter).populate("owner", "firstName lastName userName").sort({ createdAt: -1 }).lean();
+  const journals = await Journal.find(filter)
+    .select(JOURNAL_ADMIN_LIST_SELECT)
+    .populate("owner", "firstName lastName userName")
+    .sort({ createdAt: -1 })
+    .lean();
+
   res.json(filterSampleJournals(journals).map(serializeJournalSummary));
 });
 
@@ -395,6 +452,7 @@ export const getJournalByUrl = asyncHandler(async (req, res) => {
   let journal = await Journal.findOne({
     $or: [{ journalUrl: normalizedRequestedUrl }, { slug: normalizedRequestedUrl }]
   })
+    .select(JOURNAL_DETAIL_SELECT)
     .populate("owner", "firstName lastName userName")
     .lean();
 
@@ -405,6 +463,7 @@ export const getJournalByUrl = asyncHandler(async (req, res) => {
         { slug: { $regex: escapeRegExp(normalizedRequestedUrl), $options: "i" } }
       ]
     })
+      .select(JOURNAL_DETAIL_SELECT)
       .populate("owner", "firstName lastName userName")
       .lean();
 
@@ -422,8 +481,7 @@ export const getJournalByUrl = asyncHandler(async (req, res) => {
     throw new AppError("Journal not found", 404);
   }
 
-  res.set("Cache-Control", "no-store");
-  res.json(await buildJournalDetails(journal, req));
+  res.json(await buildJournalDetails(journal));
 });
 
 export const createJournal = asyncHandler(async (req, res) => {

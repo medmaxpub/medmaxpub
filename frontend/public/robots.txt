@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /super
+Disallow: /superuser
+Disallow: /user
+Disallow: /login
+Disallow: /admin/login
+Disallow: /user/login
+Disallow: /super/login
+Disallow: /superuser/login
+
+Sitemap: https://medmaxpub.com/sitemap.xml

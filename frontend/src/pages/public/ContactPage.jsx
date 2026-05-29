@@ -97,57 +97,18 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="section-shell">
+    <div className="py-6 sm:py-8 lg:py-10">
       <Toast toast={toast} onClose={() => setToast({ type: "", message: "" })} />
 
-      <div className="container-shell space-y-8">
-        <section className="card-panel p-6 sm:p-8 lg:p-10">
-          <SectionHeader
-            label="Contact"
-            title="Connect with the Medmax Publishers team"
-            description="Use the details below for publication support, journal coordination, and scholarly communication queries."
-          />
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <div className="rounded-3xl border border-brand-border bg-brand-elevated p-5">
-              <div className="flex items-center gap-3 text-brand-ink">
-                <Mail size={18} />
-                <h2 className="font-semibold">Email</h2>
-              </div>
-              <a href={`mailto:${companyInfo.email}`} className="mt-4 block text-sm leading-7 text-brand-slate hover:text-brand-gold">
-                {companyInfo.email}
-              </a>
-            </div>
-            <div className="rounded-3xl border border-brand-border bg-brand-elevated p-5">
-              <div className="flex items-center gap-3 text-brand-ink">
-                <Phone size={18} />
-                <h2 className="font-semibold">Phone</h2>
-              </div>
-              <a href={`tel:${companyInfo.phone}`} className="mt-4 block text-sm leading-7 text-brand-slate hover:text-brand-gold">
-                {companyInfo.phone}
-              </a>
-            </div>
-            <div className="rounded-3xl border border-brand-border bg-brand-elevated p-5">
-              <div className="flex items-center gap-3 text-brand-ink">
-                <MapPin size={18} />
-                <h2 className="font-semibold">Address</h2>
-              </div>
-              <div className="mt-4 space-y-1 text-sm leading-7 text-brand-slate">
-                {companyInfo.addressLines.map((line) => (
-                  <div key={line}>{line}</div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="card-panel p-6 sm:p-8 lg:p-10">
+      <div className="container-shell space-y-6">
+        <section className="card-panel p-5 sm:p-6 lg:p-8">
           <SectionHeader
             label="Contact Form"
             title="Send a message to the Medmax Publishers team"
             description="Use the form below for publication support, journal coordination, and general scholarly communication questions."
           />
 
-          <form onSubmit={handleSubmit} className="mt-8 rounded-3xl border border-brand-border bg-brand-surface p-6 sm:p-8">
+          <form onSubmit={handleSubmit} className="mt-5 rounded-2xl border border-brand-border bg-brand-surface p-5 sm:p-6">
             <div className="grid gap-5 md:grid-cols-2">
               <div className="md:col-span-1">
                 <label className="form-label" data-required="true">Full Name</label>
@@ -203,6 +164,50 @@ export default function ContactPage() {
               </button>
             </div>
           </form>
+        </section>
+
+        <section className="rounded-2xl border border-brand-border bg-white px-5 py-5 shadow-sm sm:px-6 lg:px-8">
+          <SectionHeader
+            label="Contact"
+            title="Connect with the Medmax Publishers team"
+            description="Use the details below for publication support, journal coordination, and scholarly communication queries."
+          />
+          <div className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(320px,1.35fr)]">
+            <a
+              href={`mailto:${companyInfo.email}`}
+              className="flex items-start gap-3 rounded-2xl border border-brand-border bg-brand-elevated p-4 text-brand-slate transition hover:border-brand-teal hover:bg-brand-sky"
+            >
+              <Mail size={18} className="mt-0.5 shrink-0 text-brand-ink" />
+              <span className="min-w-0">
+                <span className="block font-semibold text-brand-ink">Email</span>
+                <span className="mt-1 block text-sm leading-6">{companyInfo.email}</span>
+              </span>
+            </a>
+            <a
+              href={`tel:${companyInfo.phone}`}
+              className="flex items-start gap-3 rounded-2xl border border-brand-border bg-brand-elevated p-4 text-brand-slate transition hover:border-brand-teal hover:bg-brand-sky"
+            >
+              <Phone size={18} className="mt-0.5 shrink-0 text-brand-ink" />
+              <span className="min-w-0">
+                <span className="block font-semibold text-brand-ink">Phone</span>
+                <span className="mt-1 block text-sm leading-6">{companyInfo.phone}</span>
+              </span>
+            </a>
+            <div className="flex items-start gap-3 rounded-2xl border border-brand-border bg-brand-elevated p-4 text-brand-slate">
+              <MapPin size={18} className="mt-0.5 shrink-0 text-brand-ink" />
+              <div className="min-w-0">
+                <h2 className="font-semibold text-brand-ink">Address</h2>
+                <div className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-sm leading-6">
+                  {companyInfo.addressLines.map((line, index) => (
+                    <span key={line}>
+                      {line}
+                      {index < companyInfo.addressLines.length - 1 ? "," : ""}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
       </div>
     </div>

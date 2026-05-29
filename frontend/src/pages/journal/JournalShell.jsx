@@ -1,7 +1,7 @@
 import { ExternalLink, FileText, PlayCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
+import { cachedGet, shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import IssueAccordion from "../../components/journal/IssueAccordion";
 import PublicArticleCard from "../../components/journal/PublicArticleCard";
@@ -55,7 +55,7 @@ export default function JournalShell() {
     }
 
     const data = await withFallback(
-      () => api.get(`/journals/${journalUrl}`),
+      () => cachedGet(`/journals/${journalUrl}`, {}, { ttlMs: 15000 }),
       useDevelopmentFallback
         ? mockJournals.find((item) => getJournalRouteSlug(item.publicJournalUrl || item.journalUrl) === journalUrl)
         : null

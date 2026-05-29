@@ -2,6 +2,7 @@ import { ArrowLeftRight, Archive, Eye, Pencil, Search, Trash2 } from "lucide-rea
 import { useCallback, useEffect, useMemo, useState } from "react";
 import api from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
+import RouteLoadingScreen from "../../components/common/RouteLoadingScreen";
 import SectionHeader from "../../components/common/SectionHeader";
 import ArticlePreviewModal from "../../components/user/ArticlePreviewModal";
 import UserArticleForm from "../../components/user/UserArticleForm";
@@ -162,7 +163,7 @@ export default function UserArticlesWorkspace({ status, title, description }) {
   };
 
   if (journalLoading) {
-    return <div className="container-shell py-10 text-sm text-brand-slate">Loading journal workspace...</div>;
+    return <RouteLoadingScreen label="Loading journal workspace" />;
   }
 
   if (!journal?.id) {

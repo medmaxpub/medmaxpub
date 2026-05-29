@@ -1,7 +1,7 @@
 import { Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
+import { cachedGet, shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import EmptyState from "../../components/common/EmptyState";
 import JournalCard from "../../components/common/JournalCard";
 import SectionHeader from "../../components/common/SectionHeader";
@@ -16,7 +16,7 @@ export default function JournalsPage() {
 
   const loadJournals = useCallback(() => {
     setIsLoading(true);
-    return withFallback(() => api.get("/journals"), useDevelopmentFallback ? mockJournals : [])
+    return withFallback(() => cachedGet("/journals"), useDevelopmentFallback ? mockJournals : [])
       .then(setJournals)
       .finally(() => setIsLoading(false));
   }, [useDevelopmentFallback]);

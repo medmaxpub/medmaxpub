@@ -36,6 +36,8 @@ const journalPdfSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+journalPdfSchema.index({ journal: 1, createdAt: -1 });
+
 const JournalPdf = mongoose.model("JournalPdf", journalPdfSchema);
 
 export default JournalPdf;

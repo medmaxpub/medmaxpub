@@ -1,7 +1,7 @@
 import { BookOpen, CalendarDays, Database, FileText } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import api, { shouldUseDevelopmentFallback, withFallback } from "../../api/client";
+import { cachedGet, shouldUseDevelopmentFallback, withFallback } from "../../api/client";
 import dnaImage from "../../assets/DNA.png";
 import AboutMedmaxSection from "../../components/common/AboutMedmaxSection";
 import JournalCard from "../../components/common/JournalCard";
@@ -24,19 +24,19 @@ export default function HomePage() {
   const statIcons = [BookOpen, FileText, CalendarDays, Database];
 
   const loadFeaturedJournals = useCallback(() => {
-    return withFallback(() => api.get("/journals"), useDevelopmentFallback ? mockJournals : []).then((data) => {
+    return withFallback(() => cachedGet("/journals"), useDevelopmentFallback ? mockJournals : []).then((data) => {
       setFeaturedJournals((Array.isArray(data) ? data : []).slice(0, 4));
     });
   }, [useDevelopmentFallback]);
 
   const loadTestimonials = useCallback(() => {
-    return withFallback(() => api.get("/testimonials"), useDevelopmentFallback ? mockTestimonials : []).then((data) =>
+    return withFallback(() => cachedGet("/testimonials"), useDevelopmentFallback ? mockTestimonials : []).then((data) =>
       setTestimonials(data.length ? data : mockTestimonials)
     );
   }, [useDevelopmentFallback]);
 
   const loadSiteStats = useCallback(() => {
-    return withFallback(() => api.get("/site-stats"), useDevelopmentFallback ? { stats: websiteStats } : { stats: websiteStats }).then((data) =>
+    return withFallback(() => cachedGet("/site-stats"), useDevelopmentFallback ? { stats: websiteStats } : { stats: websiteStats }).then((data) =>
       setStats(Array.isArray(data?.stats) && data.stats.length ? data.stats : websiteStats)
     );
   }, [useDevelopmentFallback]);

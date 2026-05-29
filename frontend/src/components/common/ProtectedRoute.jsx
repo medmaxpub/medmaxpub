@@ -1,11 +1,12 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import RouteLoadingScreen from "./RouteLoadingScreen";
 
 export default function ProtectedRoute({ allowedRoles, redirectTo = "/login" }) {
   const { loading, isAuthenticated, user } = useAuth();
 
   if (loading) {
-    return <div className="container-shell py-16 text-center text-brand-slate">Checking admin session...</div>;
+    return <RouteLoadingScreen label="Checking admin session" />;
   }
 
   if (!isAuthenticated) {
