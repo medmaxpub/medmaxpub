@@ -1,8 +1,8 @@
 export const companyInfo = {
   name: "medmaxpub",
   email: import.meta.env.VITE_DEFAULT_CONTACT_EMAIL || "contact@medmaxpub.com",
-  phone: "+91 7569-062951",
-  phoneHref: ("+91 7569-062951").replace(/[^\d+]/g, ""),
+  phone: "+1 (408) 601-8182",
+  phoneHref: ("+1 (408) 601-8182").replace(/[^\d+]/g, ""),
   addressLines: [
     "Medmax Publishers LLC",
     "2705 Greystone Drive",
