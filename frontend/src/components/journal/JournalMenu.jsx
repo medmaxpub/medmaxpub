@@ -9,20 +9,35 @@ const items = [
   { label: "Author Guidelines", slug: "author-guidelines" },
   { label: "Article in Press", slug: "article-in-press" },
   { label: "Current Issue", slug: "current-issue" },
-  { label: "Archive", slug: "archive" }
+  { label: "Archive", slug: "archive" },
 ];
 
-export default function JournalMenu({ journalUrl, className = "", linkClassName = "" }) {
-  const wrapperClassName = ["flex flex-wrap gap-2", className].filter(Boolean).join(" ");
-
+export default function JournalMenu({
+  journalUrl,
+  className = "",
+  linkClassName = "",
+}) {
   return (
-    <div className={wrapperClassName}>
+    <div
+      className={[
+        "flex flex-nowrap items-center gap-2 overflow-x-auto",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       {items.map((item) => (
         <NavLink
           key={item.slug}
           to={buildJournalSectionPath(journalUrl, item.slug)}
           className={({ isActive }) =>
-            ["journal-nav-link", isActive ? "journal-nav-link-active" : "", linkClassName].filter(Boolean).join(" ")
+            [
+              "journal-nav-link whitespace-nowrap flex-shrink-0",
+              isActive ? "journal-nav-link-active" : "",
+              linkClassName,
+            ]
+              .filter(Boolean)
+              .join(" ")
           }
         >
           {item.label}
