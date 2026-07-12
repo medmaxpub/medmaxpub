@@ -1,3 +1,5 @@
+import home4 from "../assets/home-4.jpg";
+import homeBanner6 from "../assets/home-banner-6.jpg";
 export const companyInfo = {
   name: "medmaxpub",
   email: import.meta.env.VITE_DEFAULT_CONTACT_EMAIL || "contact@medmaxpub.com",
@@ -37,17 +39,27 @@ export const mediaCollections = [
 ];
 
 export const heroShowcaseImages = [
-  {
-    id: "hero-life-science",
+  // {
+  //   id: "hero-life-science",
+  //   title: "Life Sciences",
+  //   image:
+  //     "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?auto=format&fit=crop&w=1200&q=80"
+  // },
+  // {
+  //   id: "hero-clinical",
+  //   title: "Clinical Research",
+  //   image:
+  //     "https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1200&q=80"
+  // },
+    {
+    id: "hero-home4",
     title: "Life Sciences",
-    image:
-      "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?auto=format&fit=crop&w=1200&q=80"
+    image: home4
   },
   {
-    id: "hero-clinical",
+    id: "hero-banner6",
     title: "Clinical Research",
-    image:
-      "https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1200&q=80"
+    image: homeBanner6
   },
   {
     id: "hero-engineering",
