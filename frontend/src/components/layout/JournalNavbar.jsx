@@ -30,46 +30,48 @@ export default function JournalNavbar() {
 
   return (
     <div className="sticky top-0 z-30 bg-brand-mist/95 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-3 py-4 sm:px-5 lg:gap-4 lg:px-6">
-        <div className="flex items-center lg:-ml-1">
-          <Link to="/" className="inline-flex items-center">
-            <img src={medmaxTransparentLogo} alt="Medmax Publishers" className="h-24 w-auto sm:h-28 lg:h-28" />
-          </Link>
+      <div className="mx-auto w-full max-w-7xl px-3 sm:px-5 lg:px-6">
+        {/* Row 1: logo + Back / mobile toggle */}
+        <div className="flex items-center gap-3 py-4 lg:gap-4">
+          <div className="flex items-center lg:-ml-1">
+            <Link to="/" className="inline-flex items-center">
+              <img src={medmaxTransparentLogo} alt="Medmax Publishers" className="h-24 w-auto sm:h-28 lg:h-28" />
+            </Link>
+          </div>
+
+          <nav className="hidden flex-wrap items-center gap-2 lg:ml-auto lg:flex lg:justify-end">
+            {activeItems.map((item) => (
+              <NavLink key={item.to} to={item.to} className={`journal-nav-link ${item.active ? "journal-nav-link-active" : ""}`}>
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+
+          {showMobileBackOnly ? (
+            <NavLink
+              to={backTo}
+              className="journal-nav-link ml-auto lg:hidden"
+            >
+              Back
+            </NavLink>
+          ) : (
+            <button
+              type="button"
+              className="ml-auto inline-flex rounded-2xl border border-brand-border bg-brand-surface p-3 text-brand-ink lg:hidden"
+              onClick={() => setOpen((current) => !current)}
+              aria-label={open ? "Close journal menu" : "Open journal menu"}
+            >
+              {open ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          )}
         </div>
 
+        {/* Row 2: journal menu, below the logo row, left-aligned */}
         {showJournalLinks ? (
-          <div className="hidden min-w-0 flex-1 justify-center lg:flex">
-            <JournalMenu journalUrl={journalUrl} className="justify-center" linkClassName="px-3 xl:px-4" />
+          <div className="hidden justify-start border-t border-brand-border py-3 lg:flex">
+            <JournalMenu journalUrl={journalUrl} className="justify-start" linkClassName="px-3 xl:px-4" />
           </div>
-        ) : (
-          <div className="hidden flex-1 lg:block" />
-        )}
-
-        <nav className="hidden flex-wrap items-center gap-2 lg:ml-auto lg:flex lg:justify-end">
-          {activeItems.map((item) => (
-            <NavLink key={item.to} to={item.to} className={`journal-nav-link ${item.active ? "journal-nav-link-active" : ""}`}>
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-
-        {showMobileBackOnly ? (
-          <NavLink
-            to={backTo}
-            className="journal-nav-link ml-auto lg:hidden"
-          >
-            Back
-          </NavLink>
-        ) : (
-          <button
-            type="button"
-            className="ml-auto inline-flex rounded-2xl border border-brand-border bg-brand-surface p-3 text-brand-ink lg:hidden"
-            onClick={() => setOpen((current) => !current)}
-            aria-label={open ? "Close journal menu" : "Open journal menu"}
-          >
-            {open ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        )}
+        ) : null}
       </div>
 
       {open && showJournalLinks ? (
