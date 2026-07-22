@@ -198,7 +198,7 @@ export default function JournalShell() {
   );
 
   const renderCurrentIssue = () => (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {journal.currentIssue ? (
         <>
           {journal.currentIssue.articles.map((article) => (
@@ -302,7 +302,7 @@ export default function JournalShell() {
       }
 
       return (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {inPressArticles.map((article) => (
             <PublicArticleCard key={article.id} article={article} journalRoute={journalRoute} articleKey={`inpress-${article.id}`} />
           ))}
