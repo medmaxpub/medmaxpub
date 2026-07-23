@@ -244,7 +244,7 @@ export default function JournalShell() {
       const boardMembers = editorialBoard.filter((member) => !isChiefEditor(member));
 
       const renderMemberCard = (member) => (
-        <article key={member.id} className="rounded-2xl border border-brand-border bg-brand-surface p-3">
+        <article key={member.id} className="flex min-h-[220px] flex-col rounded-2xl border border-brand-border bg-brand-surface p-3">
           <div className="flex gap-2.5">
             {member.profileImageUrl ? (
               <img src={member.profileImageUrl} alt={member.name} className="h-16 w-14 rounded-lg border border-brand-border object-cover" />
@@ -254,8 +254,10 @@ export default function JournalShell() {
               </div>
             )}
             <div className="flex-1">
-              <p className="text-[11px] uppercase tracking-[0.16em] text-brand-teal">{member.editorType || "Editorial Board"}</p>
-              <h3 className="mt-0.5 text-base font-semibold text-brand-ink">{member.name}</h3>
+              {isChiefEditor(member) ? null : (
+                <p className="text-[11px] uppercase tracking-[0.16em] text-brand-teal">{member.editorType || "Editorial Board"}</p>
+              )}
+              <h3 className={`${isChiefEditor(member) ? "" : "mt-0.5"} text-base font-semibold text-brand-ink`}>{member.name}</h3>
               {member.designation ? <p className="text-xs text-brand-slate">{member.designation}</p> : null}
               {member.department ? <p className="text-xs text-brand-slate">{member.department}</p> : null}
               {member.country ? <p className="text-xs text-brand-slate">{member.country}</p> : null}
