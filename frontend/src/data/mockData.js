@@ -1,4 +1,4 @@
-import home4 from "../assets/home-4.jpg";
+import earthBannerNew from "../assets/Earth-Banner-new.png";
 import homeBanner6 from "../assets/home-banner-6.jpg";
 export const companyInfo = {
   name: "medmaxpub",
@@ -52,9 +52,9 @@ export const heroShowcaseImages = [
   //     "https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1200&q=80"
   // },
     {
-    id: "hero-home4",
+    id: "hero-earth-banner",
     title: "Life Sciences",
-    image: home4
+    image: earthBannerNew
   },
   {
     id: "hero-banner6",
