@@ -1,5 +1,5 @@
 import earthBannerNew from "../assets/Earth-Banner-new.png";
-import homeBanner6 from "../assets/home-banner-6.jpg";
+import homeBanner6 from "../assets/Robo-ai-new.png";
 export const companyInfo = {
   name: "medmaxpub",
   email: import.meta.env.VITE_DEFAULT_CONTACT_EMAIL || "contact@medmaxpub.com",
