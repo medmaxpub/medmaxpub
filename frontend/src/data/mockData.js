@@ -1,5 +1,6 @@
 import earthBannerNew from "../assets/Earth-Banner-new.png";
-import homeBanner6 from "../assets/Robo-ai-new.png";
+import roboAiNew from "../assets/Robo-ai-new.png";
+import clinicalBannerNew from "../assets/Clinical-banner-new.png";
 export const companyInfo = {
   name: "medmaxpub",
   email: import.meta.env.VITE_DEFAULT_CONTACT_EMAIL || "contact@medmaxpub.com",
@@ -57,15 +58,14 @@ export const heroShowcaseImages = [
     image: earthBannerNew
   },
   {
-    id: "hero-banner6",
+    id: "hero-clinical-banner",
     title: "Clinical Research",
-    image: homeBanner6
+    image: clinicalBannerNew
   },
   {
-    id: "hero-engineering",
+    id: "hero-robo-ai",
     title: "Engineering & Technology",
-    image:
-      "https://images.unsplash.com/photo-1532187643603-ba119ca4109e?auto=format&fit=crop&w=1200&q=80"
+    image: roboAiNew
   }
 ];
 
