@@ -1,7 +1,7 @@
 import { Mail, MessageSquare, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const whatsappUrl = "https://wa.me/917569062951";
+const whatsappUrl = "https://wa.me/17202034570";
 const supportEmail = "contact@medmaxpub.com";
 
 function WhatsAppIcon({ className = "" }) {
