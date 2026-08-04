@@ -456,8 +456,8 @@ async function fetchAssetWithCloudinaryFallback(targetUrl) {
 export const proxyPdfAsset = asyncHandler(async (req, res) => {
   const targetUrl = String(req.query.url || "").trim();
   const shouldDownload = String(req.query.download || "").trim() === "1";
-  // ✅ NEW: accept the article/journal title as the desired filename
-  const customFilename = String(req.query.filename || "").trim();
+// ✅ filename can come from the URL path (/assets/pdf/My_Title.pdf) or ?filename=
+const customFilename = String(req.params.filename || req.query.filename || "").trim();
 
   if (!targetUrl) {
     throw new AppError("PDF URL is required", 400);
