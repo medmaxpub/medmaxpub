@@ -110,6 +110,7 @@
 // app.use(errorHandler);
 
 // export default app;
+
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
@@ -117,6 +118,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import "./config/env.js";
 import routes from "./routes/index.js";
+import { serveArticlePdf, serveArticlePdfBySlug } from "./controllers/articlePdfController.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 import { uploadsRoot } from "./utils/assetStorage.js";
 
@@ -225,6 +227,19 @@ app.use(
     }
   })
 );
+
+// ✅ Clean public PDF URL:  /articles/<article-title-slug>.pdf
+//    Only handles paths ending in .pdf — anything else falls through to React.
+//    Must be registered BEFORE the static files and the React catch-all.
+app.get("/articles/:filename", (req, res, next) => {
+  if (!String(req.params.filename).toLowerCase().endsWith(".pdf")) {
+    return next();
+  }
+  return serveArticlePdfBySlug(req, res, next);
+});
+
+// Older id-based URL, kept so existing links keep working
+app.get("/articles/:id/pdf/:slug", serveArticlePdf);
 
 // API routes
 app.use("/api", routes);
