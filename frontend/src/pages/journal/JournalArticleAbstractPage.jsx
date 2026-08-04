@@ -6,7 +6,8 @@ import EmptyState from "../../components/common/EmptyState";
 import JournalMenu from "../../components/journal/JournalMenu";
 import useAutoRefresh from "../../hooks/useAutoRefresh";
 import { mockJournals } from "../../data/mockData";
-import { buildJournalSectionPath, buildJournalArticlePdfPath, getJournalRouteSlug } from "../../utils/journalLinks";
+import { buildJournalSectionPath, getJournalRouteSlug, slugifyTitle } from "../../utils/journalLinks";
+import { buildArticlePdfFileUrl } from "../../utils/pdfProxy";
 
 function hasHtmlContent(value) {
   return /<\/?[a-z][\s\S]*>/i.test(String(value || ""));
@@ -33,17 +34,24 @@ function stripHtml(value) {
     .trim();
 }
 
+function matchesArticle(item, param) {
+  return (
+    String(item.id) === String(param) ||
+    slugifyTitle(stripHtml(item.title)) === String(param)
+  );
+}
+
 function findArticleInJournal(journal, articleId) {
-  const inPressMatch = (journal?.inPressArticles || []).find((item) => String(item.id) === String(articleId));
+  const inPressMatch = (journal?.inPressArticles || []).find((item) => matchesArticle(item, articleId));
   if (inPressMatch) return inPressMatch;
 
-  const currentIssueMatch = (journal?.currentIssue?.articles || []).find((item) => String(item.id) === String(articleId));
+  const currentIssueMatch = (journal?.currentIssue?.articles || []).find((item) => matchesArticle(item, articleId));
   if (currentIssueMatch) return currentIssueMatch;
 
   for (const year of journal?.archive || []) {
     for (const volume of year.volumes || []) {
       for (const issue of volume.issues || []) {
-        const archiveMatch = (issue.articles || []).find((item) => String(item.id) === String(articleId));
+        const archiveMatch = (issue.articles || []).find((item) => matchesArticle(item, articleId));
         if (archiveMatch) return archiveMatch;
       }
     }
@@ -53,7 +61,7 @@ function findArticleInJournal(journal, articleId) {
 }
 
 export default function JournalArticleAbstractPage() {
-  const { journalUrl, articleId } = useParams();
+  const { journalUrl, articleParam: articleId } = useParams();
   const location = useLocation();
   const [journal, setJournal] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -83,7 +91,7 @@ export default function JournalArticleAbstractPage() {
   });
 
   const article = useMemo(() => {
-    if (location.state?.article && String(location.state.article.id) === String(articleId)) {
+    if (location.state?.article && matchesArticle(location.state.article, articleId)) {
       return location.state.article;
     }
     return findArticleInJournal(journal, articleId);
@@ -113,8 +121,8 @@ export default function JournalArticleAbstractPage() {
 
   const articleTitle = stripHtml(article.title) || "Untitled article";
 
-  // ✅ Link to the clean PDF viewer page — not the proxy URL
-  const pdfViewerPath = article.pdfUrl ? buildJournalArticlePdfPath(journalUrl, articleId) : null;
+  // ✅ Direct .pdf file URL — opens in Chrome's native PDF viewer
+  const pdfFileUrl = article.pdfUrl ? buildArticlePdfFileUrl(article) : null;
 
   return (
     <div className="section-shell">
@@ -134,16 +142,17 @@ export default function JournalArticleAbstractPage() {
                 Back to Article in Press
               </Link>
 
-              {/* ✅ Open PDF links to the clean viewer page — tab shows article title, URL is clean */}
-              {pdfViewerPath ? (
-                <Link
-                  to={pdfViewerPath}
-                  state={{ article }}
+              {/* ✅ Open PDF — opens the .pdf directly in a NEW TAB */}
+              {pdfFileUrl ? (
+                <a
+                  href={pdfFileUrl}
+                  target="_blank"
+                  rel="noreferrer"
                   className="button-soft px-4 py-2"
                 >
                   <FileText size={16} className="mr-2" />
                   Open PDF
-                </Link>
+                </a>
               ) : null}
             </div>
 
