@@ -50,6 +50,17 @@ export function buildJournalArticlePdfPath(journalUrl, articleId) {
   return slug && articleId ? `/journals/${slug}/article-in-press/${articleId}/pdf` : "/journals";
 }
 
+export function slugifyTitle(value) {
+  return String(value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 export function buildJournalArchiveIssuePath(journalUrl, year, volume, issueNumber) {
   const slug = getJournalRouteSlug(journalUrl);
   return slug && year && volume && issueNumber ? `/journals/${slug}/archive/${year}/${volume}/${issueNumber}` : "/journals";
