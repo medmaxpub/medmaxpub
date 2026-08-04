@@ -23,7 +23,15 @@ function toPdfFileName(title) {
 }
 
 function getSiteBaseUrl() {
-  // Strip the trailing /api so PDFs live at the site root
+  // ✅ Prefer an explicit public site URL (e.g. https://medmaxpub.com) so PDFs
+  //    stay on our own domain even though the API lives on another host.
+  const pdfBase = String(import.meta.env.VITE_PDF_BASE_URL || "").trim();
+
+  if (pdfBase) {
+    return pdfBase.replace(/\/+$/, "");
+  }
+
+  // Fallback: same host as the API, minus the trailing /api
   return String(api.defaults.baseURL || "")
     .replace(/\/+$/, "")
     .replace(/\/api$/, "");
@@ -32,11 +40,6 @@ function getSiteBaseUrl() {
 /**
  * Generic PDF proxy URL (journal PDFs, previews, downloads).
  * The title goes in the URL PATH so the browser shows it instead of "pdf-proxy".
- *
- * @param {string} fileUrl            - Original Cloudinary PDF URL
- * @param {object} options
- * @param {boolean} options.download  - Adds ?download=1 to force a Save dialog
- * @param {string}  options.filename  - Title to use as the filename
  */
 export function buildPdfProxyUrl(fileUrl, options = {}) {
   if (!fileUrl) return null;
