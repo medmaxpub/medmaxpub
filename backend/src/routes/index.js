@@ -16,6 +16,7 @@ import {
   updateArticle,
   updateArticleStatus
 } from "../controllers/articleController.js";
+import { serveArticlePdf } from "../controllers/articlePdfController.js";
 import { createManuscriptSubmission, getAdminManuscriptSubmissions } from "../controllers/manuscriptSubmissionController.js";
 import { getAdminDashboardStats } from "../controllers/dashboardController.js";
 import {
@@ -55,7 +56,8 @@ router.post("/auth/settings/password-otp/confirm", protect, confirmPasswordChang
 router.use("/contact", contactRoutes);
 router.use("/s3", s3Routes);
 router.post("/submissions", upload.array("files", 10), createManuscriptSubmission);
-router.get("/assets/pdf-proxy", proxyPdfAsset);
+router.get("/assets/pdf-proxy", proxyPdfAsset);        // legacy links
+router.get("/assets/pdf/:filename", proxyPdfAsset);    // ✅ filename shown in PDF viewer
 router.get("/assets/file-proxy", proxyFileAsset);
 
 router.get("/admin/journals", protect, getAdminJournals);
@@ -102,8 +104,10 @@ router.post(
   ]),
   createArticle
 );
+
 router.get("/issues/:id/articles", getArticlesByIssue);
 router.get("/articles/:id", getArticleById);
+router.get("/articles/:id/pdf/:slug", serveArticlePdf);   // ✅ clean .pdf URL
 router.get("/user/articles", protect, getUserArticles);
 router.put(
   "/user/articles/:id",
