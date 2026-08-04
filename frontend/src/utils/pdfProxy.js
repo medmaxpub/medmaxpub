@@ -1,41 +1,45 @@
-// import api from "../api/client";
-// import { buildAssetProxyUrl } from "./assetProxy";
-
-// export function buildPdfProxyUrl(fileUrl, options = {}) {
-//   if (!fileUrl) {
-//     return null;
-//   }
-//   const baseUrl = String(api.defaults.baseURL || "").replace(/\/+$/, "");
-
-//   if (!baseUrl) {
-//     return buildAssetProxyUrl(fileUrl, options);
-//   }
-
-//   const proxyUrl = new URL(`${baseUrl}/assets/pdf-proxy`);
-//   proxyUrl.searchParams.set("url", fileUrl);
-
-//   if (options.download) {
-//     proxyUrl.searchParams.set("download", "1");
-//   }
-
-//   return proxyUrl.toString();
-// }
 import api from "../api/client";
 import { buildAssetProxyUrl } from "./assetProxy";
+import { slugifyTitle } from "./journalLinks";
+
+function stripHtmlText(value) {
+  return String(value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function toPdfFileName(title) {
+  const clean = String(title || "document")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/[^\w\s.\-()']/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/_{2,}/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 120);
+
+  return `${clean || "document"}.pdf`;
+}
+
+function getSiteBaseUrl() {
+  // Strip the trailing /api so PDFs live at the site root
+  return String(api.defaults.baseURL || "")
+    .replace(/\/+$/, "")
+    .replace(/\/api$/, "");
+}
 
 /**
- * Builds the backend PDF proxy URL for a given Cloudinary (or other) PDF URL.
+ * Generic PDF proxy URL (journal PDFs, previews, downloads).
+ * The title goes in the URL PATH so the browser shows it instead of "pdf-proxy".
  *
- * @param {string} fileUrl   - The original Cloudinary PDF URL.
+ * @param {string} fileUrl            - Original Cloudinary PDF URL
  * @param {object} options
- * @param {boolean} options.download  - If true, adds ?download=1 so the browser triggers a Save dialog.
- * @param {string}  options.filename  - ✅ The article/journal title to use as the downloaded filename.
- *                                       Pass the plain text title here (HTML will be stripped on the backend).
+ * @param {boolean} options.download  - Adds ?download=1 to force a Save dialog
+ * @param {string}  options.filename  - Title to use as the filename
  */
 export function buildPdfProxyUrl(fileUrl, options = {}) {
-  if (!fileUrl) {
-    return null;
-  }
+  if (!fileUrl) return null;
 
   const baseUrl = String(api.defaults.baseURL || "").replace(/\/+$/, "");
 
@@ -43,17 +47,35 @@ export function buildPdfProxyUrl(fileUrl, options = {}) {
     return buildAssetProxyUrl(fileUrl, options);
   }
 
-  const proxyUrl = new URL(`${baseUrl}/assets/pdf-proxy`);
+  const proxyUrl = new URL(
+    `${baseUrl}/assets/pdf/${encodeURIComponent(toPdfFileName(options.filename))}`
+  );
   proxyUrl.searchParams.set("url", fileUrl);
 
   if (options.download) {
     proxyUrl.searchParams.set("download", "1");
   }
 
-  // ✅ NEW: forward the article/journal title so the backend sets it as the filename
-  if (options.filename) {
-    proxyUrl.searchParams.set("filename", String(options.filename).trim());
+  return proxyUrl.toString();
+}
+
+/**
+ * Clean .pdf URL for an article — opens in the browser's native PDF viewer
+ * with the article title in the toolbar.
+ *
+ * e.g. https://medmaxpub.com/articles/interventional-rescue-of-failing-....pdf
+ */
+export function buildArticlePdfFileUrl(article) {
+  const baseUrl = getSiteBaseUrl();
+  if (!baseUrl) return null;
+
+  const slug = slugifyTitle(stripHtmlText(article?.title));
+
+  if (slug) {
+    return `${baseUrl}/articles/${slug}.pdf`;
   }
 
-  return proxyUrl.toString();
+  // No usable title — fall back to the id-based URL
+  const articleId = article?.id || article?._id;
+  return articleId ? `${baseUrl}/articles/${articleId}/pdf/article.pdf` : null;
 }
