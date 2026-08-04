@@ -1,6 +1,7 @@
 import { FileText, ScrollText } from "lucide-react";
 import { Link } from "react-router-dom";
-import { buildJournalArticleAbstractPath, buildJournalArticlePdfPath } from "../../utils/journalLinks";
+import { buildJournalArticleAbstractPath } from "../../utils/journalLinks";
+import { buildArticlePdfFileUrl } from "../../utils/pdfProxy";
 
 function formatPublishedDate(value) {
   if (!value) return "NA";
@@ -26,8 +27,11 @@ function stripHtml(value) {
 export default function PublicArticleCard({ article, journalRoute, articleKey }) {
   const articleTitle = stripHtml(article.title) || "Untitled article";
 
-  // ✅ Clean viewer page URL — no proxy URL exposed to the user
-  const pdfViewerPath = buildJournalArticlePdfPath(journalRoute, article.id);
+  // ✅ Abstract keeps the title slug in the app URL
+  const abstractPath = buildJournalArticleAbstractPath(journalRoute, article.id, articleTitle);
+
+  // ✅ PDF points at a real .pdf file URL — Chrome's native viewer opens it
+  const pdfFileUrl = article.pdfUrl ? buildArticlePdfFileUrl(article) : null;
 
   return (
     <article key={articleKey || article.id} className="overflow-hidden rounded-2xl border border-cyan-500/60 bg-white shadow-sm">
@@ -60,9 +64,9 @@ export default function PublicArticleCard({ article, journalRoute, articleKey })
         </div>
 
         <div className="flex flex-wrap items-center gap-2 pt-1">
-          {/* Abstract button */}
+          {/* Abstract button — same tab */}
           <Link
-            to={buildJournalArticleAbstractPath(journalRoute, article.id)}
+            to={abstractPath}
             state={{ article }}
             className="group inline-flex items-center gap-1.5 rounded-lg border border-sky-200 bg-[linear-gradient(135deg,#f8fdff_0%,#e6f7fb_100%)] px-2.5 py-1.5 text-brand-ink shadow-sm transition hover:-translate-y-0.5 hover:border-cyan-400 hover:shadow-md"
             aria-label={`Open abstract for ${articleTitle}`}
@@ -76,14 +80,15 @@ export default function PublicArticleCard({ article, journalRoute, articleKey })
             </span>
           </Link>
 
-          {/* ✅ PDF button now links to clean viewer page — not the proxy URL directly */}
-          {article.pdfUrl ? (
-            <Link
-              to={pdfViewerPath}
-              state={{ article }}
+          {/* ✅ PDF button — opens the .pdf directly in a NEW TAB (native viewer) */}
+          {pdfFileUrl ? (
+            <a
+              href={pdfFileUrl}
+              target="_blank"
+              rel="noreferrer"
               className="group inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-[linear-gradient(135deg,#fff8f8_0%,#ffe9e9_100%)] px-2.5 py-1.5 text-brand-ink shadow-sm transition hover:-translate-y-0.5 hover:border-rose-400 hover:shadow-md"
               aria-label={`View PDF for ${articleTitle}`}
-              title="View PDF"
+              title="Open PDF in new tab"
             >
               <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-white text-rose-600 shadow-sm ring-1 ring-rose-100 transition group-hover:bg-rose-50">
                 <FileText size={13} />
@@ -91,7 +96,7 @@ export default function PublicArticleCard({ article, journalRoute, articleKey })
               <span className="text-left">
                 <span className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-rose-600">PDF</span>
               </span>
-            </Link>
+            </a>
           ) : null}
         </div>
       </div>
