@@ -61,7 +61,7 @@ function findArticleInJournal(journal, articleId) {
 }
 
 export default function JournalArticleAbstractPage() {
-  const { journalUrl, articleParam: articleId } = useParams();
+  const { journalUrl, articleId } = useParams();
   const location = useLocation();
   const [journal, setJournal] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
