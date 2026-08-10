@@ -62,12 +62,15 @@ export default function App() {
         <Route element={<JournalLayout />}>
           <Route path="/journals" element={<JournalsPage />} />
           <Route path="/journals/:journalUrl" element={<Navigate to="home" replace />} />
-          <Route path="/journals/:journalUrl/article-in-press/:articleId/abstract" element={<JournalArticleAbstractPage />} />
+ 
           {/* ✅ NEW: clean PDF viewer route — shows article title in tab and URL */}
           <Route path="/journals/:journalUrl/article-in-press/:articleId/pdf" element={<ArticlePdfViewerPage />} />
           <Route path="/journals/:journalUrl/archive/:year/:volume/:issueNumber" element={<JournalArchiveIssuePage />} />
           <Route path="/journals/:journalUrl/:section" element={<JournalShell />} />
         </Route>
+
+        {/* ✅ Standalone abstract — clean page, no site chrome */}
+        <Route path="/journals/:journalUrl/article-in-press/:articleId/abstract" element={<JournalArticleAbstractPage />} />
 
         <Route path="/login" element={<AdminLoginPage />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
