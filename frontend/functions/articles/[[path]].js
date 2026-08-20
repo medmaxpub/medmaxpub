@@ -9,7 +9,7 @@
  * through Cloudflare, so the address bar keeps your own domain.
  */
 
-const BACKEND_ORIGIN = "https://medmaxpub-production.up.railway.app";
+const BACKEND_ORIGIN = "https://medmaxpub.onrender.com";
 
 export async function onRequest(context) {
   const { request, params } = context;
