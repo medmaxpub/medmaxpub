@@ -1,4 +1,4 @@
-import { ExternalLink, FileText, PlayCircle } from "lucide-react";
+import { Building2, Crown, ExternalLink, FileText, MapPin, PlayCircle, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { cachedGet, shouldUseDevelopmentFallback, withFallback } from "../../api/client";
@@ -243,43 +243,136 @@ export default function JournalShell() {
       const chiefEditors = editorialBoard.filter(isChiefEditor);
       const boardMembers = editorialBoard.filter((member) => !isChiefEditor(member));
 
-      const renderMemberCard = (member) => (
-        <article key={member.id} className="flex min-h-[220px] flex-col rounded-2xl border border-brand-border bg-brand-surface p-3">
-          <div className="flex gap-2.5">
-            {member.profileImageUrl ? (
-              <img src={member.profileImageUrl} alt={member.name} className="h-16 w-14 rounded-lg border border-brand-border object-cover" />
-            ) : (
-              <div className="flex h-16 w-14 items-center justify-center rounded-lg border border-brand-border bg-brand-elevated text-[10px] font-semibold text-brand-slate">
-                {member.editorType || "Editor"}
-              </div>
-            )}
-            <div className="flex-1">
-              {isChiefEditor(member) ? null : (
-                <p className="text-[11px] uppercase tracking-[0.16em] text-brand-teal">{member.editorType || "Editorial Board"}</p>
+      const renderBio = (member) => {
+        const text = member.editorDescription || member.editorBiography;
+        if (!text) return null;
+        return hasHtmlContent(text) ? (
+          <div className="rich-copy mt-3 text-sm leading-6 text-slate-500" dangerouslySetInnerHTML={{ __html: text }} />
+        ) : (
+          <p className="mt-3 text-sm leading-6 text-slate-500">{text}</p>
+        );
+      };
+
+      const renderChiefCard = (member) => (
+        <article key={member.id} className="rounded-2xl border border-slate-200 bg-white px-6 py-8 sm:px-10 sm:py-10">
+          <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-center sm:text-left">
+            <div className="shrink-0">
+              {member.profileImageUrl ? (
+                <img
+                  src={member.profileImageUrl}
+                  alt={member.name}
+                  className="h-28 w-28 rounded-full border border-slate-200 object-cover sm:h-32 sm:w-32"
+                />
+              ) : (
+                <div className="flex h-28 w-28 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-2xl font-semibold text-brand-navy sm:h-32 sm:w-32">
+                  {(member.name || "E").charAt(0)}
+                </div>
               )}
-              <h3 className={`${isChiefEditor(member) ? "" : "mt-0.5"} text-base font-semibold text-brand-ink`}>{member.name}</h3>
-              {member.designation ? <p className="text-xs text-brand-slate">{member.designation}</p> : null}
-              {member.department ? <p className="text-xs text-brand-slate">{member.department}</p> : null}
-              {member.country ? <p className="text-xs text-brand-slate">{member.country}</p> : null}
+            </div>
+
+            <div className="flex-1">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-gold/40 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-gold">
+                <Crown size={13} />
+                Editor-in-Chief
+              </span>
+              <h3 className="mt-3 font-display text-2xl font-bold text-slate-900 sm:text-3xl">{member.name}</h3>
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-slate-500 sm:justify-start">
+                {member.designation ? <span>{member.designation}</span> : null}
+                {member.department ? (
+                  <span className="inline-flex items-center gap-1">
+                    <Building2 size={13} />
+                    {member.department}
+                  </span>
+                ) : null}
+                {member.country ? (
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin size={13} />
+                    {member.country}
+                  </span>
+                ) : null}
+              </div>
+
+              {(member.editorDescription || member.editorBiography) ? (
+                hasHtmlContent(member.editorDescription || member.editorBiography) ? (
+                  <div
+                    className="rich-copy mt-4 text-sm leading-6 text-slate-500"
+                    dangerouslySetInnerHTML={{ __html: member.editorDescription || member.editorBiography }}
+                  />
+                ) : (
+                  <p className="mt-4 text-sm leading-6 text-slate-500">{member.editorDescription || member.editorBiography}</p>
+                )
+              ) : null}
+
+              {member.profileUrl ? (
+                <a
+                  href={member.profileUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-brand-navy hover:text-brand-navy"
+                >
+                  <ExternalLink size={13} />
+                  View Full Profile
+                </a>
+              ) : null}
             </div>
           </div>
-          {member.editorDescription ? (
-            hasHtmlContent(member.editorDescription) ? (
-              <div className="rich-copy mt-2 text-sm text-brand-slate" dangerouslySetInnerHTML={{ __html: member.editorDescription }} />
+        </article>
+      );
+
+      const renderMemberCard = (member) => (
+        <article
+          key={member.id}
+          className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-brand-navy/30"
+        >
+          <div className="flex items-start gap-3.5">
+            {member.profileImageUrl ? (
+              <img
+                src={member.profileImageUrl}
+                alt={member.name}
+                className="h-16 w-16 shrink-0 rounded-2xl border border-slate-200 object-cover"
+              />
             ) : (
-              <p className="mt-2 text-sm leading-5 text-brand-slate">{member.editorDescription}</p>
-            )
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-lg font-semibold text-brand-navy">
+                {(member.name || "E").charAt(0)}
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                <Sparkles size={11} />
+                {member.editorType || "Editorial Board"}
+              </span>
+              <h3 className="mt-1.5 truncate font-display text-base font-semibold text-slate-900">{member.name}</h3>
+              {member.designation ? <p className="truncate text-xs text-slate-500">{member.designation}</p> : null}
+            </div>
+          </div>
+
+          {(member.department || member.country) ? (
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-slate-100 pt-3 text-xs text-slate-500">
+              {member.department ? (
+                <span className="inline-flex items-center gap-1">
+                  <Building2 size={12} />
+                  {member.department}
+                </span>
+              ) : null}
+              {member.country ? (
+                <span className="inline-flex items-center gap-1">
+                  <MapPin size={12} />
+                  {member.country}
+                </span>
+              ) : null}
+            </div>
           ) : null}
-          {member.editorBiography ? (
-            hasHtmlContent(member.editorBiography) ? (
-              <div className="rich-copy mt-2 text-sm text-brand-slate" dangerouslySetInnerHTML={{ __html: member.editorBiography }} />
-            ) : (
-              <p className="mt-2 text-sm leading-5 text-brand-slate">{member.editorBiography}</p>
-            )
-          ) : null}
+
+          {renderBio(member)}
+
           {member.profileUrl ? (
-            <a href={member.profileUrl} target="_blank" rel="noreferrer" className="button-soft mt-2 px-3 py-1 text-xs">
-              <ExternalLink size={13} className="mr-1.5" />
+            <a
+              href={member.profileUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-4 inline-flex w-fit items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-brand-navy hover:text-brand-navy"
+            >
+              <ExternalLink size={13} />
               View Profile
             </a>
           ) : null}
@@ -287,24 +380,16 @@ export default function JournalShell() {
       );
 
       return (
-        <div className="space-y-6">
-          {chiefEditors.length ? (
-            <div>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">Editor in Chief</p>
-              <div className="grid gap-3 lg:grid-cols-3">
-                {chiefEditors.map((member) => renderMemberCard(member))}
-              </div>
-            </div>
-          ) : null}
+        <div className="space-y-10">
+          {chiefEditors.length ? <div className="space-y-4">{chiefEditors.map((member) => renderChiefCard(member))}</div> : null}
 
           {boardMembers.length ? (
             <div>
-              {chiefEditors.length ? (
-                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">Editorial Board</p>
-              ) : null}
-              <div className="grid gap-3 lg:grid-cols-3">
-                {boardMembers.map((member) => renderMemberCard(member))}
+              <div className="mb-5 flex items-center gap-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Editorial Board</p>
+                <div className="h-px flex-1 bg-slate-200" />
               </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{boardMembers.map((member) => renderMemberCard(member))}</div>
             </div>
           ) : null}
         </div>

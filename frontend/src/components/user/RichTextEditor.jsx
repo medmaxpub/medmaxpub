@@ -1,4 +1,51 @@
-import { Bold, Italic, Link2, List, ListOrdered, Underline } from "lucide-react";
+import {
+  Anchor,
+  Bold,
+  CheckCheck,
+  ClipboardPaste,
+  Code2,
+  Copy,
+  Eye,
+  FilePlus2,
+  FileText,
+  Frame,
+  HelpCircle,
+  Image as ImageIcon,
+  IndentDecrease,
+  IndentIncrease,
+  Italic,
+  LayoutGrid,
+  Link2,
+  List,
+  ListOrdered,
+  AlignCenter,
+  AlignJustify,
+  AlignLeft,
+  AlignRight,
+  Maximize2,
+  Minimize2,
+  Minus,
+  MoveLeft,
+  MoveRight,
+  Printer,
+  Quote,
+  Redo2,
+  Replace as ReplaceIcon,
+  Save as SaveIcon,
+  Scissors,
+  Search,
+  SeparatorHorizontal,
+  Smile,
+  SpellCheck,
+  Sparkles as SparklesIcon,
+  Square,
+  Table as TableIcon,
+  Type,
+  Underline,
+  Undo2,
+  Unlink,
+  Zap
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const compactToolbarActions = [
@@ -436,12 +483,22 @@ export default function RichTextEditor({
 
       <div className="rich-editor-toolbar rich-editor-toolbar-full">
         <div className="rich-editor-toolbar-group">
-          <button type="button" className="rich-editor-button" onClick={handleSourceToggle}>Source</button>
-          <button type="button" className="rich-editor-button" onClick={handleSave}>Save</button>
-          <button type="button" className="rich-editor-button" onClick={handleNewPage}>New Page</button>
-          <button type="button" className="rich-editor-button" onClick={handlePreviewToggle}>Preview</button>
-          <button type="button" className="rich-editor-button" onClick={handlePrint}>Print</button>
-          <select className="rich-editor-select" defaultValue="" onChange={handleTemplateInsert}>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Source" aria-label="Source" onClick={handleSourceToggle}>
+            <Code2 size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Save" aria-label="Save" onClick={handleSave}>
+            <SaveIcon size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="New Page" aria-label="New Page" onClick={handleNewPage}>
+            <FilePlus2 size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Preview" aria-label="Preview" onClick={handlePreviewToggle}>
+            <Eye size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Print" aria-label="Print" onClick={handlePrint}>
+            <Printer size={16} />
+          </button>
+          <select className="rich-editor-select" defaultValue="" onChange={handleTemplateInsert} title="Templates">
             {templateOptions.map((item) => (
               <option key={item.label} value={item.value}>
                 {item.label}
@@ -451,64 +508,164 @@ export default function RichTextEditor({
         </div>
 
         <div className="rich-editor-toolbar-group">
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("cut")}>Cut</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("copy")}>Copy</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("paste")}>Paste</button>
-          <button type="button" className="rich-editor-button" onClick={insertPlainText}>Plain</button>
-          <button type="button" className="rich-editor-button" onClick={insertWordContent}>Word</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("undo")}>Undo</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("redo")}>Redo</button>
-          <button type="button" className="rich-editor-button" onClick={performFind}>Find</button>
-          <button type="button" className="rich-editor-button" onClick={performReplace}>Replace</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("selectAll")}>Select All</button>
-          <button type="button" className="rich-editor-button" onClick={() => setSpellCheckEnabled((current) => !current)}>ABC</button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Cut" aria-label="Cut" onClick={() => runCommand("cut")}>
+            <Scissors size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Copy" aria-label="Copy" onClick={() => runCommand("copy")}>
+            <Copy size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Paste" aria-label="Paste" onClick={() => runCommand("paste")}>
+            <ClipboardPaste size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Paste as plain text" aria-label="Paste as plain text" onClick={insertPlainText}>
+            <Type size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Paste from Word" aria-label="Paste from Word" onClick={insertWordContent}>
+            <FileText size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Undo" aria-label="Undo" onClick={() => runCommand("undo")}>
+            <Undo2 size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Redo" aria-label="Redo" onClick={() => runCommand("redo")}>
+            <Redo2 size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Find" aria-label="Find" onClick={performFind}>
+            <Search size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Replace" aria-label="Replace" onClick={performReplace}>
+            <ReplaceIcon size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Select All" aria-label="Select All" onClick={() => runCommand("selectAll")}>
+            <CheckCheck size={16} />
+          </button>
+          <button
+            type="button"
+            className="rich-editor-button rich-editor-icon-only"
+            title="Toggle Spell Check"
+            aria-label="Toggle Spell Check"
+            onClick={() => setSpellCheckEnabled((current) => !current)}
+          >
+            <SpellCheck size={16} />
+          </button>
         </div>
 
         <div className="rich-editor-toolbar-group">
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("bold")}>Bold</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("italic")}>Italic</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("underline")}>Underline</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("strikeThrough")}>Strike</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("subscript")}>Sub</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("superscript")}>Super</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("removeFormat")}>Clear</button>
-          <label className="rich-editor-color">
-            Text
+          <button type="button" className="rich-editor-button rich-editor-icon-button" title="Bold" aria-label="Bold" onClick={() => runCommand("bold")}>
+            <b>B</b>
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-button" title="Italic" aria-label="Italic" onClick={() => runCommand("italic")}>
+            <i>I</i>
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-button" title="Underline" aria-label="Underline" onClick={() => runCommand("underline")}>
+            <u>U</u>
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-button" title="Strikethrough" aria-label="Strikethrough" onClick={() => runCommand("strikeThrough")}>
+            <s>S</s>
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-button" title="Subscript" aria-label="Subscript" onClick={() => runCommand("subscript")}>
+            X<sub>2</sub>
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-button" title="Superscript" aria-label="Superscript" onClick={() => runCommand("superscript")}>
+            X<sup>2</sup>
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-button" title="Clear formatting" aria-label="Clear formatting" onClick={() => runCommand("removeFormat")}>
+            T<span className="rich-editor-clear-x">x</span>
+          </button>
+          <label className="rich-editor-color" title="Text color">
+            <span className="rich-editor-icon-button" aria-hidden="true">A</span>
             <input type="color" defaultValue="#0f172a" onChange={(event) => applyEditorColor("foreColor", event.target.value)} />
           </label>
-          <label className="rich-editor-color">
-            Highlight
+          <label className="rich-editor-color" title="Highlight color">
+            <span className="rich-editor-icon-button" aria-hidden="true">H</span>
             <input type="color" defaultValue="#fff59d" onChange={(event) => applyEditorColor("hiliteColor", event.target.value)} />
           </label>
         </div>
 
         <div className="rich-editor-toolbar-group">
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("insertOrderedList")}>1.</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("insertUnorderedList")}>•</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("outdent")}>Outdent</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("indent")}>Indent</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("formatBlock", "BLOCKQUOTE")}>Quote</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("formatBlock", "DIV")}>Div</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("justifyLeft")}>Left</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("justifyCenter")}>Center</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("justifyRight")}>Right</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("justifyFull")}>Justify</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("direction", "ltr")}>LTR</button>
-          <button type="button" className="rich-editor-button" onClick={() => runCommand("direction", "rtl")}>RTL</button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Numbered List" aria-label="Numbered List" onClick={() => runCommand("insertOrderedList")}>
+            <ListOrdered size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Bullet List" aria-label="Bullet List" onClick={() => runCommand("insertUnorderedList")}>
+            <List size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Outdent" aria-label="Outdent" onClick={() => runCommand("outdent")}>
+            <IndentDecrease size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Indent" aria-label="Indent" onClick={() => runCommand("indent")}>
+            <IndentIncrease size={16} />
+          </button>
+          <button
+            type="button"
+            className="rich-editor-button rich-editor-icon-only"
+            title="Quote"
+            aria-label="Quote"
+            onClick={() => runCommand("formatBlock", "BLOCKQUOTE")}
+          >
+            <Quote size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Div Container" aria-label="Div Container" onClick={() => runCommand("formatBlock", "DIV")}>
+            <Square size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Align Left" aria-label="Align Left" onClick={() => runCommand("justifyLeft")}>
+            <AlignLeft size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Align Center" aria-label="Align Center" onClick={() => runCommand("justifyCenter")}>
+            <AlignCenter size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Align Right" aria-label="Align Right" onClick={() => runCommand("justifyRight")}>
+            <AlignRight size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Justify" aria-label="Justify" onClick={() => runCommand("justifyFull")}>
+            <AlignJustify size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Left to Right" aria-label="Left to Right" onClick={() => runCommand("direction", "ltr")}>
+            <MoveRight size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Right to Left" aria-label="Right to Left" onClick={() => runCommand("direction", "rtl")}>
+            <MoveLeft size={16} />
+          </button>
         </div>
 
         <div className="rich-editor-toolbar-group">
-          <button type="button" className="rich-editor-button" onClick={addLink}>Link</button>
-          <button type="button" className="rich-editor-button" onClick={removeLink}>Unlink</button>
-          <button type="button" className="rich-editor-button" onClick={addAnchor}>Anchor</button>
-          <button type="button" className="rich-editor-button" onClick={insertImage}>Image</button>
-          <button type="button" className="rich-editor-button" onClick={insertFlash}>Flash</button>
-          <button type="button" className="rich-editor-button" onClick={insertTable}>Table</button>
-          <button type="button" className="rich-editor-button" onClick={() => insertHtml("<hr />")}>Line</button>
-          <button type="button" className="rich-editor-button" onClick={insertSmiley}>Smiley</button>
-          <button type="button" className="rich-editor-button" onClick={insertSpecialCharacter}>Special</button>
-          <button type="button" className="rich-editor-button" onClick={insertPageBreak}>Page Break</button>
-          <button type="button" className="rich-editor-button" onClick={insertIframe}>Iframe</button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Insert Link" aria-label="Insert Link" onClick={addLink}>
+            <Link2 size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Remove Link" aria-label="Remove Link" onClick={removeLink}>
+            <Unlink size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Insert Anchor" aria-label="Insert Anchor" onClick={addAnchor}>
+            <Anchor size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Insert Image" aria-label="Insert Image" onClick={insertImage}>
+            <ImageIcon size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Insert Flash" aria-label="Insert Flash" onClick={insertFlash}>
+            <Zap size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Insert Table" aria-label="Insert Table" onClick={insertTable}>
+            <TableIcon size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Insert Line" aria-label="Insert Line" onClick={() => insertHtml("<hr />")}>
+            <Minus size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Insert Smiley" aria-label="Insert Smiley" onClick={insertSmiley}>
+            <Smile size={16} />
+          </button>
+          <button
+            type="button"
+            className="rich-editor-button rich-editor-icon-only"
+            title="Insert Special Character"
+            aria-label="Insert Special Character"
+            onClick={insertSpecialCharacter}
+          >
+            <SparklesIcon size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Insert Page Break" aria-label="Insert Page Break" onClick={insertPageBreak}>
+            <SeparatorHorizontal size={16} />
+          </button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Insert Iframe" aria-label="Insert Iframe" onClick={insertIframe}>
+            <Frame size={16} />
+          </button>
         </div>
 
         <div className="rich-editor-toolbar-group">
@@ -542,20 +699,24 @@ export default function RichTextEditor({
               </option>
             ))}
           </select>
-          <button type="button" className="rich-editor-button" onClick={() => setIsMaximized((current) => !current)}>
-            {isMaximized ? "Minimize" : "Maximize"}
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title={isMaximized ? "Minimize" : "Maximize"} aria-label={isMaximized ? "Minimize" : "Maximize"} onClick={() => setIsMaximized((current) => !current)}>
+            {isMaximized ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
           </button>
-          <button type="button" className="rich-editor-button" onClick={() => setShowBlocks((current) => !current)}>Blocks</button>
+          <button type="button" className="rich-editor-button rich-editor-icon-only" title="Blocks" aria-label="Blocks" onClick={() => setShowBlocks((current) => !current)}>
+            <LayoutGrid size={16} />
+          </button>
           <button
             type="button"
-            className="rich-editor-button"
+            className="rich-editor-button rich-editor-icon-only"
+            title="Help"
+            aria-label="Help"
             onClick={() =>
               window.alert(
                 "This editor supports source editing, formatting, links, media embeds, templates, layout controls, and preview/print tools."
               )
             }
           >
-            ?
+            <HelpCircle size={16} />
           </button>
         </div>
       </div>
