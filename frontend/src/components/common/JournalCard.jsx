@@ -29,12 +29,12 @@ export default function JournalCard({ journal }) {
           />
         </div>
 
-        <div className="p-5 sm:p-6">
-          <h3 className="font-display text-xl font-semibold leading-tight text-brand-ink sm:text-2xl">
+        <div className="flex min-h-[104px] flex-col justify-center p-5 sm:min-h-[120px] sm:p-6">
+          <h3 className="font-display text-base font-semibold leading-snug text-brand-ink sm:text-lg">
             {journal.managingJournalName}
           </h3>
           {journal.issn ? (
-            <p className="mt-3 text-sm font-medium uppercase tracking-[0.18em] text-brand-gold">
+            <p className="mt-3 text-xs font-medium uppercase tracking-[0.18em] text-brand-gold">
               ISSN: {journal.issn}
             </p>
           ) : null}
