@@ -129,7 +129,7 @@ export async function withFallback(request, fallbackValue) {
 }
 
 export async function cachedGet(url, config = {}, options = {}) {
-  const ttlMs = options.ttlMs ?? 30000;
+  const ttlMs = options.ttlMs ?? 300000; // 5 minutes default (was 30s)
   const key = buildCacheKey(url, config);
   const cached = getCache.get(key);
 
