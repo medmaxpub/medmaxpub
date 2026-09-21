@@ -62,7 +62,18 @@ export default function JournalsPage() {
           </form>
         </div>
 
-        {isLoading ? null : filtered.length ? (
+        {isLoading ? (
+          <div className="mt-7 grid gap-6 md:grid-cols-2 xl:grid-cols-4 animate-pulse">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="rounded-2xl border border-brand-border bg-brand-surface p-5 space-y-3">
+                <div className="h-24 w-full rounded-xl bg-brand-border" />
+                <div className="h-5 w-3/4 rounded bg-brand-border" />
+                <div className="h-4 w-1/2 rounded bg-brand-border" />
+                <div className="h-4 w-2/3 rounded bg-brand-border" />
+              </div>
+            ))}
+          </div>
+        ) : filtered.length ? (
           <div className="mt-7 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {filtered.map((journal) => (
               <JournalCard key={journal.id} journal={journal} />
