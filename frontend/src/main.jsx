@@ -5,6 +5,12 @@ import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
 import "./index.css";
 
+// Disable the browser's native scroll restoration so we can manage it
+// manually per route via ScrollToTopOnNavigate.
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
@@ -14,4 +20,3 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </BrowserRouter>
   </React.StrictMode>
 );
-

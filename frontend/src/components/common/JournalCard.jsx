@@ -11,12 +11,18 @@ function getJournalCoverImage(journal) {
 }
 
 export default function JournalCard({ journal }) {
+  const handleClick = (e) => {
+    // Let Ctrl+click, Cmd+click, and middle-click open in a new tab naturally
+    if (e.ctrlKey || e.metaKey || e.button === 1) return;
+    scrollWindowToTop();
+  };
+
   return (
     <Link
       key={journal.id}
       to={buildJournalSectionPath(journal.publicJournalUrl || journal.journalUrl, "home")}
       className="journal-card-link"
-      onClick={scrollWindowToTop}
+      onClick={handleClick}
     >
       <article className="card-panel h-full overflow-hidden p-0">
         <div className="aspect-[4/5] overflow-hidden bg-brand-sky">
