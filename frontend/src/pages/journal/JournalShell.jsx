@@ -80,7 +80,39 @@ export default function JournalShell() {
   });
 
   if (isLoading) {
-    return null;
+    return (
+      <div className="section-shell">
+        <div className="container-shell animate-pulse space-y-6 py-10">
+          {/* Cover + title block */}
+          <div className="flex gap-6">
+            <div className="h-36 w-28 shrink-0 rounded-xl bg-brand-border" />
+            <div className="flex flex-1 flex-col gap-3 pt-2">
+              <div className="h-4 w-1/3 rounded bg-brand-border" />
+              <div className="h-7 w-2/3 rounded bg-brand-border" />
+              <div className="h-4 w-1/4 rounded bg-brand-border" />
+            </div>
+          </div>
+          {/* Nav tabs */}
+          <div className="flex gap-3">
+            {[80, 100, 120, 90, 110].map((w, i) => (
+              <div key={i} className="h-8 rounded-full bg-brand-border" style={{ width: w }} />
+            ))}
+          </div>
+          {/* Content cards */}
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-2xl border border-brand-border bg-brand-surface p-5 space-y-3">
+              <div className="h-4 w-1/4 rounded bg-brand-border" />
+              <div className="h-5 w-3/4 rounded bg-brand-border" />
+              <div className="h-4 w-1/3 rounded bg-brand-border" />
+              <div className="flex gap-3 pt-1">
+                <div className="h-8 w-24 rounded-full bg-brand-border" />
+                <div className="h-8 w-16 rounded-full bg-brand-border" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (!journal) {

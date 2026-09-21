@@ -256,19 +256,6 @@ async function buildJournalDetails(journal) {
     targetMap.set(key, list);
   });
 
-  // Helper: sort an article list by publishedDate descending (latest first).
-  // Articles with no publishedDate fall to the bottom.
-  const sortByDateDesc = (list) =>
-    list.sort((a, b) => {
-      const dateA = a.publishedDate ? new Date(a.publishedDate).getTime() : 0;
-      const dateB = b.publishedDate ? new Date(b.publishedDate).getTime() : 0;
-      return dateB - dateA;
-    });
-
-  sortByDateDesc(inPressArticles);
-  currentByIssue.forEach((list) => sortByDateDesc(list));
-  archiveByIssue.forEach((list) => sortByDateDesc(list));
-
   const formattedIssues = issues.map((issue) => ({
     id: issue._id,
     volume: issue.volume,
@@ -442,7 +429,7 @@ export const getJournals = asyncHandler(async (req, res) => {
   const journals = await Journal.find()
     .select(JOURNAL_PUBLIC_LIST_SELECT)
     .populate("owner", "firstName lastName userName")
-    .sort({ createdAt: -1 })
+    .sort({ createdAt: 1 })
     .lean();
 
   res.json(filterSampleJournals(journals).map(serializeJournalListItem));
@@ -453,7 +440,7 @@ export const getAdminJournals = asyncHandler(async (req, res) => {
   const journals = await Journal.find(filter)
     .select(JOURNAL_ADMIN_LIST_SELECT)
     .populate("owner", "firstName lastName userName")
-    .sort({ createdAt: -1 })
+    .sort({ createdAt: 1 })
     .lean();
 
   res.json(filterSampleJournals(journals).map(serializeJournalSummary));
