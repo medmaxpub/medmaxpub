@@ -1,41 +1,56 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 
-// Stores scroll positions keyed by route key (pathname + search)
-const scrollStore = new Map();
+/**
+ * Scroll position manager for React Router SPA navigation.
+ *
+ * Behaviour:
+ *  - Forward navigation (clicking a link)  → scroll to top
+ *  - Back / Forward (browser buttons)      → restore saved scroll position
+ *  - Cmd/Ctrl + click / middle click       → opens new tab, current page unchanged
+ *
+ * Works together with StableOutlet (140ms page transition) by waiting
+ * 160ms before applying scroll — after the new page has mounted.
+ *
+ * Scroll positions are stored in a Map keyed by React Router's location.key,
+ * which is unique per history entry. This means two visits to the same URL
+ * get independent scroll positions, which is correct browser behaviour.
+ */
+
+// Persists for the lifetime of the tab — survives React re-renders
+const scrollPositions = new Map();
 
 export default function ScrollToTopOnNavigate() {
   const location = useLocation();
   const prevKeyRef = useRef(null);
-  const routeKey = `${location.pathname}${location.search}`;
 
   useEffect(() => {
-    // Save scroll position of the page we are LEAVING
-    if (prevKeyRef.current && prevKeyRef.current !== routeKey) {
-      scrollStore.set(prevKeyRef.current, window.scrollY);
+    const currentKey = location.key;
+    const prevKey = prevKeyRef.current;
+
+    // Save the scroll position of the page we are LEAVING
+    // before the new page mounts and steals the scroll.
+    if (prevKey && prevKey !== currentKey) {
+      scrollPositions.set(prevKey, window.scrollY);
     }
 
-    const isBackOrForward = location.key !== "default" && scrollStore.has(routeKey);
-
-    if (isBackOrForward) {
-      // Restore saved scroll position for Back/Forward navigation
-      const savedY = scrollStore.get(routeKey) ?? 0;
-      const timerId = window.setTimeout(() => {
-        window.scrollTo({ top: savedY, left: 0, behavior: "auto" });
-      }, 160); // wait for StableOutlet transition to finish
-      return () => window.clearTimeout(timerId);
-    } else {
-      // Normal forward navigation — scroll to top
-      const timerId = window.setTimeout(() => {
+    // Decide what to do after the StableOutlet transition (160ms)
+    const timerId = window.setTimeout(() => {
+      if (scrollPositions.has(currentKey)) {
+        // Back or Forward — restore the saved position
+        window.scrollTo({ top: scrollPositions.get(currentKey), left: 0, behavior: "auto" });
+      } else {
+        // Fresh forward navigation — start at top
         window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-      }, 160);
-      return () => window.clearTimeout(timerId);
-    }
-  }, [routeKey, location.key]);
+      }
+    }, 160);
 
-  // Track current key so we can save it when leaving
+    return () => window.clearTimeout(timerId);
+  }, [location.key]); // ← key, not pathname — unique per history entry
+
+  // Always keep prevKey in sync after every render
   useEffect(() => {
-    prevKeyRef.current = routeKey;
+    prevKeyRef.current = location.key;
   });
 
   return null;

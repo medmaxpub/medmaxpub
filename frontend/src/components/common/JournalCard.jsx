@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { buildJournalSectionPath } from "../../utils/journalLinks";
-import { scrollWindowToTop } from "../../utils/scrollPosition";
 
 function getJournalCoverImage(journal) {
   if (journal.coverImage) {
@@ -12,14 +11,17 @@ function getJournalCoverImage(journal) {
 
 export default function JournalCard({ journal }) {
   const handleClick = (e) => {
-    // Let Ctrl+click, Cmd+click, and middle-click open in a new tab naturally
-    if (e.ctrlKey || e.metaKey || e.button === 1) return;
-    scrollWindowToTop();
+    // Cmd+click (Mac), Ctrl+click (Win/Linux), middle-click:
+    // let the browser open a new tab — do NOT scroll the current page.
+    if (e.metaKey || e.ctrlKey || e.button === 1) {
+      return;
+    }
+    // Normal left-click: ScrollToTopOnNavigate handles scroll via
+    // location.key change — no manual scrollTo needed here.
   };
 
   return (
     <Link
-      key={journal.id}
       to={buildJournalSectionPath(journal.publicJournalUrl || journal.journalUrl, "home")}
       className="journal-card-link"
       onClick={handleClick}
