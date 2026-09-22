@@ -13,6 +13,7 @@ import { deleteAsset, uploadAsset } from "../utils/assetStorage.js";
 import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { filterSampleJournals, isSampleJournalRecord } from "../utils/sampleContent.js";
+import { getCached, setCached, invalidateCache } from "../utils/serverCache.js";
 
 function normalizeText(value) {
   return String(value || "").trim();
@@ -426,13 +427,19 @@ async function upsertLinkedOwner(req, payload, existingJournal = null) {
 }
 
 export const getJournals = asyncHandler(async (req, res) => {
+  const cacheKey = "journals:public:list";
+  const cached = getCached(cacheKey);
+  if (cached) return res.json(cached);
+
   const journals = await Journal.find()
     .select(JOURNAL_PUBLIC_LIST_SELECT)
     .populate("owner", "firstName lastName userName")
     .sort({ createdAt: 1 })
     .lean();
 
-  res.json(filterSampleJournals(journals).map(serializeJournalListItem));
+  const result = filterSampleJournals(journals).map(serializeJournalListItem);
+  setCached(cacheKey, result);
+  res.json(result);
 });
 
 export const getAdminJournals = asyncHandler(async (req, res) => {
@@ -448,6 +455,9 @@ export const getAdminJournals = asyncHandler(async (req, res) => {
 
 export const getJournalByUrl = asyncHandler(async (req, res) => {
   const normalizedRequestedUrl = normalizeJournalUrl(req.params.journalUrl);
+  const cacheKey = `journals:detail:${normalizedRequestedUrl}`;
+  const cached = getCached(cacheKey);
+  if (cached) return res.json(cached);
 
   let journal = await Journal.findOne({
     $or: [{ journalUrl: normalizedRequestedUrl }, { slug: normalizedRequestedUrl }]
@@ -481,7 +491,9 @@ export const getJournalByUrl = asyncHandler(async (req, res) => {
     throw new AppError("Journal not found", 404);
   }
 
-  res.json(await buildJournalDetails(journal));
+  const result = await buildJournalDetails(journal);
+  setCached(cacheKey, result);
+  res.json(result);
 });
 
 export const createJournal = asyncHandler(async (req, res) => {
@@ -511,6 +523,7 @@ export const createJournal = asyncHandler(async (req, res) => {
   });
 
   await syncUserJournals(owner._id);
+  invalidateCache("journals:");
   const populatedJournal = await Journal.findById(journal._id).populate("owner", "firstName lastName userName").lean();
   res.status(201).json(serializeJournalSummary(populatedJournal));
 });
@@ -552,7 +565,7 @@ export const updateJournal = asyncHandler(async (req, res) => {
   await journal.save();
 
   await syncUserJournals(owner._id);
-
+  invalidateCache("journals:");
   const populatedJournal = await Journal.findById(journal._id).populate("owner", "firstName lastName userName").lean();
   res.json(serializeJournalSummary(populatedJournal));
 });
@@ -588,6 +601,7 @@ export const deleteJournal = asyncHandler(async (req, res) => {
     await syncUserJournals(ownerId);
   }
 
+  invalidateCache("journals:");
   res.status(204).send();
 });
 
