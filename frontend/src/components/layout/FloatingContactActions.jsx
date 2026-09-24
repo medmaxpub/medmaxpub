@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 const whatsappUrl = "https://wa.me/17202034570";
 const supportEmail = "contact@medmaxpub.com";
+const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&to=${supportEmail}`;
 
 function WhatsAppIcon({ className = "" }) {
   return (
@@ -84,14 +85,16 @@ export default function FloatingContactActions() {
                 </div>
 
                 <a
-                  href={`mailto:${supportEmail}`}
+                  href={gmailComposeUrl}
+                  target="_blank"
+                  rel="noreferrer"
                   className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-brand-gold/70 hover:text-slate-900"
                 >
                   <Mail size={18} className="text-brand-crimson" />
                   {supportEmail}
                 </a>
 
-                <a href={`mailto:${supportEmail}`} className="button-primary mt-5 w-full bg-brand-crimson hover:bg-brand-gold">
+                <a href={gmailComposeUrl} target="_blank" rel="noreferrer" className="button-primary mt-5 w-full bg-brand-crimson hover:bg-brand-gold">
                   Send Email
                 </a>
               </div>
